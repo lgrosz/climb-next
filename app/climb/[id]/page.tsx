@@ -1,9 +1,12 @@
+import DeleteClimbButton from '@/components/DeleteClimbButton'
+
 var query = /* GraphQL */`query GetClimb($id: Int!) {
-  climb(id: $id) { names }
+  climb(id: $id) { id, names }
 }`
 
 export default async function Page({ params }: { params: { id: string } }) {
   let {
+    id,
     names
   } = await fetch("http://127.0.0.1:8000/", {
     method: "POST",
@@ -33,6 +36,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           ))}
         </ul>
       </div>
+      <DeleteClimbButton climbId={id}>Delete <i>{name}</i></DeleteClimbButton>
     </div>
   )
 }
