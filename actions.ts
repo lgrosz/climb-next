@@ -26,4 +26,29 @@ export async function removeClimb(id: number) {
     except(result.errors)
   }
 }
+
+export async function addClimb() {
+  const response = await fetch("http://127.0.0.1:8000/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { addClimb { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    console.log('result is', JSON.stringify(result, null, 2));
+    let id = result.data.addClimb.id
+    revalidatePath("/climbs")
+    revalidatePath(`/climb/${id}`)
+    return id;
+  } else {
+    except(result.errors)
+  }
+}
  

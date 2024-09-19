@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import CreateClimbButton from '@/components/CreateClimbButton'
 
 var query = /* GraphQL */`query GetClimbs {
   climbs { id, names }
@@ -31,6 +32,7 @@ export default async function Page() {
           </li>
         ))}
       </ul>
+      <CreateClimbButton>Create new climb</CreateClimbButton>
     </div>
   );
 }
