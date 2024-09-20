@@ -32,7 +32,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <h2>Names</h2>
       <div>
         <ul>
-          {names.map((name, index) => (
+          {names.map((name: string, index: number) => (
             <li key={index}>{name}</li>
           ))}
         </ul>
