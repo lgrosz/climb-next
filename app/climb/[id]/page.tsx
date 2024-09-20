@@ -1,9 +1,21 @@
 import DeleteClimbButton from '@/components/DeleteClimbButton'
 import AddClimbNameForm from '@/components/AddClimbNameForm'
+import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
 
 var query = /* GraphQL */`query GetClimb($id: Int!) {
   climb(id: $id) { id, names }
 }`
+
+async function ClimbNameListItem({ climbId, name, children }: { climbId: number, name: string, children: React.ReactNode }) {
+  return (
+    <li>
+      <div>
+        {children}
+        <RemoveClimbNameButton climbId={climbId} name={name}>Remove</RemoveClimbNameButton>
+      </div>
+    </li>
+  )
+}
 
 export default async function Page({ params }: { params: { id: string } }) {
   let {
@@ -33,7 +45,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <div>
         <ul>
           {names.map((name: string, index: number) => (
-            <li key={index}>{name}</li>
+            <ClimbNameListItem key={index} climbId={id} name={name}>{name}</ClimbNameListItem>
           ))}
         </ul>
         <AddClimbNameForm climbId={id} />
