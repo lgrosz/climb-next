@@ -23,7 +23,7 @@ export async function removeClimb(id: number) {
     revalidatePath("/climbs")
     revalidatePath(`/climb/${id}`)
   } else {
-    except(result.errors)
+    throw(result.errors)
   }
 }
 
@@ -48,7 +48,7 @@ export async function addClimb() {
     revalidatePath(`/climb/${id}`)
     return id;
   } else {
-    except(result.errors)
+    throw(result.errors)
   }
 }
  
