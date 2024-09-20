@@ -42,7 +42,6 @@ export async function addClimb() {
   const result = await response.json()
 
   if (response.ok) {
-    console.log('result is', JSON.stringify(result, null, 2));
     let id = result.data.addClimb.id
     revalidatePath("/climbs")
     revalidatePath(`/climb/${id}`)
