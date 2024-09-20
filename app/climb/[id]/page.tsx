@@ -1,4 +1,5 @@
 import DeleteClimbButton from '@/components/DeleteClimbButton'
+import AddClimbNameForm from '@/components/AddClimbNameForm'
 
 var query = /* GraphQL */`query GetClimb($id: Int!) {
   climb(id: $id) { id, names }
@@ -35,6 +36,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             <li key={index}>{name}</li>
           ))}
         </ul>
+        <AddClimbNameForm climbId={id} />
       </div>
       <DeleteClimbButton climbId={id}>Delete <i>{name}</i></DeleteClimbButton>
     </div>
