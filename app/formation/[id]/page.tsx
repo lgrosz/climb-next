@@ -1,9 +1,10 @@
 import DeleteFormationButton from '@/components/DeleteFormationButton'
 import AddFormationNameForm from '@/components/AddFormationNameForm'
 import RemoveFormationNameButton from '@/components/RemoveFormationNameButton'
+import Map from '@/components/Map'
 
 var query = /* GraphQL */`query GetFormation($id: Int!) {
-  formation(id: $id) { id, names }
+  formation(id: $id) { id, names, location { latitude, longitude } }
 }`
 
 async function FormationNameListItem({ formationId, name, children }: { formationId: number, name: string, children: React.ReactNode }) {
@@ -20,7 +21,8 @@ async function FormationNameListItem({ formationId, name, children }: { formatio
 export default async function Page({ params }: { params: { id: string } }) {
   let {
     id,
-    names
+    names,
+    location
   } = await fetch("http://127.0.0.1:8000/", {
     method: "POST",
     headers: {
@@ -50,6 +52,11 @@ export default async function Page({ params }: { params: { id: string } }) {
         </ul>
         <AddFormationNameForm formationId={id} />
       </div>
+      {
+        location.latitude ? 
+        <Map marker={[location.latitude, location.longitude]} />
+        : null
+      }
       <DeleteFormationButton formationId={id}>Delete <i>{name}</i></DeleteFormationButton>
     </div>
   )
