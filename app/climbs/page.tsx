@@ -25,7 +25,7 @@ export default async function Page() {
     <div>
       <h1>Climbs</h1>
       <ul>
-        {climbs.map((climb, index) => (
+        {climbs.map((climb: any, index: number) => (
           <li key={index}>
             <Link href={`/climb/${climb.id}`}>
               <i>{climb.names.find(Boolean) ?? "Unnamed"}</i>
