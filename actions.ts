@@ -195,3 +195,100 @@ export async function removeAreaName(id: number, name: string) {
     throw(result.errors)
   }
 }
+
+export async function removeFormation(id: number) {
+  const response = await fetch("http://127.0.0.1:8000/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { removeFormation(id: ${id}) { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    // TODO
+    // - How can I revalidate everything that may reference
+    //   this formation??
+    revalidatePath("/formations")
+    revalidatePath(`/formation/${id}`)
+  } else {
+    throw(result.errors)
+  }
+}
+
+export async function addFormation() {
+  const response = await fetch("http://127.0.0.1:8000/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { addFormation { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.addFormation.id
+    revalidatePath("/formations")
+    revalidatePath(`/formation/${id}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
+export async function addFormationName(id: number, name: string) {
+  const response = await fetch("http://127.0.0.1:8000/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { addFormationName(id: ${id}, name: "${name}") { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.addFormationName.id
+    revalidatePath("/formations")
+    revalidatePath(`/formation/${id}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
+export async function removeFormationName(id: number, name: string) {
+  const response = await fetch("http://127.0.0.1:8000/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { removeFormationName(id: ${id}, name: "${name}") { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.removeFormationName.id
+    revalidatePath("/formations")
+    revalidatePath(`/formation/${id}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
