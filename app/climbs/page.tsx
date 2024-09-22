@@ -23,6 +23,7 @@ export default async function Page() {
 
   return (
     <div>
+      <h1>Climbs</h1>
       <ul>
         {climbs.map((climb, index) => (
           <li key={index}>
