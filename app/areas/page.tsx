@@ -1,14 +1,77 @@
+import React from 'react'
 import Link from 'next/link'
 import CreateAreaButton from '@/components/CreateAreaButton'
 
 var query = /* GraphQL */`query GetAreas {
-  areas { id, names }
+  areas {
+    id
+    names
+    superArea {
+      id
+    }
+  }
 }`
+
+interface Area {
+  id: number,
+  names: string[],
+  superArea: {
+    id: number
+  } | null
+}
+
+interface Node extends Area {
+  subAreas: Node[]
+}
+
+function buildTree(areas: Area[]): Node[] {
+  const areaMap = new Map<number, Node>()
+
+  areas.forEach(area => {
+    areaMap.set(area.id, { ...area, subAreas: [] })
+  })
+
+  const roots: Node[] = []
+
+  areas.forEach(area => {
+    const areaRef = areaMap.get(area.id)
+    if (!areaRef) return
+
+    if (area.superArea === null) {
+      roots.push(areaRef)
+    } else {
+      const superArea = areaMap.get(area.superArea.id)
+
+      if (superArea) {
+        superArea.subAreas.push(areaRef)
+      }
+    }
+  })
+
+  return roots
+}
+
+async function NodeList({ nodes } : { nodes: Node[] }) {
+  return (
+    <ul>
+      {nodes.map((node: Node) => (
+        <React.Fragment key={`area-${node.id}`}>
+          <li>
+            <Link href={`/area/${node.id}`}>
+              <i>{node.names.find(Boolean) ?? "Unnamed"}</i>
+            </Link>
+          </li>
+          { node.subAreas ? <NodeList nodes={node.subAreas} /> : null }
+        </React.Fragment>
+      ))}
+    </ul>
+  )
+}
 
 export default async function Page() {
   let {
     areas
-  } = await fetch("http://127.0.0.1:8000/", {
+  }: { areas: Area[] } = await fetch("http://127.0.0.1:8000/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,18 +84,12 @@ export default async function Page() {
     .then(r => r.json())
     .then(json => json.data)
 
+  const roots = buildTree(areas)
+
   return (
     <div>
       <h1>Areas</h1>
-      <ul>
-        {areas.map((area: any, index: number) => (
-          <li key={index}>
-            <Link href={`/area/${area.id}`}>
-              <i>{area.names.find(Boolean) ?? "Unnamed"}</i>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <NodeList nodes={roots} />
       <CreateAreaButton>Create new area</CreateAreaButton>
     </div>
   );
