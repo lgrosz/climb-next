@@ -91,7 +91,8 @@ export default async function Page() {
     <div>
       <h1>Areas</h1>
       <NodeList nodes={roots} />
-      <CreateAreaButton>Create new area</CreateAreaButton>
+      <h2>Management</h2>
+      <Link href={`/areas/create`}>Create area</Link>
     </div>
   );
 }

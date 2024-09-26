@@ -125,7 +125,7 @@ export async function removeArea(id: number) {
   }
 }
 
-export async function addArea() {
+export async function addArea(names?: String[], superAreaId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
@@ -133,8 +133,22 @@ export async function addArea() {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: `mutation { addArea { id }}`
-    })
+      query: `mutation AddArea(
+        $names: [String]
+        $superAreaId: Int
+      ) {
+        addArea(
+          names: $names
+          superAreaId: $superAreaId
+        ) {
+          id
+        }
+      }`,
+      variables: {
+        names: names ?? null,
+        superAreaId: superAreaId ?? null,
+      },
+    }),
   })
 
   const result = await response.json()
