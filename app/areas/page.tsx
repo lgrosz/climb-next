@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import CreateAreaButton from '@/components/CreateAreaButton'
+import { GRAPHQL_ENDPOINT } from '@/constants'
 
 var query = /* GraphQL */`query GetAreas {
   areas {
@@ -71,7 +72,7 @@ async function NodeList({ nodes } : { nodes: Node[] }) {
 export default async function Page() {
   let {
     areas
-  }: { areas: Area[] } = await fetch("http://127.0.0.1:8000/", {
+  }: { areas: Area[] } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

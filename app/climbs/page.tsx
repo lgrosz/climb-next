@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import CreateClimbButton from '@/components/CreateClimbButton'
+import { GRAPHQL_ENDPOINT } from '@/constants';
 
 var query = /* GraphQL */`query GetClimbs {
   climbs { id, names }
@@ -8,7 +9,7 @@ var query = /* GraphQL */`query GetClimbs {
 export default async function Page() {
   let {
     climbs
-  } = await fetch("http://127.0.0.1:8000/", {
+  } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

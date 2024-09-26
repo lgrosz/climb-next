@@ -1,9 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { GRAPHQL_ENDPOINT } from '@/constants'
 
 export async function removeClimb(id: number) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -28,7 +29,7 @@ export async function removeClimb(id: number) {
 }
 
 export async function addClimb() {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export async function addClimb() {
 }
  
 export async function addClimbName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -76,7 +77,7 @@ export async function addClimbName(id: number, name: string) {
 }
 
 export async function removeClimbName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -100,7 +101,7 @@ export async function removeClimbName(id: number, name: string) {
 }
 
 export async function removeArea(id: number) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -125,7 +126,7 @@ export async function removeArea(id: number) {
 }
 
 export async function addArea() {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -149,7 +150,7 @@ export async function addArea() {
 }
 
 export async function addAreaName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -173,7 +174,7 @@ export async function addAreaName(id: number, name: string) {
 }
 
 export async function removeAreaName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -197,7 +198,7 @@ export async function removeAreaName(id: number, name: string) {
 }
 
 export async function removeFormation(id: number) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -222,7 +223,7 @@ export async function removeFormation(id: number) {
 }
 
 export async function addFormation() {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -246,7 +247,7 @@ export async function addFormation() {
 }
 
 export async function addFormationName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -270,7 +271,7 @@ export async function addFormationName(id: number, name: string) {
 }
 
 export async function removeFormationName(id: number, name: string) {
-  const response = await fetch("http://127.0.0.1:8000/", {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

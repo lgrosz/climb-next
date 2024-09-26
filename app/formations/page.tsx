@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import CreateFormationButton from '@/components/CreateFormationButton'
+import { GRAPHQL_ENDPOINT } from '@/constants';
 
 var query = /* GraphQL */`query GetFormations {
   formations { id, names }
@@ -8,7 +9,7 @@ var query = /* GraphQL */`query GetFormations {
 export default async function Page() {
   let {
     formations
-  } = await fetch("http://127.0.0.1:8000/", {
+  } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

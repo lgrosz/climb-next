@@ -1,6 +1,7 @@
 import DeleteClimbButton from '@/components/DeleteClimbButton'
 import AddClimbNameForm from '@/components/AddClimbNameForm'
 import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
+import { GRAPHQL_ENDPOINT } from '@/constants'
 
 var query = /* GraphQL */`query GetClimb($id: Int!) {
   climb(id: $id) { id, names }
@@ -21,7 +22,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   let {
     id,
     names
-  } = await fetch("http://127.0.0.1:8000/", {
+  } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
