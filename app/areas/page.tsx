@@ -54,7 +54,7 @@ function buildTree(areas: Area[]): Node[] {
 
 async function NodeList({ nodes } : { nodes: Node[] }) {
   return (
-    <ul>
+    <>
       {nodes.map((node: Node) => (
         <React.Fragment key={`area-${node.id}`}>
           <li>
@@ -62,10 +62,14 @@ async function NodeList({ nodes } : { nodes: Node[] }) {
               <i>{node.names.find(Boolean) ?? "Unnamed"}</i>
             </Link>
           </li>
-          { node.subAreas ? <NodeList nodes={node.subAreas} /> : null }
+          {node.subAreas ?
+            <ul>
+              <NodeList nodes={node.subAreas} />
+            </ul> : null
+          }
         </React.Fragment>
       ))}
-    </ul>
+    </>
   )
 }
 
@@ -90,9 +94,12 @@ export default async function Page() {
   return (
     <div>
       <h1>Areas</h1>
-      <NodeList nodes={roots} />
-      <h2>Management</h2>
-      <Link href={`/areas/create`}>Create area</Link>
+      <ul>
+        <NodeList nodes={roots} />
+        <li>
+          <Link href={`/areas/create`}>Create area</Link>
+        </li>
+      </ul>
     </div>
   );
 }
