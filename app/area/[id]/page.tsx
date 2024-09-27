@@ -22,6 +22,10 @@ interface Area {
     id: number,
     names: string[]
   } | null,
+  subAreas: {
+    id: number,
+    names: string[]
+  }[]
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -39,6 +43,10 @@ export default async function Page({ params }: { params: { id: string } }) {
           id
           names
           superArea {
+            id
+            names
+          }
+          subAreas {
             id
             names
           }
@@ -71,6 +79,16 @@ export default async function Page({ params }: { params: { id: string } }) {
         :
         <Link href={`/areas`}>Back to areas</Link>
       }
+      <h2>Sub Areas</h2>
+      {area.subAreas.length < 1 ? <p>No sub areas</p> : null}
+      <ul>
+        {area.subAreas.map((subarea) => (
+          <li key={`subarea-${subarea.id}`}>
+            <Link href={`/area/${subarea.id}`}>{subarea.names.find(Boolean) ?? "Unnamed"}</Link>
+          </li>
+        ))}
+        { /* TODO add-subarea by linking to create area form with some query parameters */ }
+      </ul>
       <hr />
       <DeleteAreaButton areaId={area.id}>Delete <i>{name}</i></DeleteAreaButton>
     </div>
