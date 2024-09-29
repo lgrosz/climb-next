@@ -1,24 +1,22 @@
 import CreateAreaForm from "@/components/CreateAreaForm"
 import { GRAPHQL_ENDPOINT } from "@/constants";
 
-var query = /* GraphQL */`query GetAreas {
-  areas {
-    id
-    names
-  }
-}`
+interface Area {
+  id: number,
+  names: string[],
+}
 
 export default async function Form() {
-  let {
-    areas
-  }: { areas: { id: number, names: string[] }[] } = await fetch(GRAPHQL_ENDPOINT, {
+  let areas: Area[] = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: query
+      query: `query GetAreas {
+        areas { id names }
+      }`
     })
   })
     .then(r => r.json())
