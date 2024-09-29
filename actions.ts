@@ -244,8 +244,25 @@ export async function addFormation() {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: `mutation { addFormation { id }}`
-    })
+      query: `mutation AddFormation(
+        $names: [String]
+        $areaId: Int
+        $superFormationId: Int
+      ) {
+        addFormation(
+          names: $names
+          areaId: $areaId
+          superFormationId: $superFormationId
+        ) {
+          id
+        }
+      }`,
+      variables: {
+        names: names ?? null,
+        areaId: areaId ?? null,
+        superFormationId: superFormationId ?? null,
+      },
+    }),
   })
 
   const result = await response.json()

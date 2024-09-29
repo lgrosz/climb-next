@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import CreateFormationButton from '@/components/CreateFormationButton'
 import { GRAPHQL_ENDPOINT } from '@/constants';
 
 var query = /* GraphQL */`query GetFormations {
@@ -33,8 +32,10 @@ export default async function Page() {
             </Link>
           </li>
         ))}
+        <li>
+          <Link href={`/formations/create`}>Create formation</Link>
+        </li>
       </ul>
-      <CreateFormationButton>Create new formation</CreateFormationButton>
     </div>
   );
 }
