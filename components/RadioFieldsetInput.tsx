@@ -8,7 +8,7 @@ interface RadioInputProperties {
 }
 
 interface RadioFieldsetInputProperties {
-  value: number | undefined,
+  value: string | number | readonly string[] | undefined,
   onChange: (newValue: string | number | readonly string[] | undefined) => void,
   values: RadioInputProperties[],
   caption?: string
