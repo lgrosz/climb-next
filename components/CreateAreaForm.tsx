@@ -1,19 +1,33 @@
 'use client'
 
 import StringArrayInput from "@/components/StringArrayInput";
-import RadioFieldsetInput from "@/components/RadioFieldsetInput";
+import TreeRadioFieldsetInput, { ValueNode } from "@/components/TreeRadioFieldsetInput";
 import { ChangeEvent, useState } from "react";
 import { addArea } from "@/actions";
 import { useRouter } from "next/navigation";
 
-interface IdentifiableNamedArea {
+interface AreaNode {
   id: number,
-  name: string,
+  names: string[],
+  subAreas: AreaNode[],
 }
 
 interface CreateAreaFormProperties {
-  areas: IdentifiableNamedArea[],
+  areas: AreaNode[],
 }
+
+function areaAsRadioProps(areaNode: AreaNode): ValueNode {
+  return {
+    props: {
+      id: areaNode.id.toString(),
+      name: "superArea",
+      value: areaNode.id,
+      label: areaNode.names.find(Boolean) ?? "Unnamed",
+    },
+    children: areaNode.subAreas.map(subArea => areaAsRadioProps(subArea)),
+  };
+}
+
 
 export default function CreateAreaForm(props: CreateAreaFormProperties) {
   const router = useRouter();
@@ -44,15 +58,10 @@ export default function CreateAreaForm(props: CreateAreaFormProperties) {
       </div>
       <div>
         <label htmlFor="superAreaId">Super Area:</label>
-        <RadioFieldsetInput
+        <TreeRadioFieldsetInput
           caption="Select an area:"
           value={superAreaId}
-          values={props.areas.map(area => ({
-            id: `${area.id}`,
-            name: "superArea",
-            value: area.id,
-            label: area.name,
-          }))}
+          nodes={props.areas.map(areaAsRadioProps)}
           onChange={(value) => setSuperAreaId(Number(value))}
         />
         <button type="button" onClick={() => setSuperAreaId(undefined)}>Clear selection</button>
