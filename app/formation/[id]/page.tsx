@@ -2,10 +2,7 @@ import DeleteFormationButton from '@/components/DeleteFormationButton'
 import AddFormationNameForm from '@/components/AddFormationNameForm'
 import RemoveFormationNameButton from '@/components/RemoveFormationNameButton'
 import { GRAPHQL_ENDPOINT } from '@/constants'
-
-var query = /* GraphQL */`query GetFormation($id: Int!) {
-  formation(id: $id) { id, names }
-}`
+import Link from 'next/link'
 
 async function FormationNameListItem({ formationId, name, children }: { formationId: number, name: string, children: React.ReactNode }) {
   return (
@@ -18,18 +15,42 @@ async function FormationNameListItem({ formationId, name, children }: { formatio
   )
 }
 
+interface Formation {
+  id: number,
+  names: string[],
+  area: {
+    id: number,
+    names: string[]
+  } | null,
+  superFormation: {
+    id: number,
+    names: string[]
+  },
+  subFormations: {
+    id: number,
+    names: string[]
+  }[]
+}
+
 export default async function Page({ params }: { params: { id: string } }) {
-  let {
-    id,
-    names
-  } = await fetch(GRAPHQL_ENDPOINT, {
+  let formation: Formation = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: query,
+      query: `query GetFormation($id: Int!) {
+        formation(
+          id: $id
+        ) {
+          id
+          names
+          area { id names }
+          superFormation { id names }
+          subFormations { id names }
+        }
+      }`,
       variables: { id: parseInt(params.id) }
     })
   })
@@ -37,7 +58,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     .then(json => json.data.formation)
 
   // We will treat the official name as the first of the names list
-  const name = names.find(Boolean)
+  const name = formation.names.find(Boolean)
 
   return (
     <div>
@@ -45,13 +66,32 @@ export default async function Page({ params }: { params: { id: string } }) {
       <h2>Names</h2>
       <div>
         <ul>
-          {names.map((name: string, index: number) => (
-            <FormationNameListItem key={index} formationId={id} name={name}>{name}</FormationNameListItem>
+          {formation.names.map((name: string, index: number) => (
+            <FormationNameListItem key={index} formationId={formation.id} name={name}>{name}</FormationNameListItem>
           ))}
         </ul>
-        <AddFormationNameForm formationId={id} />
+        <AddFormationNameForm formationId={formation.id} />
       </div>
-      <DeleteFormationButton formationId={id}>Delete <i>{name}</i></DeleteFormationButton>
+      <h2>Sub Formations</h2>
+      {formation.subFormations.length < 1 ? <p>No sub formations</p> : null}
+      <ul>
+        {formation.subFormations.map((subformation) => (
+          <li key={`subformation-${subformation.id}`}>
+            <Link href={`/formation/${subformation.id}`}>{subformation.names.find(Boolean) ?? "Unnamed"}</Link>
+          </li>
+        ))}
+        { /* TODO add-subarea by linking to create area form with some query parameters */ }
+      </ul>
+      <h2>{formation.area ? "Area" : "Super Formation"}</h2>
+      {formation.area ?
+        <Link href={`/area/${formation.area.id}`}>{formation.area.names.find(Boolean) ?? "Unnamed"}</Link>
+        : formation.superFormation ?
+        <Link href={`/formation/${formation.superFormation.id}`}>{formation.superFormation.names.find(Boolean) ?? "Unnamed"}</Link>
+        :
+        <Link href={`/formations`}>Back to formations</Link>
+      }
+      <hr />
+      <DeleteFormationButton formationId={formation.id}>Delete <i>{name}</i></DeleteFormationButton>
     </div>
   )
 }

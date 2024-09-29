@@ -25,6 +25,10 @@ interface Area {
   subAreas: {
     id: number,
     names: string[]
+  }[],
+  formations: {
+    id: number,
+    names: string[]
   }[]
 }
 
@@ -47,6 +51,10 @@ export default async function Page({ params }: { params: { id: string } }) {
             names
           }
           subAreas {
+            id
+            names
+          }
+          formations {
             id
             names
           }
@@ -88,6 +96,16 @@ export default async function Page({ params }: { params: { id: string } }) {
           </li>
         ))}
         { /* TODO add-subarea by linking to create area form with some query parameters */ }
+      </ul>
+      <h2>Formations</h2>
+      {area.formations.length < 1 ? <p>No formations</p> : null}
+      <ul>
+        {area.formations.map((formation) => (
+          <li key={`formation-${formation.id}`}>
+            <Link href={`/formation/${formation.id}`}>{formation.names.find(Boolean) ?? "Unnamed"}</Link>
+          </li>
+        ))}
+        { /* TODO add-formation by linking to create formation form with some query parameters */ }
       </ul>
       <hr />
       <DeleteAreaButton areaId={area.id}>Delete <i>{name}</i></DeleteAreaButton>
