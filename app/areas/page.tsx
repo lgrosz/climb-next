@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import CreateAreaButton from '@/components/CreateAreaButton'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 
 var query = /* GraphQL */`query GetAreas {
