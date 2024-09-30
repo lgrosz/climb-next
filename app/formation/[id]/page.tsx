@@ -29,7 +29,11 @@ interface Formation {
   subFormations: {
     id: number,
     names: string[]
-  }[]
+  }[],
+  climbs: {
+    id: number,
+    names: string[]
+  }[],
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -44,11 +48,11 @@ export default async function Page({ params }: { params: { id: string } }) {
         formation(
           id: $id
         ) {
-          id
-          names
+          id names
           area { id names }
           superFormation { id names }
           subFormations { id names }
+          climbs { id names }
         }
       }`,
       variables: { id: parseInt(params.id) }
@@ -90,6 +94,16 @@ export default async function Page({ params }: { params: { id: string } }) {
         :
         <Link href={`/formations`}>Back to formations</Link>
       }
+      <h2>Climbs</h2>
+      {formation.climbs.length < 1 ? <p>No climbs</p> : null}
+      <ul>
+        {formation.climbs.map((climb) => (
+          <li key={`climb-${climb.id}`}>
+            <Link href={`/climb/${climb.id}`}>{climb.names.find(Boolean) ?? "Unnamed"}</Link>
+          </li>
+        ))}
+        { /* TODO add-climb by linking to create climb form with some query parameters */ }
+      </ul>
       <hr />
       <DeleteFormationButton formationId={formation.id}>Delete <i>{name}</i></DeleteFormationButton>
     </div>

@@ -29,7 +29,11 @@ interface Area {
   formations: {
     id: number,
     names: string[]
-  }[]
+  }[],
+  climbs: {
+    id: number,
+    names: string[]
+  }[],
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -44,20 +48,11 @@ export default async function Page({ params }: { params: { id: string } }) {
         area(
           id: $id
         ) {
-          id
-          names
-          superArea {
-            id
-            names
-          }
-          subAreas {
-            id
-            names
-          }
-          formations {
-            id
-            names
-          }
+          id names
+          superArea { id names }
+          subAreas { id names }
+          formations { id names }
+          climbs { id names }
         }
       }`,
       variables: { id: parseInt(params.id) }
@@ -106,6 +101,16 @@ export default async function Page({ params }: { params: { id: string } }) {
           </li>
         ))}
         { /* TODO add-formation by linking to create formation form with some query parameters */ }
+      </ul>
+      <h2>Climbs</h2>
+      {area.climbs.length < 1 ? <p>No climbs</p> : null}
+      <ul>
+        {area.climbs.map((climb) => (
+          <li key={`climb-${climb.id}`}>
+            <Link href={`/climb/${climb.id}`}>{climb.names.find(Boolean) ?? "Unnamed"}</Link>
+          </li>
+        ))}
+        { /* TODO add-climb by linking to create climb form with some query parameters */ }
       </ul>
       <hr />
       <DeleteAreaButton areaId={area.id}>Delete <i>{name}</i></DeleteAreaButton>
