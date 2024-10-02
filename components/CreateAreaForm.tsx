@@ -36,7 +36,6 @@ export default function CreateAreaForm(props: CreateAreaFormProperties) {
 
   const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('submitting', names, superAreaId)
 
     try {
       let id = await addArea(names, superAreaId)
