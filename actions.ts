@@ -236,7 +236,7 @@ export async function removeFormation(id: number) {
   }
 }
 
-export async function addFormation() {
+export async function addFormation(names?: String[], areaId?: number, superFormationId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
