@@ -83,24 +83,40 @@ export default async function Page({ params }: { params: { id: string } }) {
         <Link href={`/areas`}>Back to areas</Link>
       }
       <h2>Sub Areas</h2>
-      {area.subAreas.length < 1 ? <p>No sub areas</p> : null}
       <ul>
         {area.subAreas.map((subarea) => (
           <li key={`subarea-${subarea.id}`}>
             <Link href={`/area/${subarea.id}`}>{subarea.names.find(Boolean) ?? "Unnamed"}</Link>
           </li>
         ))}
-        { /* TODO add-subarea by linking to create area form with some query parameters */ }
+        <li>
+          <Link
+            href={{
+              pathname: "/areas/create",
+              query: { "super-area-id": area.id },
+            }}
+          >
+            Create sub area
+          </Link>
+        </li>
       </ul>
       <h2>Formations</h2>
-      {area.formations.length < 1 ? <p>No formations</p> : null}
       <ul>
         {area.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formation/${formation.id}`}>{formation.names.find(Boolean) ?? "Unnamed"}</Link>
           </li>
         ))}
-        { /* TODO add-formation by linking to create formation form with some query parameters */ }
+        <li>
+          <Link
+            href={{
+              pathname: "/formations/create",
+              query: { "area-id": area.id },
+            }}
+          >
+            Create formation
+          </Link>
+        </li>
       </ul>
       <h2>Climbs</h2>
       {area.climbs.length < 1 ? <p>No climbs</p> : null}

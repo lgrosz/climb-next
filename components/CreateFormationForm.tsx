@@ -15,6 +15,8 @@ interface Node {
 
 interface CreateAreaFormProperties {
   roots: Node[],
+  areaId?: number,
+  superFormationId?: number,
 }
 
 function nodeAsRadioProps(node: Node): ValueNode {
@@ -32,8 +34,8 @@ function nodeAsRadioProps(node: Node): ValueNode {
 export default function CreateAreaForm(props: CreateAreaFormProperties) {
   const router = useRouter();
   const [names, setNames] = useState<string[] | undefined>();
-  const [areaId, setAreaId] = useState<number | undefined>();
-  const [superFormationId, setSuperFormationId] = useState<number | undefined>();
+  const [areaId, setAreaId] = useState<number | undefined>(props.areaId);
+  const [superFormationId, setSuperFormationId] = useState<number | undefined>(props.superFormationId);
 
   const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()

@@ -62,7 +62,16 @@ function buildTree(areas: Area[], formations: Formation[]): TreeNode[] {
   return Array.from(areaMap.values()).filter(area => !areas.find(a => a.id === area.id)?.superArea);
 }
 
-export default async function Form() {
+interface SearchParams {
+  "area-id"?: string,
+  "super-formation-id"?: string,
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: SearchParams,
+}) {
   let {
     areas,
     formations
@@ -96,10 +105,22 @@ export default async function Form() {
 
   const roots = buildTree(areas, formations)
 
+  const areaId: number | undefined = searchParams["area-id"]
+    ? parseInt(searchParams["area-id"], 10)
+    : undefined;
+
+  const superFormationId: number | undefined = searchParams["super-formation-id"]
+    ? parseInt(searchParams["super-formation-id"], 10)
+    : undefined;
+
   return (
     <div>
       <h1>Create formation</h1>
-      <CreateFormationForm roots={roots} />
+      <CreateFormationForm
+        roots={roots}
+        areaId={areaId}
+        superFormationId={superFormationId}
+      />
     </div>
   );
 }

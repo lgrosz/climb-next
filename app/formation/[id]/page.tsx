@@ -77,14 +77,22 @@ export default async function Page({ params }: { params: { id: string } }) {
         <AddFormationNameForm formationId={formation.id} />
       </div>
       <h2>Sub Formations</h2>
-      {formation.subFormations.length < 1 ? <p>No sub formations</p> : null}
       <ul>
         {formation.subFormations.map((subformation) => (
           <li key={`subformation-${subformation.id}`}>
             <Link href={`/formation/${subformation.id}`}>{subformation.names.find(Boolean) ?? "Unnamed"}</Link>
           </li>
         ))}
-        { /* TODO add-subarea by linking to create area form with some query parameters */ }
+        <li>
+          <Link
+            href={{
+              pathname: "/formations/create",
+              query: { "super-formation-id": formation.id },
+            }}
+          >
+            Create formation
+          </Link>
+        </li>
       </ul>
       <h2>{formation.area ? "Area" : "Super Formation"}</h2>
       {formation.area ?

@@ -38,7 +38,15 @@ function buildTree(areas: Area[]): Node[] {
   return roots
 }
 
-export default async function Form() {
+interface SearchParams {
+  "super-area-id"?: string,
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: SearchParams,
+}) {
   let { areas }: { areas: Area[] } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
@@ -60,10 +68,16 @@ export default async function Form() {
 
   const roots = buildTree(areas)
 
+  const superAreaId: number | undefined = searchParams["super-area-id"]
+    ? parseInt(searchParams["super-area-id"], 10)
+    : undefined;
+
   return (
     <div>
       <h1>Create area</h1>
-      <CreateAreaForm areas={roots} />
+      <CreateAreaForm
+        areas={roots}
+        superAreaId={superAreaId} />
     </div>
   );
 }
