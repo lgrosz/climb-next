@@ -80,7 +80,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       {area.superArea ?
         <Link href={`/area/${area.superArea.id}`}>{area.superArea.names.find(Boolean) ?? "Unnamed"}</Link>
         :
-        <Link href={`/areas`}>Back to areas</Link>
+        "No ancestor"
       }
       <h2>Sub Areas</h2>
       <ul>

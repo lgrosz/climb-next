@@ -94,13 +94,13 @@ export default async function Page({ params }: { params: { id: string } }) {
           </Link>
         </li>
       </ul>
-      <h2>{formation.area ? "Area" : "Super Formation"}</h2>
+      <h2>{formation.area ? "Area" : formation.superFormation ? "Super Formation" : "No ancestor"}</h2>
       {formation.area ?
         <Link href={`/area/${formation.area.id}`}>{formation.area.names.find(Boolean) ?? "Unnamed"}</Link>
         : formation.superFormation ?
         <Link href={`/formation/${formation.superFormation.id}`}>{formation.superFormation.names.find(Boolean) ?? "Unnamed"}</Link>
         :
-        <Link href={`/formations`}>Back to formations</Link>
+        "No ancestor"
       }
       <h2>Climbs</h2>
       <ul>
