@@ -103,14 +103,22 @@ export default async function Page({ params }: { params: { id: string } }) {
         <Link href={`/formations`}>Back to formations</Link>
       }
       <h2>Climbs</h2>
-      {formation.climbs.length < 1 ? <p>No climbs</p> : null}
       <ul>
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climb/${climb.id}`}>{climb.names.find(Boolean) ?? "Unnamed"}</Link>
           </li>
         ))}
-        { /* TODO add-climb by linking to create climb form with some query parameters */ }
+        <li>
+          <Link
+            href={{
+              pathname: "/climbs/create",
+              query: { "formation-id": formation.id },
+            }}
+          >
+            Create climb
+          </Link>
+        </li>
       </ul>
       <hr />
       <DeleteFormationButton formationId={formation.id}>Delete <i>{name}</i></DeleteFormationButton>

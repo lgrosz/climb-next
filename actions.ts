@@ -28,7 +28,7 @@ export async function removeClimb(id: number) {
   }
 }
 
-export async function addClimb() {
+export async function addClimb(names?: string[], areaId?: number, formationId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
@@ -36,8 +36,25 @@ export async function addClimb() {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: `mutation { addClimb { id }}`
-    })
+      query: `mutation AddClimb(
+        $names: [String]
+        $areaId: Int
+        $formationId: Int
+      ) {
+        addClimb(
+          names: $names
+          areaId: $areaId
+          formationId: $formationId
+        ) {
+          id
+        }
+      }`,
+      variables: {
+        names: names ?? null,
+        areaId: areaId ?? null,
+        formationId: formationId ?? null,
+      },
+    }),
   })
 
   const result = await response.json()
