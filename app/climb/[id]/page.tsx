@@ -2,6 +2,7 @@ import Link from 'next/link'
 import DeleteClimbButton from '@/components/DeleteClimbButton'
 import AddClimbNameForm from '@/components/AddClimbNameForm'
 import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
+import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 
 async function ClimbNameListItem({ climbId, name, children }: { climbId: number, name: string, children: React.ReactNode }) {
@@ -15,9 +16,15 @@ async function ClimbNameListItem({ climbId, name, children }: { climbId: number,
   )
 }
 
+interface Grade {
+  type: string,
+  value: string,
+}
+
 interface Climb {
   id: number,
   names: string[],
+  grades: Grade[],
   area: { id: number, names: string[] } | null,
   formation: { id: number, names: string[] } | null,
 }
@@ -39,6 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           id: $id
         ) {
           id names
+          grades { type value }
           area { id names }
           formation { id names }
         }
@@ -52,9 +60,31 @@ export default async function Page({ params }: { params: { id: string } }) {
   // We will treat the official name as the first of the names list
   const name = names.find(Boolean)
 
+  const verminGrades: VerminGrade[] = climb.grades
+    .map(grade => {
+      if (grade.type === "VERMIN") {
+        try {
+          return VerminGrade.fromString(grade.value)
+        } catch (error) {
+          console.error("Failed to parse grade:", grade.value, error)
+          return null
+        }
+      } else {
+        return null
+      }
+    })
+    .filter((grade): grade is VerminGrade => grade !== null);
+
   return (
     <div>
       <h1>Climb <i>{name}</i></h1>
+      <h2>Grades</h2>
+      {Boolean(verminGrades.length) &&
+        <>
+          <h3>Hueco</h3>
+          <p>{VerminGrade.slashString(verminGrades)}</p>
+        </>
+      }
       <h2>Names</h2>
       <div>
         <ul>
