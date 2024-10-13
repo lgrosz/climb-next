@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import VerminGrade from './vermin-grade'
 
 export async function removeClimb(id: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -110,6 +111,76 @@ export async function removeClimbName(id: number, name: string) {
   if (response.ok) {
     let id = result.data.removeClimbName.id
     revalidatePath("/climbs")
+    revalidatePath(`/climb/${id}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
+interface VerminGradeData {
+  value: number,
+}
+
+export async function addClimbVerminGrade(id: number, data: VerminGradeData) {
+  const grade = new VerminGrade(data.value)
+
+  const response = await fetch(GRAPHQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation {
+        addClimbGrade(
+          id: ${id}
+          grade: {
+            type: VERMIN
+            value: "${grade.toString()}"
+          }
+        ) { id }
+      }`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.addClimbGrade.id
+    revalidatePath(`/climb/${id}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
+export async function removeClimbVerminGrade(id: number, data: VerminGradeData) {
+  const grade = new VerminGrade(data.value)
+
+  const response = await fetch(GRAPHQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation {
+        removeClimbGrade(
+          id: ${id}
+          grade: {
+            type: VERMIN
+            value: "${grade.toString()}"
+          }
+        ) { id }
+      }`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.removeClimbGrade.id
     revalidatePath(`/climb/${id}`)
     return id;
   } else {

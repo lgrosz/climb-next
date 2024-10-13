@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import DeleteClimbButton from '@/components/DeleteClimbButton'
 import AddClimbNameForm from '@/components/AddClimbNameForm'
+import AddVerminGradeForm from '@/components/AddVerminGradeForm'
 import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
+import RemoveClimbVerminGradeButton from '@/components/RemoveClimbVerminGradeButton'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 
@@ -83,6 +85,24 @@ export default async function Page({ params }: { params: { id: string } }) {
         <>
           <h3>Hueco</h3>
           <p>{VerminGrade.slashString(verminGrades)}</p>
+          <ul>
+          {verminGrades.map(grade => (
+            <li>
+              <span>{grade.toString()}</span>
+              <RemoveClimbVerminGradeButton
+                climbId={id}
+                data={ { value: grade.getValue() } }
+              >
+                -
+              </RemoveClimbVerminGradeButton>
+            </li>
+          ))}
+          <li>
+            <AddVerminGradeForm
+              climbId={id}
+            />
+          </li>
+          </ul>
         </>
       }
       <h2>Names</h2>
