@@ -73,8 +73,10 @@ export default async function Page({ params }: { params: { id: string } }) {
           {area.names.map((name: string, index: number) => (
             <AreaNameListItem key={index} areaId={area.id} name={name}>{name}</AreaNameListItem>
           ))}
+          <li>
+            <AddAreaNameForm areaId={area.id} />
+          </li>
         </ul>
-        <AddAreaNameForm areaId={area.id} />
       </div>
       <h2>Super Area</h2>
       {area.superArea ?

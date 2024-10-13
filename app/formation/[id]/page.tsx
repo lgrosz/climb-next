@@ -73,8 +73,10 @@ export default async function Page({ params }: { params: { id: string } }) {
           {formation.names.map((name: string, index: number) => (
             <FormationNameListItem key={index} formationId={formation.id} name={name}>{name}</FormationNameListItem>
           ))}
+          <li>
+            <AddFormationNameForm formationId={formation.id} />
+          </li>
         </ul>
-        <AddFormationNameForm formationId={formation.id} />
       </div>
       <h2>Sub Formations</h2>
       <ul>

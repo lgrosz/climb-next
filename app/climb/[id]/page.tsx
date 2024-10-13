@@ -111,8 +111,10 @@ export default async function Page({ params }: { params: { id: string } }) {
           {names.map((name: string, index: number) => (
             <ClimbNameListItem key={index} climbId={id} name={name}>{name}</ClimbNameListItem>
           ))}
+          <li>
+            <AddClimbNameForm climbId={id} />
+          </li>
         </ul>
-        <AddClimbNameForm climbId={id} />
       </div>
       <h2>{climb.area ? "Area" : climb.formation ? "Formation" : "No ancestor" }</h2>
       {climb.area ?
