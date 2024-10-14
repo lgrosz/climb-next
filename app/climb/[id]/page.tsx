@@ -81,30 +81,26 @@ export default async function Page({ params }: { params: { id: string } }) {
     <div>
       <h1>Climb <i>{name}</i></h1>
       <h2>Grades</h2>
-      {Boolean(verminGrades.length) &&
-        <>
-          <h3>Hueco</h3>
-          <p>{VerminGrade.slashString(verminGrades)}</p>
-          <ul>
-          {verminGrades.map(grade => (
-            <li>
-              <span>{grade.toString()}</span>
-              <RemoveClimbVerminGradeButton
-                climbId={id}
-                data={ { value: grade.getValue() } }
-              >
-                -
-              </RemoveClimbVerminGradeButton>
-            </li>
-          ))}
+      <h3>Hueco</h3>
+      <p>{VerminGrade.slashString(verminGrades)}</p>
+      <ul>
+        {verminGrades.map(grade => (
           <li>
-            <AddVerminGradeForm
+            <span>{grade.toString()}</span>
+            <RemoveClimbVerminGradeButton
               climbId={id}
-            />
+              data={ { value: grade.getValue() } }
+            >
+              -
+            </RemoveClimbVerminGradeButton>
           </li>
-          </ul>
-        </>
-      }
+        ))}
+        <li>
+          <AddVerminGradeForm
+            climbId={id}
+          />
+        </li>
+      </ul>
       <h2>Names</h2>
       <div>
         <ul>
