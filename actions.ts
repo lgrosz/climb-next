@@ -29,7 +29,16 @@ export async function removeClimb(id: number) {
   }
 }
 
-export async function addClimb(names?: string[], areaId?: number, formationId?: number) {
+enum GradeType {
+  Vermin,
+}
+
+interface GradeData {
+  type: "VERMIN",
+  value: string,
+}
+
+export async function addClimb(names?: string[], grades?: GradeData[], areaId?: number, formationId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {
@@ -39,11 +48,13 @@ export async function addClimb(names?: string[], areaId?: number, formationId?: 
     body: JSON.stringify({
       query: `mutation AddClimb(
         $names: [String]
+        $grades: [GradeInput]
         $areaId: Int
         $formationId: Int
       ) {
         addClimb(
           names: $names
+          grades: $grades
           areaId: $areaId
           formationId: $formationId
         ) {
@@ -52,6 +63,7 @@ export async function addClimb(names?: string[], areaId?: number, formationId?: 
       }`,
       variables: {
         names: names ?? null,
+        grades: grades ?? null,
         areaId: areaId ?? null,
         formationId: formationId ?? null,
       },

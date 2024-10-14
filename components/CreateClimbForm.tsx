@@ -1,10 +1,12 @@
 'use client'
 
 import StringArrayInput from "@/components/StringArrayInput";
+import GradeArrayInput from "@/components/GradeArrayInput";
 import TreeRadioFieldsetInput, { ValueNode } from "@/components/TreeRadioFieldsetInput";
 import { ChangeEvent, useState } from "react";
 import { addClimb } from "@/actions";
 import { useRouter } from "next/navigation";
+import VerminGrade from "@/vermin-grade";
 
 interface Node {
   id: number,
@@ -34,6 +36,7 @@ function nodeAsRadioProps(node: Node): ValueNode {
 export default function CreateClimbForm(props: CreateClimbFormProperties) {
   const router = useRouter();
   const [names, setNames] = useState<string[] | undefined>();
+  const [grades, setGrades] = useState<VerminGrade[] | undefined>();
   const [areaId, setAreaId] = useState<number | undefined>(props.areaId);
   const [formationId, setformationId] = useState<number | undefined>(props.formationId);
 
@@ -41,7 +44,12 @@ export default function CreateClimbForm(props: CreateClimbFormProperties) {
     e.preventDefault()
 
     try {
-      let id = await addClimb(names, areaId, formationId)
+      let id = await addClimb(
+        names,
+        grades?.map(grade => ({ type: "VERMIN", value: grade.toString() })),
+        areaId,
+        formationId
+      )
       router.push(`/climb/${id}`)
     } catch (error) {
       console.error("Failed to add formation", error)
@@ -56,6 +64,14 @@ export default function CreateClimbForm(props: CreateClimbFormProperties) {
           value={names ?? []}
           onChange={setNames}
           addStringPlaceholder="Add name"
+        />
+      </div>
+      <div>
+        <label htmlFor="grades">Grades:</label>
+        <GradeArrayInput
+          value={grades ?? []}
+          onChange={setGrades}
+          addStringPlaceholder="Add grade"
         />
       </div>
       <div>
