@@ -29,8 +29,20 @@ export default function StringArrayInput(props: StringArrayInputProperties) {
   };
 
   return (
-    <div>
-      <div>
+    <ul>
+      {props.value.map((name, index) => (
+        <li key={index}>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => handleUpdateString(index, e.target.value)}
+          />
+          <button type="button" onClick={() => handleRemoveString(index)}>
+            Remove
+          </button>
+        </li>
+      ))}
+      <li>
         <input
           type="text"
           value={newString}
@@ -38,21 +50,7 @@ export default function StringArrayInput(props: StringArrayInputProperties) {
           placeholder={props.addStringPlaceholder}
         />
         <button type="button" onClick={handleAddString}>Add String</button>
-      </div>
-      <ul>
-        {props.value.map((name, index) => (
-          <li key={index}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleUpdateString(index, e.target.value)}
-            />
-            <button type="button" onClick={() => handleRemoveString(index)}>
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      </li>
+    </ul>
   );
 };
