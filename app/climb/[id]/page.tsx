@@ -139,7 +139,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <div>
         <ul>
         {ascents.map(ascent => (
-          <li>
+          <li key={`climb-${id}-ascent-${ascent.id}`}>
             <div>
               <span>{new Date(ascent.ascentDate?.start).toLocaleDateString()} - {new Date(ascent.ascentDate?.end).toLocaleDateString()}</span>
               <RemoveAscentButton ascentId={ascent.id}>-</RemoveAscentButton>
