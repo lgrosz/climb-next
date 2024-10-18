@@ -130,6 +130,30 @@ export async function removeClimbName(id: number, name: string) {
   }
 }
 
+export async function removeAscent(id: number) {
+  const response = await fetch(GRAPHQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation { removeAscent(id: ${id}) { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.removeAscent.id
+    // TODO invalidate anything that may reference this ascent... maybe need to
+    // pre-query for climbs and such to correctly invalidate their pages.
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
 interface VerminGradeData {
   value: number,
 }

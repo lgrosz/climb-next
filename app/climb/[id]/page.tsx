@@ -4,6 +4,7 @@ import AddClimbNameForm from '@/components/AddClimbNameForm'
 import AddVerminGradeForm from '@/components/AddVerminGradeForm'
 import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
 import RemoveClimbVerminGradeButton from '@/components/RemoveClimbVerminGradeButton'
+import RemoveAscentButton from '@/components/RemoveAscentButton'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 
@@ -23,10 +24,21 @@ interface Grade {
   value: string,
 }
 
+interface DateRange {
+  start: string,
+  end: string,
+}
+
+interface Ascent {
+  id: number,
+  ascentDate: DateRange,
+}
+
 interface Climb {
   id: number,
   names: string[],
   grades: Grade[],
+  ascents: Ascent[],
   area: { id: number, names: string[] } | null,
   formation: { id: number, names: string[] } | null,
 }
@@ -35,6 +47,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   let {
     id,
     names,
+    ascents,
     ...climb
   }: Climb = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
@@ -49,6 +62,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         ) {
           id names
           grades { type value }
+          ascents { id ascentDate { start end } }
           area { id names }
           formation { id names }
         }
@@ -120,6 +134,19 @@ export default async function Page({ params }: { params: { id: string } }) {
         :
         "No ancestor"
       }
+      <h2>Ascents</h2>
+      <div>
+        <ul>
+        {ascents.map(ascent => (
+          <li>
+            <div>
+              <span>{new Date(ascent.ascentDate?.start).toLocaleDateString()} - {new Date(ascent.ascentDate?.end).toLocaleDateString()}</span>
+              <RemoveAscentButton ascentId={ascent.id}>-</RemoveAscentButton>
+            </div>
+          </li>
+        ))}
+        </ul>
+      </div>
       <hr />
       <DeleteClimbButton climbId={id}>Delete <i>{name}</i></DeleteClimbButton>
     </div>
