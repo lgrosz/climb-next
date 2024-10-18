@@ -130,6 +130,47 @@ export async function removeClimbName(id: number, name: string) {
   }
 }
 
+type DateRangeInput = {
+  start: Date,
+  end: Date,
+}
+
+export async function addAscent(climbId: number, ascentDate?: DateRangeInput) {
+  let ascentDateString = "null"
+
+  if (ascentDate) {
+    ascentDateString = `{
+      start: "${ascentDate.start.toISOString()}"
+      end: "${ascentDate.end.toISOString()}"
+    }`
+  }
+
+  const response = await fetch(GRAPHQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation {
+        addAscent(
+          climbId: ${climbId}
+          ascentDate: ${ascentDateString}
+        ) { id }}`
+    })
+  })
+
+  const result = await response.json()
+
+  if (response.ok) {
+    let id = result.data.addAscent.id
+    revalidatePath(`/climb/${climbId}`)
+    return id;
+  } else {
+    throw(result.errors)
+  }
+}
+
 export async function removeAscent(id: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",

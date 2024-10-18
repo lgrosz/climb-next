@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import DeleteClimbButton from '@/components/DeleteClimbButton'
+import AddClimbAscentForm from '@/components/AddClimbAscentForm'
 import AddClimbNameForm from '@/components/AddClimbNameForm'
 import AddVerminGradeForm from '@/components/AddVerminGradeForm'
 import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
@@ -145,6 +146,9 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
           </li>
         ))}
+          <li>
+            <AddClimbAscentForm climbId={id} />
+          </li>
         </ul>
       </div>
       <hr />
