@@ -1,30 +1,44 @@
 import React from 'react'
 import Link from 'next/link'
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import { query } from '@/graphql'
+
+interface AreaParent {
+  __typename: string,
+  id: number
+}
 
 interface Area {
   id: number,
-  names: string[],
-  superArea: { id: number } | null
+  name: string | null,
+  parent: AreaParent | null,
+}
+
+interface FormationParent {
+  __typename: string,
+  id: number
 }
 
 interface Formation {
   id: number,
-  names: string[],
-  area: { id: number } | null;
-  superFormation: { id: number } | null;
+  name: string | null,
+  parent: FormationParent | null,
+}
+
+interface ClimbParent {
+  __typename: string,
+  id: number,
 }
 
 interface Climb {
   id: number,
-  names: string[],
-  area: { id: number } | null;
-  formation: { id: number } | null;
+  name: string | null,
+  parent: ClimbParent | null,
 }
 
 interface TreeNode {
   id: number,
-  name: string,
+  name: string | null,
   type:
     "area" |
     "formation" |
@@ -40,7 +54,7 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
   areas.forEach(area => {
     areaMap.set(area.id, {
       id: area.id,
-      name: area.names.find(Boolean) ?? "Unnamed",
+      name: area.name,
       type: 'area',
       children: []
     });
@@ -49,7 +63,7 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
   formations.forEach(formation => {
     formationMap.set(formation.id, {
       id: formation.id,
-      name: formation.names.find(Boolean) ?? "Unnamed",
+      name: formation.name,
       type: 'formation',
       children: []
     });
@@ -58,7 +72,7 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
   climbs.forEach(climb => {
     climbMap.set(climb.id, {
       id: climb.id,
-      name: climb.names.find(Boolean) ?? "Unnamed",
+      name: climb.name,
       type: 'climb',
       children: []
     });
@@ -68,10 +82,13 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
 
   climbs.forEach(climb => {
     const node = climbMap.get(climb.id)!;
-    if(climb.formation) {
-      formationMap.get(climb.formation.id)?.children.push(node);
-    } else if (climb.area) {
-      areaMap.get(climb.area.id)?.children.push(node);
+
+    if (climb.parent) {
+      if (climb.parent.__typename == "Formation") {
+        formationMap.get(climb.parent.id)?.children.push(node);
+      } else if (climb.parent.__typename == "Area") {
+        areaMap.get(climb.parent.id)?.children.push(node);
+      }
     } else {
       roots.push(node);
     }
@@ -79,10 +96,13 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
 
   formations.forEach(formation => {
     const node = formationMap.get(formation.id)!;
-    if (formation.superFormation) {
-      formationMap.get(formation.superFormation.id)?.children.push(node);
-    } else if (formation.area) {
-      areaMap.get(formation.area.id)?.children.push(node);
+
+    if (formation.parent) {
+      if (formation.parent.__typename == "Formation") {
+        formationMap.get(formation.parent.id)?.children.push(node);
+      } else {
+        areaMap.get(formation.parent.id)?.children.push(node);
+      }
     } else {
       roots.push(node);
     }
@@ -90,8 +110,11 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
 
   areas.forEach(area => {
     const node = areaMap.get(area.id)!;
-    if (area.superArea) {
-      areaMap.get(area.superArea.id)?.children.push(node);
+
+    if (area.parent) {
+      if (area.parent.__typename == "Area") {
+        areaMap.get(area.parent.id)?.children.push(node);
+      }
     } else {
       roots.push(node);
     }
@@ -130,46 +153,47 @@ async function Node({ node }: { node : TreeNode }) {
   );
 }
 
-export default async function Page() {
-  let {
-    areas,
-    formations,
-    climbs,
-  }: {
-    areas: Area[],
-    formations: Formation[],
-    climbs: Climb[]
-  } = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `query GetEntities {
-        areas {
-          id
-          names
-          superArea { id }
-        }
-        formations {
-          id
-          names
-          area { id }
-          superFormation { id }
-        }
-        climbs {
-          id
-          names
-          area { id }
-          formation { id }
-        }
-      }`
-    })
-  })
-    .then(r => r.json())
-    .then(json => json.data)
+const dataQuery = `
+  query {
+    areas {
+      id
+      name
+      parent {
+        __typename
+        ... on Area { id }
+      }
+    }
+    formations {
+      id
+      name
+      parent {
+        __typename
+        ... on Area { id }
+        ... on Formation { id }
+      }
+    }
+    climbs {
+      id
+      name
+      parent {
+        __typename
+        ... on Area { id }
+        ... on Formation { id }
+      }
+    }
+  }
+`
 
+export default async function Page() {
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery).then(r => r.json());
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(errors);
+    return <div>There was an error generating the page.</div>
+  }
+
+  const { areas, formations, climbs } = data;
   const roots = buildTree(areas, formations, climbs)
 
   return (
