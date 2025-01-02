@@ -1,128 +1,87 @@
 import Link from 'next/link'
-import DeleteClimbButton from '@/components/DeleteClimbButton'
-import AddClimbNameForm from '@/components/AddClimbNameForm'
-import AddVerminGradeForm from '@/components/AddVerminGradeForm'
-import RemoveClimbNameButton from '@/components/RemoveClimbNameButton'
-import RemoveClimbVerminGradeButton from '@/components/RemoveClimbVerminGradeButton'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import { query } from '@/graphql'
 
-async function ClimbNameListItem({ climbId, name, children }: { climbId: number, name: string, children: React.ReactNode }) {
-  return (
-    <li>
-      <div>
-        {children}
-        <RemoveClimbNameButton climbId={climbId} name={name}>Remove</RemoveClimbNameButton>
-      </div>
-    </li>
-  )
+interface ClimbParent {
+  __typename: string,
+  id: number,
+  name: string,
 }
 
-interface Grade {
-  type: string,
-  value: string,
+interface VerminGradeData {
+  value: number,
 }
+
+type GradeData = VerminGradeData;
 
 interface Climb {
   id: number,
-  names: string[],
-  grades: Grade[],
-  area: { id: number, names: string[] } | null,
-  formation: { id: number, names: string[] } | null,
+  name: string | null,
+  parent: ClimbParent | null,
+  grades: GradeData[],
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  let {
-    id,
-    names,
-    ...climb
-  }: Climb = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `query GetClimb($id: Int!) {
-        climb(
-          id: $id
-        ) {
-          id names
-          grades { type value }
-          area { id names }
-          formation { id names }
-        }
-      }`,
-      variables: { id: parseInt(params.id) }
-    })
-  })
-    .then(r => r.json())
-    .then(json => json.data.climb)
-
-  // We will treat the official name as the first of the names list
-  const name = names.find(Boolean)
-
-  const verminGrades: VerminGrade[] = climb.grades
-    .map(grade => {
-      if (grade.type === "VERMIN") {
-        try {
-          return VerminGrade.fromString(grade.value)
-        } catch (error) {
-          console.error("Failed to parse grade:", grade.value, error)
-          return null
-        }
-      } else {
-        return null
+const dataQuery = `
+  query($id: Int!) {
+    climb(
+      id: $id
+    ) {
+      id name
+      grades {
+        ... on VerminGrade { value }
       }
-    })
-    .filter((grade): grade is VerminGrade => grade !== null);
+      parent {
+        __typename
+        ... on Area { id name }
+        ... on Formation { id name }
+      }
+    }
+  }
+`
+
+export default async function Page({ params }: { params: { id: string } }) {
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, { id: parseInt(params.id) })
+    .then(r => r.json());
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+    return <div>There was an error generating the page.</div>
+  }
+
+  const { climb }: { climb: Climb } = data;
+
+  let parentHref: string | null = null;
+  if (climb?.parent?.__typename == "Formation") {
+    parentHref = `/formation/${climb.parent.id}`
+  } else if (climb?.parent?.__typename == "Area") {
+    parentHref = `/area/${climb.parent.id}`
+  }
+
+  const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));
 
   return (
     <div>
-      <h1>Climb <i>{name}</i></h1>
-      <h2>Grades</h2>
-      <h3>Hueco</h3>
-      <p>{VerminGrade.slashString(verminGrades)}</p>
-      <ul>
-        {verminGrades.map(grade => (
-          <li>
-            <span>{grade.toString()}</span>
-            <RemoveClimbVerminGradeButton
-              climbId={id}
-              data={ { value: grade.getValue() } }
-            >
-              -
-            </RemoveClimbVerminGradeButton>
-          </li>
-        ))}
-        <li>
-          <AddVerminGradeForm
-            climbId={id}
-          />
-        </li>
-      </ul>
-      <h2>Names</h2>
-      <div>
-        <ul>
-          {names.map((name: string, index: number) => (
-            <ClimbNameListItem key={index} climbId={id} name={name}>{name}</ClimbNameListItem>
-          ))}
-          <li>
-            <AddClimbNameForm climbId={id} />
-          </li>
-        </ul>
-      </div>
-      <h2>{climb.area ? "Area" : climb.formation ? "Formation" : "No ancestor" }</h2>
-      {climb.area ?
-        <Link href={`/area/${climb.area.id}`}>{climb.area.names.find(Boolean) ?? "Unnamed"}</Link>
-        : climb.formation ?
-        <Link href={`/formation/${climb.formation.id}`}>{climb.formation.names.find(Boolean) ?? "Unnamed"}</Link>
-        :
-        "No ancestor"
+      {
+        climb.name ?
+        <h1>{climb.name}</h1> :
+        <h1><i>Unnamed Climb</i></h1>
       }
-      <hr />
-      <DeleteClimbButton climbId={id}>Delete <i>{name}</i></DeleteClimbButton>
+      {
+        climb.parent ?
+        <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
+        null
+      }
+      <h3>Grades</h3>
+      <ul>
+      {
+        verminGrades.length > 0 ?
+        <li>{VerminGrade.slashString(verminGrades)}</li> :
+        null
+      }
+      </ul>
     </div>
-  )
+  );
 }
 
