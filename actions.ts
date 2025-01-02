@@ -90,31 +90,6 @@ export async function addArea(names?: String[], superAreaId?: number) {
   }
 }
 
-export async function removeFormation(id: number) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation { removeFormation(id: ${id}) { id }}`
-    })
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    // TODO
-    // - How can I revalidate everything that may reference
-    //   this formation??
-    revalidatePath("/formations")
-    revalidatePath(`/formation/${id}`)
-  } else {
-    throw(result.errors)
-  }
-}
-
 export async function addFormation(names?: String[], areaId?: number, superFormationId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
@@ -148,54 +123,6 @@ export async function addFormation(names?: String[], areaId?: number, superForma
 
   if (response.ok) {
     let id = result.data.addFormation.id
-    revalidatePath("/formations")
-    revalidatePath(`/formation/${id}`)
-    return id;
-  } else {
-    throw(result.errors)
-  }
-}
-
-export async function addFormationName(id: number, name: string) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation { addFormationName(id: ${id}, name: "${name}") { id }}`
-    })
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    let id = result.data.addFormationName.id
-    revalidatePath("/formations")
-    revalidatePath(`/formation/${id}`)
-    return id;
-  } else {
-    throw(result.errors)
-  }
-}
-
-export async function removeFormationName(id: number, name: string) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation { removeFormationName(id: ${id}, name: "${name}") { id }}`
-    })
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    let id = result.data.removeFormationName.id
     revalidatePath("/formations")
     revalidatePath(`/formation/${id}`)
     return id;

@@ -1,129 +1,95 @@
-import DeleteFormationButton from '@/components/DeleteFormationButton'
-import AddFormationNameForm from '@/components/AddFormationNameForm'
-import RemoveFormationNameButton from '@/components/RemoveFormationNameButton'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
+import { query } from '@/graphql'
 
-async function FormationNameListItem({ formationId, name, children }: { formationId: number, name: string, children: React.ReactNode }) {
-  return (
-    <li>
-      <div>
-        {children}
-        <RemoveFormationNameButton formationId={formationId} name={name}>Remove</RemoveFormationNameButton>
-      </div>
-    </li>
-  )
+interface FormationParent {
+  __typename: string,
+  id: number,
+  name: string | null
+}
+
+interface SubFormation {
+  id: number,
+  name: string | null
+}
+
+interface Climb {
+  id: number,
+  name: string | null
 }
 
 interface Formation {
   id: number,
-  names: string[],
-  area: {
-    id: number,
-    names: string[]
-  } | null,
-  superFormation: {
-    id: number,
-    names: string[]
-  },
-  subFormations: {
-    id: number,
-    names: string[]
-  }[],
-  climbs: {
-    id: number,
-    names: string[]
-  }[],
+  name: string | null,
+  parent: FormationParent | null,
+  formations: SubFormation[],
+  climbs: Climb[],
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  let formation: Formation = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `query GetFormation($id: Int!) {
-        formation(
-          id: $id
-        ) {
-          id names
-          area { id names }
-          superFormation { id names }
-          subFormations { id names }
-          climbs { id names }
-        }
-      }`,
-      variables: { id: parseInt(params.id) }
-    })
-  })
-    .then(r => r.json())
-    .then(json => json.data.formation)
+const dataQuery = `
+  query($id: Int!) {
+    formation(
+      id: $id
+    ) {
+      id name
+      formations { id name }
+      climbs { id name }
+      parent {
+        __typename
+        ... on Area { id name }
+        ... on Formation { id name }
+      }
+    }
+  }
+`
 
-  // We will treat the official name as the first of the names list
-  const name = formation.names.find(Boolean)
+export default async function Page({ params }: { params: { id: string } }) {
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, { id: parseInt(params.id) })
+    .then(r => r.json());
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+    return <div>There was an error generating the page.</div>
+  }
+
+  const { formation }: { formation: Formation } = data;
+
+  let parentHref: string | null = null;
+  if (formation?.parent?.__typename == "Area") {
+    parentHref = `/area/${formation.parent.id}`
+  } else if (formation?.parent?.__typename == "Formation") {
+    parentHref = `/formation/${formation.parent.id}`
+  }
 
   return (
     <div>
-      <h1>Formation <i>{name}</i></h1>
-      <h2>Names</h2>
-      <div>
-        <ul>
-          {formation.names.map((name: string, index: number) => (
-            <FormationNameListItem key={index} formationId={formation.id} name={name}>{name}</FormationNameListItem>
-          ))}
-          <li>
-            <AddFormationNameForm formationId={formation.id} />
-          </li>
-        </ul>
-      </div>
-      <h2>Sub Formations</h2>
+      {
+        formation.name ?
+        <h1>{formation.name}</h1> :
+        <h1><i>Unnamed formation</i></h1>
+      }
+      {
+        formation.parent ?
+        <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
+        null
+      }
+      <h3>Formations</h3>
       <ul>
-        {formation.subFormations.map((subformation) => (
-          <li key={`subformation-${subformation.id}`}>
-            <Link href={`/formation/${subformation.id}`}>{subformation.names.find(Boolean) ?? "Unnamed"}</Link>
+        {formation.formations.map((formation) => (
+          <li key={`formations-${formation.id}`}>
+            <Link href={`/formation/${formation.id}`}>{formation.name}</Link>
           </li>
         ))}
-        <li>
-          <Link
-            href={{
-              pathname: "/formations/create",
-              query: { "super-formation-id": formation.id },
-            }}
-          >
-            Create formation
-          </Link>
-        </li>
       </ul>
-      <h2>{formation.area ? "Area" : formation.superFormation ? "Super Formation" : "No ancestor"}</h2>
-      {formation.area ?
-        <Link href={`/area/${formation.area.id}`}>{formation.area.names.find(Boolean) ?? "Unnamed"}</Link>
-        : formation.superFormation ?
-        <Link href={`/formation/${formation.superFormation.id}`}>{formation.superFormation.names.find(Boolean) ?? "Unnamed"}</Link>
-        :
-        "No ancestor"
-      }
-      <h2>Climbs</h2>
+      <h3>Climbs</h3>
       <ul>
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
-            <Link href={`/climb/${climb.id}`}>{climb.names.find(Boolean) ?? "Unnamed"}</Link>
+            <Link href={`/climb/${climb.id}`}>{climb.name}</Link>
           </li>
         ))}
-        <li>
-          <Link
-            href={{
-              pathname: "/climbs/create",
-              query: { "formation-id": formation.id },
-            }}
-          >
-            Create climb
-          </Link>
-        </li>
       </ul>
-      <hr />
-      <DeleteFormationButton formationId={formation.id}>Delete <i>{name}</i></DeleteFormationButton>
     </div>
   )
 }
