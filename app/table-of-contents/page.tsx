@@ -185,7 +185,8 @@ const dataQuery = `
 `
 
 export default async function Page() {
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery).then(r => r.json());
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, null)
+    .then(r => r.json());
   const { data, errors } = result;
 
   if (errors) {

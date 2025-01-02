@@ -1,4 +1,4 @@
-export function query(endpoint: string, query: string) {
+export function query(endpoint: string, query: string, variables: any) {
   return fetch(endpoint, {
     method: "POST",
     headers: {
@@ -7,6 +7,7 @@ export function query(endpoint: string, query: string) {
     },
     body: JSON.stringify({
       query: query,
+      variables: variables,
     })
   })
 }
