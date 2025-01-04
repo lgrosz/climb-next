@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import { query } from '@/graphql';
 
 interface GradeData {
   type: "VERMIN",
@@ -88,6 +89,79 @@ export async function addArea(names?: String[], superAreaId?: number) {
   } else {
     throw(result.errors)
   }
+}
+
+export async function renameArea(areaId: number, name: string) {
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $name: String
+    ) {
+      action: renameArea(
+        id: $id
+        name: $name
+      ) {
+        name
+        parent {
+          __typename
+          ... on Area {
+            id
+          }
+        }
+        areas { id }
+        formations { id }
+        climbs { id }
+      }
+    }
+  `;
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: areaId,
+    name: name || null,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  revalidatePath('/table-of-contents')
+  revalidatePath(`/areas/${areaId}`)
+
+  if (data?.action?.parent?.__typename == "Area") {
+    const parentAreaId = data?.action?.parent?.id;
+    if (parentAreaId) {
+      revalidatePath(`/areas/${parentAreaId}`)
+    }
+  }
+
+  const childAreas = data?.action?.areas ?? []
+  for (const child of childAreas) {
+    const childAreaId = child?.id
+    if (childAreaId) {
+      revalidatePath(`/areas/${childAreaId}`)
+    }
+  }
+
+  const childFormations = data?.action?.formations ?? []
+  for (const child of childFormations) {
+    const childFormationId = child?.id
+    if (childFormationId) {
+      revalidatePath(`/formations/${childFormationId}`)
+    }
+  }
+
+  const childClimbs = data?.action?.climbs ?? []
+  for (const child of childClimbs) {
+    const childClimbId = child?.id
+    if (childClimbId) {
+      revalidatePath(`/climbs/${childClimbId}`)
+    }
+  }
+
+  return data?.action?.name ?? "";
 }
 
 export async function addFormation(names?: String[], areaId?: number, superFormationId?: number) {
