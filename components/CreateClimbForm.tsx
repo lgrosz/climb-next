@@ -50,7 +50,7 @@ export default function CreateClimbForm(props: CreateClimbFormProperties) {
         areaId,
         formationId
       )
-      router.push(`/climb/${id}`)
+      router.push(`/climbs/${id}`)
     } catch (error) {
       console.error("Failed to add formation", error)
     }

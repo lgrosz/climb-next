@@ -129,13 +129,13 @@ async function Node({ node }: { node : TreeNode }) {
 
   if (node.type == "area") {
     text = "[a]"
-    href = "/area/"
+    href = "/areas/"
   } else if (node.type == "formation") {
     text = "[f]"
-    href = "/formation/"
+    href = "/formations/"
   } else if (node.type == "climb") {
     text = "[c]"
-    href = "/climb/"
+    href = "/climbs/"
   }
 
   text = `${text} ${node.name}`

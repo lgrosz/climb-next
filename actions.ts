@@ -45,7 +45,7 @@ export async function addClimb(names?: string[], grades?: GradeData[], areaId?: 
   if (response.ok) {
     let id = result.data.addClimb.id
     revalidatePath("/climbs")
-    revalidatePath(`/climb/${id}`)
+    revalidatePath(`/climbs/${id}`)
     return id;
   } else {
     throw(result.errors)
@@ -83,7 +83,7 @@ export async function addArea(names?: String[], superAreaId?: number) {
   if (response.ok) {
     let id = result.data.addArea.id
     revalidatePath("/areas")
-    revalidatePath(`/area/${id}`)
+    revalidatePath(`/areas/${id}`)
     return id;
   } else {
     throw(result.errors)
@@ -124,7 +124,7 @@ export async function addFormation(names?: String[], areaId?: number, superForma
   if (response.ok) {
     let id = result.data.addFormation.id
     revalidatePath("/formations")
-    revalidatePath(`/formation/${id}`)
+    revalidatePath(`/formations/${id}`)
     return id;
   } else {
     throw(result.errors)

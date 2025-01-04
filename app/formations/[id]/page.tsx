@@ -2,48 +2,42 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 
-interface SubArea {
+interface FormationParent {
+  __typename: string,
   id: number,
-  name: string | null,
+  name: string | null
+}
+
+interface SubFormation {
+  id: number,
+  name: string | null
+}
+
+interface Climb {
+  id: number,
+  name: string | null
 }
 
 interface Formation {
   id: number,
   name: string | null,
-}
-
-interface Climb {
-  id: number,
-  name: string | null,
-}
-
-interface AreaParent {
-  __typename: string,
-  id: number,
-  name: string | null,
-}
-
-interface Area {
-  id: number,
-  name: string | null,
-  areas: SubArea[],
-  formations: Formation[],
+  parent: FormationParent | null,
+  formations: SubFormation[],
   climbs: Climb[],
-  parent: AreaParent | null,
 }
 
 const dataQuery = `
   query($id: Int!) {
-    area(
+    formation(
       id: $id
     ) {
       id name
-      areas { id name }
       formations { id name }
       climbs { id name }
       parent {
         __typename
         ... on Area { id name }
+        ... on Formation { id name }
       }
     }
   }
@@ -59,46 +53,40 @@ export default async function Page({ params }: { params: { id: string } }) {
     return <div>There was an error generating the page.</div>
   }
 
-  const { area }: { area: Area } = data;
+  const { formation }: { formation: Formation } = data;
 
   let parentHref: string | null = null;
-  if (area?.parent?.__typename == "Area") {
-    parentHref = `/areas/${area.parent.id}`
+  if (formation?.parent?.__typename == "Area") {
+    parentHref = `/areas/${formation.parent.id}`
+  } else if (formation?.parent?.__typename == "Formation") {
+    parentHref = `/formations/${formation.parent.id}`
   }
 
   return (
     <div>
       {
-        area.name ?
-        <h1>{area.name}</h1> :
-        <h1><i>Unnamed Area</i></h1>
+        formation.name ?
+        <h1>{formation.name}</h1> :
+        <h1><i>Unnamed formation</i></h1>
       }
       {
-        area.parent ?
-        <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
+        formation.parent ?
+        <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
         null
       }
-      <h3>Areas</h3>
-      <ul>
-        {area.areas.map((area) => (
-          <li key={`area-${area.id}`}>
-            <Link href={`/area/${area.id}`}>{area.name}</Link>
-          </li>
-        ))}
-      </ul>
       <h3>Formations</h3>
       <ul>
-        {area.formations.map((formation) => (
-          <li key={`formation-${formation.id}`}>
-            <Link href={`/formation/${formation.id}`}>{formation.name}</Link>
+        {formation.formations.map((formation) => (
+          <li key={`formations-${formation.id}`}>
+            <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
           </li>
         ))}
       </ul>
       <h3>Climbs</h3>
       <ul>
-        {area.climbs.map((climb) => (
+        {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
-            <Link href={`/climb/${climb.id}`}>{climb.name}</Link>
+            <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
           </li>
         ))}
       </ul>

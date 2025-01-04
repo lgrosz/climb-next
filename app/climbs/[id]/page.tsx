@@ -54,9 +54,9 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   let parentHref: string | null = null;
   if (climb?.parent?.__typename == "Formation") {
-    parentHref = `/formation/${climb.parent.id}`
+    parentHref = `/formations/${climb.parent.id}`
   } else if (climb?.parent?.__typename == "Area") {
-    parentHref = `/area/${climb.parent.id}`
+    parentHref = `/areas/${climb.parent.id}`
   }
 
   const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));

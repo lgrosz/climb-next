@@ -42,7 +42,7 @@ export default function CreateAreaForm(props: CreateAreaFormProperties) {
 
     try {
       let id = await addFormation(names, areaId, superFormationId)
-      router.push(`/formation/${id}`)
+      router.push(`/formations/${id}`)
     } catch (error) {
       console.error("Failed to add formation", error)
     }

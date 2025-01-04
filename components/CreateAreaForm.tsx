@@ -40,7 +40,7 @@ export default function CreateAreaForm(props: CreateAreaFormProperties) {
 
     try {
       let id = await addArea(names, superAreaId)
-      router.push(`/area/${id}`)
+      router.push(`/areas/${id}`)
     } catch (error) {
       console.error("Failed to add area", error)
     }
