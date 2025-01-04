@@ -1,6 +1,8 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
+import RenameHeader from '@/components/RenameHeader'
+import { renameFormation } from '@/actions'
 
 interface FormationParent {
   __typename: string,
@@ -62,13 +64,18 @@ export default async function Page({ params }: { params: { id: string } }) {
     parentHref = `/formations/${formation.parent.id}`
   }
 
+  const rename = async (name: string) => {
+    'use server';
+    return await renameFormation(formation.id, name);
+  }
+
   return (
     <div>
-      {
-        formation.name ?
-        <h1>{formation.name}</h1> :
-        <h1><i>Unnamed formation</i></h1>
-      }
+      <RenameHeader
+        name={formation.name ?? ""}
+        as="h1"
+        rename={rename}
+      />
       {
         formation.parent ?
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
