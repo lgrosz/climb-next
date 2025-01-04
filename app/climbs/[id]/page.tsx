@@ -2,6 +2,8 @@ import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql'
+import RenameHeader from '@/components/RenameHeader'
+import { renameClimb } from '@/actions'
 
 interface ClimbParent {
   __typename: string,
@@ -59,15 +61,20 @@ export default async function Page({ params }: { params: { id: string } }) {
     parentHref = `/areas/${climb.parent.id}`
   }
 
+  const rename = async (name: string) => {
+    'use server';
+    return await renameClimb(climb.id, name);
+  }
+
   const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));
 
   return (
     <div>
-      {
-        climb.name ?
-        <h1>{climb.name}</h1> :
-        <h1><i>Unnamed Climb</i></h1>
-      }
+      <RenameHeader
+        name={climb.name ?? ""}
+        as="h1"
+        rename={rename}
+      />
       {
         climb.parent ?
         <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
