@@ -1,6 +1,8 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
+import RenameHeader from '@/components/RenameHeader';
+import { renameArea } from '@/actions';
 
 interface SubArea {
   id: number,
@@ -66,13 +68,18 @@ export default async function Page({ params }: { params: { id: string } }) {
     parentHref = `/areas/${area.parent.id}`
   }
 
+  const rename = async (name: string) => {
+    'use server';
+    return await renameArea(area.id, name);
+  }
+
   return (
     <div>
-      {
-        area.name ?
-        <h1>{area.name}</h1> :
-        <h1><i>Unnamed Area</i></h1>
-      }
+      <RenameHeader
+        name={area.name ?? ""}
+        as="h1"
+        rename={rename}
+      />
       {
         area.parent ?
         <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
