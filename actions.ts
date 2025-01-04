@@ -52,6 +52,51 @@ export async function addClimb(names?: string[], grades?: GradeData[], areaId?: 
     throw(result.errors)
   }
 }
+
+export async function renameClimb(climbId: number, name: string) {
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $name: String
+    ) {
+      action: renameClimb(
+        id: $id
+        name: $name
+      ) {
+        name
+      }
+    }
+  `;
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: climbId,
+    name: name || null,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  revalidatePath('/table-of-contents')
+  revalidatePath(`/climbs/${climbId}`)
+
+  if (data?.action?.parent?.__typename == "Area") {
+    const parentAreaId = data?.action?.parent?.id;
+    if (parentAreaId) {
+      revalidatePath(`/areas/${parentAreaId}`)
+    }
+  } else if (data?.action?.parent?.__typename == "Formation") {
+    const parentFormationId = data?.action?.parent?.id;
+    if (parentFormationId) {
+      revalidatePath(`/formations/${parentFormationId}`)
+    }
+  }
+
+  return data?.action?.name ?? "";
+}
  
 export async function addArea(names?: String[], superAreaId?: number) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
