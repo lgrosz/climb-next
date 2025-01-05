@@ -86,7 +86,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
         null
       }
-      <h3>Areas</h3>
+      <div>
+        <h3>Areas</h3>
+        <Link href="/areas/new">New area</Link>
+      </div>
       <ul>
         {area.areas.map((area) => (
           <li key={`area-${area.id}`}>
