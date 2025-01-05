@@ -2,6 +2,68 @@ import { GRAPHQL_ENDPOINT } from "@/constants";
 import { query } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
+export async function create(
+  name?: string,
+  parent?: { area?: number }
+) {
+  // TODO Raise error on failure
+  const mutationParameters = [];
+  const actionParameters = [];
+
+  if (name) {
+    mutationParameters.push('$name: String');
+    actionParameters.push('name: $name');
+  }
+
+  if (parent?.area) {
+    mutationParameters.push('$area: Int!');
+    actionParameters.push('parent: { area: $area }');
+  }
+
+  // TODO The () shouldn't be there if parameters are empty
+  const mutation = `
+    mutation(
+      ${mutationParameters.join(' ')}
+    ) {
+      action: addArea(
+        ${actionParameters.join(' ')}
+      ) {
+        id
+        parent {
+          ... on Area { id }
+        }
+      }
+    }
+  `
+
+  const result = await query(GRAPHQL_ENDPOINT, mutation, {
+    name: name,
+    area: parent?.area,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(errors);
+  }
+
+  let id = data?.action?.id;
+  let parentId = data?.action?.parent?.id;
+
+  if (id) {
+    revalidatePath(`/areas/${id}`);
+  }
+
+  if (parentId) {
+    revalidatePath(`/areas/${parentId}`);
+  }
+
+  revalidatePath('/');
+
+  return id;
+}
+
 export async function rename(areaId: number, name: string) {
   // TODO Raise error on failure
 
