@@ -5,7 +5,7 @@ import { ElementType, useState } from "react"
 interface Props {
   name?: string,
   as?: ElementType,
-  rename: (_: string) => Promise<string>,
+  rename: (_: string) => Promise<void>,
 }
 
 export default ({ name = "", as: Tag = "h1", rename }: Props) => {
@@ -15,7 +15,8 @@ export default ({ name = "", as: Tag = "h1", rename }: Props) => {
 
   const save = async () => {
     try {
-      const name = await rename(editText.trim());
+      const name = editText.trim()
+      await rename(name);
       setHeaderText(name);
       setEditText(name);
       setIsEditing(false);
