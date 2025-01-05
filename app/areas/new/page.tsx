@@ -1,9 +1,20 @@
 import Form from 'next/form';
-import { submitNewArea } from './actions';
+import { create } from '@/areas/actions';
+import { redirect } from "next/navigation";
 
 export default () => {
+  const action = async (formData: FormData) => {
+    'use server';
+    const name = formData.get('name')?.toString() || null;
+    const parentAreaId = Number(formData.get('parent-area-id')?.toString()) || null;
+
+    let id = await create(name ?? undefined, { area: parentAreaId ?? undefined });
+
+    redirect(`/areas/${id}`);
+  }
+
   return (
-    <Form action={submitNewArea}>
+    <Form action={action}>
       <div>
         <label htmlFor="name">Add a name</label>
         <input
