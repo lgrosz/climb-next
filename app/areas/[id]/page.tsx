@@ -2,7 +2,7 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader';
-import { renameArea } from '@/actions';
+import { rename as renameArea } from '@/areas/actions';
 
 interface SubArea {
   id: number,
