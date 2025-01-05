@@ -98,44 +98,6 @@ export async function renameClimb(climbId: number, name: string) {
   return data?.action?.name ?? "";
 }
  
-export async function addArea(names?: String[], superAreaId?: number) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation AddArea(
-        $names: [String]
-        $superAreaId: Int
-      ) {
-        addArea(
-          names: $names
-          superAreaId: $superAreaId
-        ) {
-          id
-        }
-      }`,
-      variables: {
-        names: names ?? null,
-        superAreaId: superAreaId ?? null,
-      },
-    }),
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    let id = result.data.addArea.id
-    revalidatePath("/areas")
-    revalidatePath(`/areas/${id}`)
-    return id;
-  } else {
-    throw(result.errors)
-  }
-}
-
 export async function renameArea(areaId: number, name: string) {
   const dataQuery = `
     mutation(
