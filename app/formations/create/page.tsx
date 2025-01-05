@@ -67,11 +67,12 @@ interface SearchParams {
   "super-formation-id"?: string,
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams,
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<SearchParams>,
+  }
+) {
+  const searchParams = await props.searchParams;
   let {
     areas,
     formations

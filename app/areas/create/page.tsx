@@ -42,11 +42,12 @@ interface SearchParams {
   "super-area-id"?: string,
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams,
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<SearchParams>,
+  }
+) {
+  const searchParams = await props.searchParams;
   let { areas }: { areas: Area[] } = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
     headers: {

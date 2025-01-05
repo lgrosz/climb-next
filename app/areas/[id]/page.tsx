@@ -51,7 +51,8 @@ const dataQuery = `
   }
 `
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const result = await query(GRAPHQL_ENDPOINT, dataQuery, { id: parseInt(params.id) })
     .then(r => r.json());
   const { data, errors } = result;
