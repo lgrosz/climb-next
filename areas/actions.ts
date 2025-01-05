@@ -40,7 +40,7 @@ export async function rename(areaId: number, name: string) {
     console.error(JSON.stringify(errors, null, 2));
   }
 
-  revalidatePath('/table-of-contents')
+  revalidatePath('/')
   revalidatePath(`/areas/${areaId}`)
 
   if (data?.action?.parent?.__typename == "Area") {

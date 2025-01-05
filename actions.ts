@@ -80,7 +80,7 @@ export async function renameClimb(climbId: number, name: string) {
     console.error(JSON.stringify(errors, null, 2));
   }
 
-  revalidatePath('/table-of-contents')
+  revalidatePath('/')
   revalidatePath(`/climbs/${climbId}`)
 
   if (data?.action?.parent?.__typename == "Area") {
@@ -177,7 +177,7 @@ export async function renameFormation(formationId: number, name: string) {
     console.error(JSON.stringify(errors, null, 2));
   }
 
-  revalidatePath('/table-of-contents')
+  revalidatePath('/')
   revalidatePath(`/formations/${formationId}`)
 
   if (data?.action?.parent?.__typename == "Area") {

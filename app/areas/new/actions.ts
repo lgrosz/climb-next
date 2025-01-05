@@ -79,6 +79,6 @@ export async function submitNewArea(formData: FormData)
     revalidatePath(`/areas/${parentId}`);
   }
 
-  revalidatePath('/table-of-contents');
+  revalidatePath('/');
   redirect(`/areas/${id}`);
 }
