@@ -97,7 +97,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </li>
         ))}
       </ul>
-      <h3>Formations</h3>
+      <div>
+        <h3>Formations</h3>
+        <Link href="/formations/new">New formation</Link>
+      </div>
       <ul>
         {area.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
