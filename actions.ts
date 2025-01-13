@@ -98,47 +98,6 @@ export async function renameClimb(climbId: number, name: string) {
   return data?.action?.name ?? "";
 }
  
-export async function addFormation(names?: String[], areaId?: number, superFormationId?: number) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation AddFormation(
-        $names: [String]
-        $areaId: Int
-        $superFormationId: Int
-      ) {
-        addFormation(
-          names: $names
-          areaId: $areaId
-          superFormationId: $superFormationId
-        ) {
-          id
-        }
-      }`,
-      variables: {
-        names: names ?? null,
-        areaId: areaId ?? null,
-        superFormationId: superFormationId ?? null,
-      },
-    }),
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    let id = result.data.addFormation.id
-    revalidatePath("/formations")
-    revalidatePath(`/formations/${id}`)
-    return id;
-  } else {
-    throw(result.errors)
-  }
-}
-
 export async function renameFormation(formationId: number, name: string) {
   const dataQuery = `
     mutation(
