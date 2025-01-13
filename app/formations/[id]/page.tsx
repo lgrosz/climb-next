@@ -82,7 +82,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
         null
       }
-      <h3>Formations</h3>
+      <div>
+        <h3>Formations</h3>
+        <Link href="/formations/new">New formation</Link>
+      </div>
       <ul>
         {formation.formations.map((formation) => (
           <li key={`formations-${formation.id}`}>
