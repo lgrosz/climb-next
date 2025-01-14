@@ -108,7 +108,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </li>
         ))}
       </ul>
-      <h3>Climbs</h3>
+      <div>
+        <h3>Climbs</h3>
+        <Link href="/climbs/new">New climb</Link>
+      </div>
       <ul>
         {area.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
