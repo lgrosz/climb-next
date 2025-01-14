@@ -20,6 +20,7 @@ type GradeData = VerminGradeData;
 interface Climb {
   id: number,
   name: string | null,
+  description: string | null,
   parent: ClimbParent | null,
   grades: GradeData[],
 }
@@ -29,7 +30,7 @@ const dataQuery = `
     climb(
       id: $id
     ) {
-      id name
+      id name description
       grades {
         ... on VerminGrade { value }
       }
@@ -81,6 +82,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
         null
       }
+      <div>
+        <h3>Description</h3>
+        <p>
+          {
+            climb.description ??
+            <em>No description available.</em>
+          }
+        </p>
+      </div>
       <h3>Grades</h3>
       <ul>
       {
