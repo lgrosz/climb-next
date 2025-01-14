@@ -4,55 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql';
 
-interface GradeData {
-  type: "VERMIN",
-  value: string,
-}
-
-export async function addClimb(names?: string[], grades?: GradeData[], areaId?: number, formationId?: number) {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: `mutation AddClimb(
-        $names: [String]
-        $grades: [GradeInput]
-        $areaId: Int
-        $formationId: Int
-      ) {
-        addClimb(
-          names: $names
-          grades: $grades
-          areaId: $areaId
-          formationId: $formationId
-        ) {
-          id
-        }
-      }`,
-      variables: {
-        names: names ?? null,
-        grades: grades ?? null,
-        areaId: areaId ?? null,
-        formationId: formationId ?? null,
-      },
-    }),
-  })
-
-  const result = await response.json()
-
-  if (response.ok) {
-    let id = result.data.addClimb.id
-    revalidatePath("/climbs")
-    revalidatePath(`/climbs/${id}`)
-    return id;
-  } else {
-    throw(result.errors)
-  }
-}
-
 export async function renameClimb(climbId: number, name: string) {
   const dataQuery = `
     mutation(
