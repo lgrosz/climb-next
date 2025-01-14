@@ -23,6 +23,7 @@ interface Climb {
 interface Formation {
   id: number,
   name: string | null,
+  description: string | null,
   parent: FormationParent | null,
   formations: SubFormation[],
   climbs: Climb[],
@@ -33,7 +34,7 @@ const dataQuery = `
     formation(
       id: $id
     ) {
-      id name
+      id name description
       formations { id name }
       climbs { id name }
       parent {
@@ -82,6 +83,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
         null
       }
+      <div>
+        <h3>Description</h3>
+        <p>
+          {
+            formation.description ??
+            <em>No description available.</em>
+          }
+        </p>
+      </div>
       <div>
         <h3>Formations</h3>
         <Link href="/formations/new">New formation</Link>
