@@ -3,7 +3,7 @@ import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader'
-import { renameClimb } from '@/actions'
+import { rename as renameClimb } from '@/climbs/actions'
 
 interface ClimbParent {
   __typename: string,

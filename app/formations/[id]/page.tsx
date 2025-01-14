@@ -2,7 +2,7 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader'
-import { renameFormation } from '@/actions'
+import { rename as renameFormation } from '@/formations/actions'
 
 interface FormationParent {
   __typename: string,
