@@ -28,6 +28,7 @@ interface AreaParent {
 interface Area {
   id: number,
   name: string | null,
+  description: string | null,
   areas: SubArea[],
   formations: Formation[],
   climbs: Climb[],
@@ -39,7 +40,7 @@ const dataQuery = `
     area(
       id: $id
     ) {
-      id name
+      id name description
       areas { id name }
       formations { id name }
       climbs { id name }
@@ -86,6 +87,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
         null
       }
+      <div>
+        <h3>Description</h3>
+        <p>
+          {
+            area.description ??
+            <em>No description available.</em>
+          }
+        </p>
+      </div>
       <div>
         <h3>Areas</h3>
         <Link href="/areas/new">New area</Link>
