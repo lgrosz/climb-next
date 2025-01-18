@@ -124,3 +124,36 @@ export async function rename(climbId: number, name: string) {
 
   return data?.action?.name ?? "";
 }
+
+export async function describe(climbId: number, description: string) {
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $description: String
+    ) {
+      action: describeClimb(
+        id: $id
+        description: $description
+      ) {
+        description
+      }
+    }
+  `;
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: climbId,
+    description: description || null,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  revalidatePath('/')
+  revalidatePath(`/climbs/${climbId}`)
+
+  return data?.action?.description ?? "";
+}
