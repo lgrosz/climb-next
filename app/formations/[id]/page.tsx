@@ -75,6 +75,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div>
       <RenameHeader
         name={formation.name ?? ""}
+        placeholder="Unnamed formation"
         as="h1"
         rename={rename}
       />
