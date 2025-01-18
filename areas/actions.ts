@@ -139,4 +139,39 @@ export async function rename(areaId: number, name: string) {
   return data?.action?.name ?? "";
 }
 
+export async function describe(areaId: number, description: string) {
+  // TODO Raise error on failure
+
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $description: String
+    ) {
+      action: describeArea(
+        id: $id
+        description: $description
+      ) {
+        description
+      }
+    }
+  `;
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: areaId,
+    description: description || null,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  revalidatePath('/')
+  revalidatePath(`/areas/${areaId}`)
+
+  return data?.action?.description ?? "";
+}
+
 
