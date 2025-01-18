@@ -88,6 +88,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div>
       <RenameHeader
         name={area.name ?? ""}
+        placeholder="Unnamed area"
         as="h1"
         rename={rename}
       />

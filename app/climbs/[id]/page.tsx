@@ -74,6 +74,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div>
       <RenameHeader
         name={climb.name ?? ""}
+        placeholder="Unnamed climb"
         as="h1"
         rename={rename}
       />
