@@ -2,7 +2,11 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader'
-import { rename as renameFormation } from '@/formations/actions'
+import EditableTextArea from '@/components/EditableTextArea';
+import {
+  rename as renameFormation,
+  describe as describeFormation,
+} from '@/formations/actions'
 
 interface FormationParent {
   __typename: string,
@@ -71,6 +75,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return await renameFormation(formation.id, name);
   }
 
+  const describe = async (description: string) => {
+    'use server';
+    return await describeFormation(formation.id, description);
+  }
+
   return (
     <div>
       <RenameHeader
@@ -86,12 +95,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       }
       <div>
         <h3>Description</h3>
-        <p>
-          {
-            formation.description ??
-            <em>No description available.</em>
-          }
-        </p>
+        <EditableTextArea
+          text={formation.description ?? ""}
+          placeholder="No description available"
+          as="p"
+          onSave={describe}
+        />
       </div>
       <div>
         <h3>Formations</h3>
