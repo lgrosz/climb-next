@@ -24,10 +24,16 @@ interface Climb {
   name: string | null
 }
 
+interface Coordinate {
+  latitude: number,
+  longitude: number,
+}
+
 interface Formation {
   id: number,
   name: string | null,
   description: string | null,
+  location: Coordinate | null,
   parent: FormationParent | null,
   formations: SubFormation[],
   climbs: Climb[],
@@ -39,6 +45,7 @@ const dataQuery = `
       id: $id
     ) {
       id name description
+      location { latitude longitude }
       formations { id name }
       climbs { id name }
       parent {
@@ -88,6 +95,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         as="h1"
         rename={rename}
       />
+      {
+        formation.location ?
+        <h3>
+          <a href={`geo:${formation.location.latitude},${formation.location.longitude}`}>
+            {/* TODO A DMS formatted string would be great here */ }
+            ({formation.location.latitude}, {formation.location.longitude})
+          </a>
+        </h3>:
+        null
+      }
       {
         formation.parent ?
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
