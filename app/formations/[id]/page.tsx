@@ -2,10 +2,12 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader'
+import RelocateHeader from '@/components/RelocateHeader'
 import EditableTextArea from '@/components/EditableTextArea';
 import {
   rename as renameFormation,
   describe as describeFormation,
+  relocate as relocateFormation,
 } from '@/formations/actions'
 
 interface FormationParent {
@@ -87,6 +89,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return await describeFormation(formation.id, description);
   }
 
+  const relocate = async (location: Coordinate | null) => {
+    'use server';
+    return await relocateFormation(formation.id, location);
+  }
+
   return (
     <div>
       <RenameHeader
@@ -95,16 +102,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         as="h1"
         rename={rename}
       />
-      {
-        formation.location ?
-        <h3>
-          <a href={`geo:${formation.location.latitude},${formation.location.longitude}`}>
-            {/* TODO A DMS formatted string would be great here */ }
-            ({formation.location.latitude}, {formation.location.longitude})
-          </a>
-        </h3>:
-        null
-      }
+      <RelocateHeader
+        location={formation.location}
+        placeholder="No location"
+        as="h3"
+        relocate={relocate}
+      />
       {
         formation.parent ?
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
