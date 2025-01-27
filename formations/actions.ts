@@ -184,3 +184,36 @@ export async function describe(formationId: number, description: string) {
 
   return data?.action?.description ?? "";
 }
+
+export async function relocate(formationId: number, location: { latitude: number, longitude: number } | null) {
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $location: CoordinateInput
+    ) {
+      action: relocateFormation(
+        id: $id
+        location: $location
+      ) {
+        location { latitude longitude }
+      }
+    }
+  `;
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: formationId,
+    location: location,
+  })
+    .then(r => r.json());
+
+  const { data, errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  revalidatePath('/')
+  revalidatePath(`/formations/${formationId}`)
+
+  return data?.action?.location ?? null;
+}
