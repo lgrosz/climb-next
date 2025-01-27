@@ -60,6 +60,19 @@ export default ({
     setIsEditing(false);
   }
 
+  const round = (num: number, precision: number) => {
+    var base = 10 ** precision;
+    return Math.round(num * base) / base;
+  }
+
+  const dms = (d: number) => {
+    const degrees = Math.floor(d);
+    const minutesAndSeconds = (d - degrees) * 60;
+    const minutes = Math.floor(minutesAndSeconds);
+    const seconds = (minutesAndSeconds - minutes) * 60;
+    return `${degrees}° ${minutes}' ${round(seconds, 1).toFixed(1)}"`;
+  }
+
   return (
     <div>
       {
@@ -84,8 +97,7 @@ export default ({
               {
                 headerLatitude && headerLongitude ?
                   <a href={`geo:${headerLatitude},${headerLongitude}`}>
-                    {/* TODO A DMS formatted string would be great here */ }
-                    ({headerLatitude}, {headerLongitude})
+                    ({dms(headerLatitude)}, {dms(headerLongitude)})
                   </a>
                 :
                 <i>{placeholder}</i>
