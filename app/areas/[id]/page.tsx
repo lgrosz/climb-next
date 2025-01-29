@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { query } from '@/graphql'
 import RenameHeader from '@/components/RenameHeader';
 import EditableTextArea from '@/components/EditableTextArea';
+import EditAreaDescriptionForm from '@/components/EditAreaDescriptionForm';
 import {
   rename as renameArea,
   describe as describeArea,
@@ -104,6 +105,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           placeholder="No description available"
           as="p"
           onSave={describe}
+        />
+        <EditAreaDescriptionForm
+          id={area.id}
+          description={area.description}
         />
       </div>
       <div>
