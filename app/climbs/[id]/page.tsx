@@ -2,10 +2,8 @@ import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql'
-import RenameHeader from '@/components/RenameHeader'
 import EditableTextArea from '@/components/EditableTextArea';
 import {
-  rename as renameClimb,
   describe as describeClimb,
 } from '@/climbs/actions'
 
@@ -67,11 +65,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/areas/${climb.parent.id}`
   }
 
-  const rename = async (name: string) => {
-    'use server';
-    return await renameClimb(climb.id, name);
-  }
-
   const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));
 
   const describe = async (description: string) => {
@@ -81,12 +74,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <RenameHeader
-        name={climb.name ?? ""}
-        placeholder="Unnamed climb"
-        as="h1"
-        rename={rename}
-      />
+      <h1>
+        {
+          climb.name ??
+          <i>Unnamed climb</i>
+        }
+      </h1>
+      <Link href={`/climbs/${climb.id}/rename`}>Rename</Link>
       {
         climb.parent ?
         <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
