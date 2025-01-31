@@ -1,11 +1,9 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
-import RenameHeader from '@/components/RenameHeader'
 import RelocateHeader from '@/components/RelocateHeader'
 import EditableTextArea from '@/components/EditableTextArea';
 import {
-  rename as renameFormation,
   describe as describeFormation,
   relocate as relocateFormation,
 } from '@/formations/actions'
@@ -79,11 +77,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/formations/${formation.parent.id}`
   }
 
-  const rename = async (name: string) => {
-    'use server';
-    return await renameFormation(formation.id, name);
-  }
-
   const describe = async (description: string) => {
     'use server';
     return await describeFormation(formation.id, description);
@@ -96,12 +89,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <RenameHeader
-        name={formation.name ?? ""}
-        placeholder="Unnamed formation"
-        as="h1"
-        rename={rename}
-      />
+      <h1>
+        {
+          formation.name ??
+          <i>Unnamed formation</i>
+        }
+      </h1>
+      <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
       <RelocateHeader
         location={formation.location}
         placeholder="No location"

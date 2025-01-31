@@ -1,10 +1,8 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
-import RenameHeader from '@/components/RenameHeader';
 import EditableTextArea from '@/components/EditableTextArea';
 import {
-  rename as renameArea,
   describe as describeArea,
 } from '@/areas/actions';
 
@@ -74,11 +72,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/areas/${area.parent.id}`
   }
 
-  const rename = async (name: string) => {
-    'use server';
-    return await renameArea(area.id, name);
-  }
-
   const describe = async (description: string) => {
     'use server';
     return await describeArea(area.id, description);
@@ -86,12 +79,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <RenameHeader
-        name={area.name ?? ""}
-        placeholder="Unnamed area"
-        as="h1"
-        rename={rename}
-      />
+      <h1>
+        {
+          area.name ??
+          <i>Unnamed area</i>
+        }
+      </h1>
+      <Link href={`/areas/${area.id}/rename`}>Rename</Link>
       {
         area.parent ?
         <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
