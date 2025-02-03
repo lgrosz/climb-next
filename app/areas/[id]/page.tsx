@@ -1,10 +1,6 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
-import EditableTextArea from '@/components/EditableTextArea';
-import {
-  describe as describeArea,
-} from '@/areas/actions';
 
 interface SubArea {
   id: number,
@@ -72,11 +68,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/areas/${area.parent.id}`
   }
 
-  const describe = async (description: string) => {
-    'use server';
-    return await describeArea(area.id, description);
-  }
-
   return (
     <div>
       <h1>
@@ -93,12 +84,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       }
       <div>
         <h3>Description</h3>
-        <EditableTextArea
-          text={area.description ?? ""}
-          placeholder="No description available"
-          as="p"
-          onSave={describe}
-        />
+        <p>
+          {
+            area.description ??
+            <i>No description available</i>
+          }
+        </p>
+        <Link href={`/areas/${area.id}/describe`}>Describe</Link>
       </div>
       <div>
         <h3>Areas</h3>

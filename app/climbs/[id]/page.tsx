@@ -2,10 +2,6 @@ import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql'
-import EditableTextArea from '@/components/EditableTextArea';
-import {
-  describe as describeClimb,
-} from '@/climbs/actions'
 
 interface ClimbParent {
   __typename: string,
@@ -67,11 +63,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));
 
-  const describe = async (description: string) => {
-    'use server';
-    return await describeClimb(climb.id, description);
-  }
-
   return (
     <div>
       <h1>
@@ -88,12 +79,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       }
       <div>
         <h3>Description</h3>
-        <EditableTextArea
-          text={climb.description ?? ""}
-          placeholder="No description available"
-          as="p"
-          onSave={describe}
-        />
+        <p>
+          {
+            climb.description ??
+            <i>No description available</i>
+          }
+        </p>
+        <Link href={`/climbs/${climb.id}/describe`}>Describe</Link>
       </div>
       <h3>Grades</h3>
       <ul>
