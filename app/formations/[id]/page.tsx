@@ -2,9 +2,7 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
 import RelocateHeader from '@/components/RelocateHeader'
-import EditableTextArea from '@/components/EditableTextArea';
 import {
-  describe as describeFormation,
   relocate as relocateFormation,
 } from '@/formations/actions'
 
@@ -77,11 +75,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/formations/${formation.parent.id}`
   }
 
-  const describe = async (description: string) => {
-    'use server';
-    return await describeFormation(formation.id, description);
-  }
-
   const relocate = async (location: Coordinate | null) => {
     'use server';
     return await relocateFormation(formation.id, location);
@@ -109,12 +102,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       }
       <div>
         <h3>Description</h3>
-        <EditableTextArea
-          text={formation.description ?? ""}
-          placeholder="No description available"
-          as="p"
-          onSave={describe}
-        />
+        <p>
+          {
+            formation.description ??
+            <i>No description available</i>
+          }
+        </p>
       </div>
       <div>
         <h3>Formations</h3>
