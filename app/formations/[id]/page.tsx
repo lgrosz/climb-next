@@ -1,7 +1,6 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
-import RelocateHeader from '@/components/RelocateHeader'
 import {
   relocate as relocateFormation,
 } from '@/formations/actions'
@@ -75,9 +74,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/formations/${formation.parent.id}`
   }
 
-  const relocate = async (location: Coordinate | null) => {
-    'use server';
-    return await relocateFormation(formation.id, location);
+  const round = (num: number, precision: number) => {
+    var base = 10 ** precision;
+    return Math.round(num * base) / base;
+  }
+
+  const dms = (d: number) => {
+    const degrees = Math.floor(d);
+    const minutesAndSeconds = (d - degrees) * 60;
+    const minutes = Math.floor(minutesAndSeconds);
+    const seconds = (minutesAndSeconds - minutes) * 60;
+    return `${degrees}° ${minutes}' ${round(seconds, 1).toFixed(1)}"`;
   }
 
   return (
@@ -89,12 +96,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         }
       </h1>
       <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
-      <RelocateHeader
-        location={formation.location}
-        placeholder="No location"
-        as="h3"
-        relocate={relocate}
-      />
+      <h3>
+        {
+          formation.location ?
+          <a href={`geo:${formation.location.latitude},${formation.location.longitude}`}>
+            ({dms(formation.location.latitude)}, {dms(formation.location.longitude)})
+          </a> :
+          <i>No location</i>
+        }
+      </h3>
+      <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
       {
         formation.parent ?
         <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
