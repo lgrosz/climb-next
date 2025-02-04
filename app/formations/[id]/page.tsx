@@ -1,9 +1,6 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import { query } from '@/graphql'
-import {
-  relocate as relocateFormation,
-} from '@/formations/actions'
 import Coordinate from '@/lib/Coordinate'
 
 interface FormationParent {
