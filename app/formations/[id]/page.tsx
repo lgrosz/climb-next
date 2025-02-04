@@ -79,12 +79,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return Math.round(num * base) / base;
   }
 
-  const dms = (d: number) => {
+  const dms = (d: number, isLatitude: boolean) => {
     const degrees = Math.floor(d);
     const minutesAndSeconds = (d - degrees) * 60;
     const minutes = Math.floor(minutesAndSeconds);
     const seconds = (minutesAndSeconds - minutes) * 60;
-    return `${degrees}° ${minutes}' ${round(seconds, 1).toFixed(1)}"`;
+    const direction = isLatitude ? (d >= 0 ? 'N' : 'S') : (d >= 0 ? 'E' : 'W');
+    return `${degrees}° ${minutes}' ${round(seconds, 1).toFixed(1)}" ${direction}`;
   }
 
   return (
@@ -100,7 +101,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {
           formation.location ?
           <a href={`geo:${formation.location.latitude},${formation.location.longitude}`}>
-            ({dms(formation.location.latitude)}, {dms(formation.location.longitude)})
+            ({dms(formation.location.latitude, true)}, {dms(formation.location.longitude, false)})
           </a> :
           <i>No location</i>
         }
