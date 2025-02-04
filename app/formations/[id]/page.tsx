@@ -4,6 +4,7 @@ import { query } from '@/graphql'
 import {
   relocate as relocateFormation,
 } from '@/formations/actions'
+import Coordinate from '@/lib/Coordinate'
 
 interface FormationParent {
   __typename: string,
@@ -21,16 +22,14 @@ interface Climb {
   name: string | null
 }
 
-interface Coordinate {
-  latitude: number,
-  longitude: number,
-}
-
 interface Formation {
   id: number,
   name: string | null,
   description: string | null,
-  location: Coordinate | null,
+  location: {
+    latitude: number,
+    longitude: number,
+  } | null,
   parent: FormationParent | null,
   formations: SubFormation[],
   climbs: Climb[],
@@ -74,18 +73,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/formations/${formation.parent.id}`
   }
 
-  const round = (num: number, precision: number) => {
-    var base = 10 ** precision;
-    return Math.round(num * base) / base;
-  }
-
-  const dms = (d: number, isLatitude: boolean) => {
-    const degrees = Math.floor(d);
-    const minutesAndSeconds = (d - degrees) * 60;
-    const minutes = Math.floor(minutesAndSeconds);
-    const seconds = (minutesAndSeconds - minutes) * 60;
-    const direction = isLatitude ? (d >= 0 ? 'N' : 'S') : (d >= 0 ? 'E' : 'W');
-    return `${degrees}°${minutes.toString().padStart(2, '0')}'${round(seconds, 1).toFixed(1).toString().padStart(4, '0')}"${direction}`;
+  var location: Coordinate | null;
+  if (formation.location) {
+    location = new Coordinate(formation.location?.latitude, formation.location?.longitude);
+  } else {
+    location = null;
   }
 
   return (
@@ -99,9 +91,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
       <h3>
         {
-          formation.location ?
-          <a href={`geo:${formation.location.latitude},${formation.location.longitude}`}>
-            ({dms(formation.location.latitude, true)} {dms(formation.location.longitude, false)})
+          location ?
+          <a href={`geo:${location.latitude},${location.longitude}`}>
+            {location.toDMSString()}
           </a> :
           <i>No location</i>
         }
