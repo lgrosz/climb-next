@@ -48,18 +48,22 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
+      <div>
+        <h1>
+          {
+            climb.name ??
+            <i>Unnamed climb</i>
+          }
+        </h1>
+        <Link href={`/climbs/${climb.id}/rename`}>Rename</Link>
+      </div>
+      <div>
         {
-          climb.name ??
-          <i>Unnamed climb</i>
+          climb.parent ?
+          <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
+          null
         }
-      </h1>
-      <Link href={`/climbs/${climb.id}/rename`}>Rename</Link>
-      {
-        climb.parent ?
-        <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
-        null
-      }
+      </div>
       <div>
         <h3>Description</h3>
         <p>
