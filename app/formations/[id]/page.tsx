@@ -50,28 +50,34 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
+      <div>
+        <h1>
+          {
+            formation.name ??
+            <i>Unnamed formation</i>
+          }
+        </h1>
+        <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
+      </div>
+      <div>
+        <h3>
+          {
+            location ?
+            <a href={`geo:${location.latitude},${location.longitude}`}>
+              {location.toDMSString()}
+            </a> :
+            <i>No location</i>
+          }
+        </h3>
+        <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
+      </div>
+      <div>
         {
-          formation.name ??
-          <i>Unnamed formation</i>
+          formation.parent ?
+          <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
+          null
         }
-      </h1>
-      <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
-      <h3>
-        {
-          location ?
-          <a href={`geo:${location.latitude},${location.longitude}`}>
-            {location.toDMSString()}
-          </a> :
-          <i>No location</i>
-        }
-      </h3>
-      <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
-      {
-        formation.parent ?
-        <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
-        null
-      }
+      </div>
       <div>
         <h3>Description</h3>
         <p>

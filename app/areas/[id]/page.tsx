@@ -40,13 +40,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
-        {
-          area.name ??
-          <i>Unnamed area</i>
-        }
-      </h1>
-      <Link href={`/areas/${area.id}/rename`}>Rename</Link>
+      <div>
+        <h1>
+          {
+            area.name ??
+            <i>Unnamed area</i>
+          }
+        </h1>
+        <Link href={`/areas/${area.id}/rename`}>Rename</Link>
+      </div>
       {
         area.parent ?
         <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
