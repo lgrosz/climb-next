@@ -85,7 +85,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     const minutes = Math.floor(minutesAndSeconds);
     const seconds = (minutesAndSeconds - minutes) * 60;
     const direction = isLatitude ? (d >= 0 ? 'N' : 'S') : (d >= 0 ? 'E' : 'W');
-    return `${degrees}° ${minutes}' ${round(seconds, 1).toFixed(1)}" ${direction}`;
+    return `${degrees}° ${minutes.toString().padStart(2, '0')}' ${round(seconds, 1).toFixed(1).toString().padStart(4, '0')}" ${direction}`;
   }
 
   return (
