@@ -49,11 +49,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </h1>
         <Link href={`/areas/${area.id}/rename`}>Rename</Link>
       </div>
-      {
-        area.parent ?
-        <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
-        null
-      }
+      <div>
+        {
+          area.parent ?
+          <h2><Link href={`${parentHref}`}>{area.parent.name}</Link></h2> :
+          null
+        }
+        <Link href={`/areas/${area.id}/move`}>Move</Link>
+      </div>
       <div>
         <h3>Description</h3>
         <p>
