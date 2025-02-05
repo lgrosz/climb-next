@@ -1,5 +1,6 @@
 import { GRAPHQL_ENDPOINT } from "@/constants";
 import { query } from "@/graphql";
+import { AreaParent } from "@/graphql/schema";
 import { revalidatePath } from "next/cache";
 
 export async function create(
@@ -172,6 +173,47 @@ export async function describe(areaId: number, description: string) {
   revalidatePath(`/areas/${areaId}`)
 
   return data?.action?.description ?? "";
+}
+
+export async function move(areaId: number, parent: AreaParent | null) {
+  // TODO Raise error on failure
+
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $parent: AreaParentInput
+    ) {
+      action: moveArea(
+        id: $id
+        parent: $parent
+      ) {
+        id
+      }
+    }
+  `;
+
+  var areaParentInput = null;
+  if (parent) {
+    areaParentInput = { area: parent.id };
+  }
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: areaId,
+    parent: areaParentInput
+  })
+    .then(r => r.json());
+
+  const { errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  // TODO revalidate
+  // - revalidate path of old parent area
+  // - revalidate path of new parent area
+  revalidatePath('/')
+  revalidatePath(`/areas/${areaId}`)
 }
 
 
