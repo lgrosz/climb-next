@@ -1,27 +1,8 @@
 import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
-import { query } from '@/graphql'
-
-interface ClimbParent {
-  __typename: string,
-  id: number,
-  name: string,
-}
-
-interface VerminGradeData {
-  value: number,
-}
-
-type GradeData = VerminGradeData;
-
-interface Climb {
-  id: number,
-  name: string | null,
-  description: string | null,
-  parent: ClimbParent | null,
-  grades: GradeData[],
-}
+import { query } from '@/graphql';
+import { Climb } from '@/graphql/schema';
 
 const dataQuery = `
   query($id: Int!) {
@@ -61,7 +42,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/areas/${climb.parent.id}`
   }
 
-  const verminGrades: VerminGrade[] = climb.grades.map(grade => new VerminGrade(grade.value));
+  const verminGrades: VerminGrade[] = climb.grades?.map(grade =>
+    grade.value ? new VerminGrade(grade.value) : undefined
+  )?.filter((g): g is VerminGrade => !!g) ?? [];
 
   return (
     <div>
