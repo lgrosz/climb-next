@@ -1,40 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import { Area, Climb, Formation } from '@/graphql/schema'
 import { query } from '@/graphql'
-
-interface AreaParent {
-  __typename: string,
-  id: number
-}
-
-interface Area {
-  id: number,
-  name: string | null,
-  parent: AreaParent | null,
-}
-
-interface FormationParent {
-  __typename: string,
-  id: number
-}
-
-interface Formation {
-  id: number,
-  name: string | null,
-  parent: FormationParent | null,
-}
-
-interface ClimbParent {
-  __typename: string,
-  id: number,
-}
-
-interface Climb {
-  id: number,
-  name: string | null,
-  parent: ClimbParent | null,
-}
 
 interface TreeNode {
   id: number,
@@ -52,53 +20,64 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
   const climbMap: Map<number, TreeNode> = new Map();
 
   areas.forEach(area => {
-    areaMap.set(area.id, {
-      id: area.id,
-      name: area.name,
-      type: 'area',
-      children: []
-    });
+    if (area.id !== undefined && area.name !== undefined) {
+      areaMap.set(area.id, {
+        id: area.id,
+        name: area.name,
+        type: 'area',
+        children: []
+      });
+    }
   });
 
   formations.forEach(formation => {
-    formationMap.set(formation.id, {
-      id: formation.id,
-      name: formation.name,
-      type: 'formation',
-      children: []
-    });
+    if (formation.id !== undefined && formation.name !== undefined) {
+      formationMap.set(formation.id, {
+        id: formation.id,
+        name: formation.name,
+        type: 'formation',
+        children: []
+      });
+    }
   });
 
   climbs.forEach(climb => {
-    climbMap.set(climb.id, {
-      id: climb.id,
-      name: climb.name,
-      type: 'climb',
-      children: []
-    });
+    if (climb.id !== undefined && climb.name !== undefined) {
+      climbMap.set(climb.id, {
+        id: climb.id,
+        name: climb.name,
+        type: 'climb',
+        children: []
+      });
+    }
   });
 
   let roots: TreeNode[] = [];
 
   climbs.forEach(climb => {
-    const node = climbMap.get(climb.id)!;
+    if (climb.id === undefined) return;
+    const node = climbMap.get(climb.id);
+    if (!node) return;
 
-    if (climb.parent) {
-      if (climb.parent.__typename == "Formation") {
-        formationMap.get(climb.parent.id)?.children.push(node);
-      } else if (climb.parent.__typename == "Area") {
-        areaMap.get(climb.parent.id)?.children.push(node);
+    const parentId = climb.parent?.id;
+    if (parentId !== undefined) {
+      if (climb.parent?.__typename === "Formation") {
+        formationMap.get(parentId)?.children.push(node);
+      } else if (climb.parent?.__typename === "Area") {
+        areaMap.get(parentId)?.children.push(node);
       }
     } else {
       roots.push(node);
     }
-  })
+  });
 
   formations.forEach(formation => {
-    const node = formationMap.get(formation.id)!;
+    if (formation.id === undefined) return;
+    const node = formationMap.get(formation.id);
+    if (!node) return;
 
-    if (formation.parent) {
-      if (formation.parent.__typename == "Formation") {
+    if (formation.parent?.id !== undefined) {
+      if (formation.parent.__typename === "Formation") {
         formationMap.get(formation.parent.id)?.children.push(node);
       } else {
         areaMap.get(formation.parent.id)?.children.push(node);
@@ -109,12 +88,12 @@ function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): Tre
   });
 
   areas.forEach(area => {
-    const node = areaMap.get(area.id)!;
+    if (area.id === undefined) return;
+    const node = areaMap.get(area.id);
+    if (!node) return;
 
-    if (area.parent) {
-      if (area.parent.__typename == "Area") {
-        areaMap.get(area.parent.id)?.children.push(node);
-      }
+    if (area.parent?.id !== undefined && area.parent.__typename === "Area") {
+      areaMap.get(area.parent.id)?.children.push(node);
     } else {
       roots.push(node);
     }

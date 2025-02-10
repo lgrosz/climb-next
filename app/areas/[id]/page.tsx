@@ -1,37 +1,7 @@
 import { GRAPHQL_ENDPOINT } from '@/constants'
+import { query } from '@/graphql';
+import { Area } from '@/graphql/schema';
 import Link from 'next/link'
-import { query } from '@/graphql'
-
-interface SubArea {
-  id: number,
-  name: string | null,
-}
-
-interface Formation {
-  id: number,
-  name: string | null,
-}
-
-interface Climb {
-  id: number,
-  name: string | null,
-}
-
-interface AreaParent {
-  __typename: string,
-  id: number,
-  name: string | null,
-}
-
-interface Area {
-  id: number,
-  name: string | null,
-  description: string | null,
-  areas: SubArea[],
-  formations: Formation[],
-  climbs: Climb[],
-  parent: AreaParent | null,
-}
 
 const dataQuery = `
   query($id: Int!) {
@@ -97,7 +67,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/areas/new">New area</Link>
       </div>
       <ul>
-        {area.areas.map((area) => (
+        {area.areas?.map((area) => (
           <li key={`area-${area.id}`}>
             <Link href={`/areas/${area.id}`}>{area.name}</Link>
           </li>
@@ -108,7 +78,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/formations/new">New formation</Link>
       </div>
       <ul>
-        {area.formations.map((formation) => (
+        {area.formations?.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
           </li>
@@ -119,7 +89,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/climbs/new">New climb</Link>
       </div>
       <ul>
-        {area.climbs.map((climb) => (
+        {area.climbs?.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
           </li>
