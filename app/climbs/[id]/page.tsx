@@ -88,13 +88,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href={`/climbs/${climb.id}/describe`}>Describe</Link>
       </div>
       <h3>Grades</h3>
-      <ul>
-      {
-        verminGrades.length > 0 ?
-        <li>{VerminGrade.slashString(verminGrades)}</li> :
-        null
-      }
-      </ul>
+      {verminGrades.length > 0 && (
+        <ul>
+          <li>{VerminGrade.slashString(verminGrades)}</li>
+        </ul>
+      )}
     </div>
   );
 }
