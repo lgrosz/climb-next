@@ -4,7 +4,7 @@
 
 export interface Area {
   __typename?: 'Area'
-  id?: number
+  id?: string
   name?: string | null
   description?: string | null
   parent?: AreaParent | null
@@ -17,7 +17,7 @@ export type AreaParent = Area;
 
 export interface Formation {
   __typename?: 'Formation'
-  id?: number
+  id?: string
   name?: string | null
   description?: string | null
   location?: Coordinate | null
@@ -36,7 +36,7 @@ export type FormationParent = Area | Formation;
 
 export interface Climb {
   __typename?: "Climb"
-  id?: number
+  id?: string
   name?: string | null
   description?: string | null
   grades?: Grade[]

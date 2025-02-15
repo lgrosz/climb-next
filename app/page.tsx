@@ -5,7 +5,7 @@ import { Area, Climb, Formation } from '@/graphql/schema'
 import { query } from '@/graphql'
 
 interface TreeNode {
-  id: number,
+  id: string,
   name: string | null,
   type:
     "area" |
@@ -15,9 +15,9 @@ interface TreeNode {
 }
 
 function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): TreeNode[] {
-  const areaMap: Map<number, TreeNode> = new Map();
-  const formationMap: Map<number, TreeNode> = new Map();
-  const climbMap: Map<number, TreeNode> = new Map();
+  const areaMap: Map<string, TreeNode> = new Map();
+  const formationMap: Map<string, TreeNode> = new Map();
+  const climbMap: Map<string, TreeNode> = new Map();
 
   areas.forEach(area => {
     if (area.id !== undefined && area.name !== undefined) {
