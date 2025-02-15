@@ -7,12 +7,9 @@ export default async (props: { params: Promise<{ id: string }> }) => {
   const id = parseInt(params.id);
   const action = async (data: FormData) => {
     'use server';
-    const latitude = Number(data.get('latitude')?.toString() || null);
-    const longitude = Number(data.get('longitude')?.toString() || null);
-    await relocate(id, {
-      latitude: latitude,
-      longitude: longitude,
-    })
+    const latitude = Number(data.get('latitude') || NaN);
+    const longitude = Number(data.get('longitude') || NaN);
+    await relocate(id, isNaN(latitude) || isNaN(longitude) ? null : { latitude, longitude });
     redirect(`/formations/${id}`);
   }
 
