@@ -1,5 +1,6 @@
 import { GRAPHQL_ENDPOINT } from "@/constants";
 import { query } from "@/graphql";
+import { ClimbParent } from "@/graphql/schema";
 import { revalidatePath } from "next/cache";
 
 export async function create(
@@ -78,6 +79,49 @@ export async function create(
   revalidatePath('/');
 
   return id;
+}
+
+export async function move(climbId: number, parent: ClimbParent | null) {
+  // TODO Raise error on failure
+
+  const dataQuery = `
+    mutation(
+      $id: Int!
+      $parent: ClimbParentInput
+    ) {
+      action: moveClimb(
+        id: $id
+        parent: $parent
+      ) {
+        id
+      }
+    }
+  `;
+
+  var climbParentInput = null;
+  if (parent?.__typename == 'Area') {
+    climbParentInput = { area: parent.id };
+  } else if (parent?.__typename == 'Formation') {
+    climbParentInput = { formation: parent.id };
+  }
+
+  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
+    id: climbId,
+    parent: climbParentInput
+  })
+    .then(r => r.json());
+
+  const { errors } = result;
+
+  if (errors) {
+    console.error(JSON.stringify(errors, null, 2));
+  }
+
+  // TODO revalidate
+  // - revalidate path of old parent
+  // - revalidate path of new parent
+  revalidatePath('/')
+  revalidatePath(`/climbs/${climbId}`)
 }
 
 export async function rename(climbId: number, name: string) {

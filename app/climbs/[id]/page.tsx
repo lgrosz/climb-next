@@ -63,6 +63,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
           null
         }
+        <Link href={`/climbs/${climb.id}/move`}>Move</Link>
       </div>
       <div>
         <h3>Description</h3>
