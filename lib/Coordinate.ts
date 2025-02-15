@@ -18,7 +18,7 @@ class Coordinate {
     const minutes = Math.floor(minutesAndSeconds);
     const seconds = (minutesAndSeconds - minutes) * 60;
     const direction = isLatitude ? (d >= 0 ? 'N' : 'S') : (d >= 0 ? 'E' : 'W');
-    return `${degrees}°${minutes.toString().padStart(2, '0')}'${this.round(seconds, 1).toFixed(1).toString().padStart(4, '0')}"${direction}`;
+    return `${Math.abs(degrees)}°${minutes.toString().padStart(2, '0')}'${this.round(seconds, 1).toFixed(1).toString().padStart(4, '0')}"${direction}`;
   }
 
   public toDMSString(): string {
