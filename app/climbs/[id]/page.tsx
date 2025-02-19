@@ -4,6 +4,10 @@ import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql';
 import { Climb } from '@/graphql/schema';
 
+// TODO not sure how I can get all grades in one call since the aliases define
+// the keys in the schema, but the schema is static.. I will likely need some
+// custom schema defined everywhere I plan to alias things.. I suppose this is
+// when a GraphQL schema generator per-query would be useful.
 const dataQuery = `
   query($id: Int!) {
     climb(
@@ -11,7 +15,7 @@ const dataQuery = `
     ) {
       id name description
       grades {
-        ... on VerminGrade { value }
+        ... on Vermin { value }
       }
       parent {
         __typename
@@ -43,7 +47,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const verminGrades: VerminGrade[] = climb.grades?.map(grade =>
-    grade.value ? new VerminGrade(grade.value) : undefined
+    grade.value ? VerminGrade.fromString(grade.value) : undefined
   )?.filter((g): g is VerminGrade => !!g) ?? [];
 
   return (

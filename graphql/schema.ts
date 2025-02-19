@@ -45,10 +45,19 @@ export interface Climb {
 
 export type ClimbParent = Area | Formation;
 
-export type Grade = VerminGrade;
+export type Grade = Vermin;
 
-export interface VerminGrade {
-  __typename?: "VerminGrade"
-  value?: number,
+export interface Vermin {
+  __typename?: "Vermin"
+  value?: string,
 }
 
+export interface Fontainebleau {
+  __typename?: "Fontainebleau"
+  value?: string,
+}
+
+export interface YosemiteDecimal {
+  __typename?: "YosemiteDecimal"
+  value?: string,
+}
