@@ -39,16 +39,25 @@ export interface Climb {
   id?: string
   name?: string | null
   description?: string | null
-  grades?: Grade[]
+  grades?: ClimbGrade[]
   parent?: ClimbParent | null
 }
 
 export type ClimbParent = Area | Formation;
 
-export type Grade = VerminGrade;
+export type ClimbGrade = ClimbVerminGrade;
 
-export interface VerminGrade {
-  __typename?: "VerminGrade"
-  value?: number,
+export interface ClimbVerminGrade {
+  __typename?: "ClimbVerminGrade"
+  value?: string,
 }
 
+export interface ClimbFontainebleauGrade {
+  __typename?: "ClimbFontainebleauGrade"
+  value?: string,
+}
+
+export interface ClimbYosemiteDecimalGrade {
+  __typename?: "ClimbYosemiteDecimalGrade"
+  value?: string,
+}
