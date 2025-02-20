@@ -24,12 +24,15 @@ export default class FontainebleauGrade {
         if (value < 1) {
             throw new FontainebleauParseGradeError("Invalid grade value");
         }
+
         if (value < 6 && modifier !== null) {
             throw new FontainebleauParseGradeError("Grades below 6 cannot have a modifier");
         }
+
         if (value >= 6 && modifier === null) {
             throw new FontainebleauParseGradeError("Grades 6 and above must have a modifier");
         }
+
         this.value = value;
         this.modifier = modifier;
         this.plus = plus;
@@ -66,11 +69,11 @@ export default class FontainebleauGrade {
     public getValue(): number {
         return this.value;
     }
-    
+
     public getModifier(): Modifier | null {
         return this.modifier;
     }
-    
+
     public hasPlus(): boolean {
         return this.plus;
     }
