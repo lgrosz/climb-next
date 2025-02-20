@@ -2,12 +2,22 @@ import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { GRAPHQL_ENDPOINT } from '@/constants'
 import { query } from '@/graphql';
-import { Climb } from '@/graphql/schema';
+import {
+  Climb,
+  Vermin,
+  Fontainebleau,
+  YosemiteDecimal,
+} from '@/graphql/schema';
+import FontainebleauGrade from '@/fontainebleau-grade';
+import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
 
-// TODO not sure how I can get all grades in one call since the aliases define
-// the keys in the schema, but the schema is static.. I will likely need some
-// custom schema defined everywhere I plan to alias things.. I suppose this is
-// when a GraphQL schema generator per-query would be useful.
+// since the grades are aliased.. I have to tweak the expected schema
+interface CustomClimbVerminGrade extends Omit<Vermin, "value"> { v_value?: string }
+interface CustomClimbFontainebleauGrade extends Omit<Fontainebleau, "value"> { font_value?: string }
+interface CustomClimbYosemiteDecimalGrade extends Omit<YosemiteDecimal, "value"> { yds_value?: string }
+type CustomClimbGrade = CustomClimbFontainebleauGrade | CustomClimbVerminGrade | CustomClimbYosemiteDecimalGrade;
+interface CustomClimb extends Omit<Climb, "grades"> { grades?: CustomClimbGrade[] }
+
 const dataQuery = `
   query($id: Int!) {
     climb(
@@ -15,7 +25,18 @@ const dataQuery = `
     ) {
       id name description
       grades {
-        ... on Vermin { value }
+        ... on Fontainebleau {
+          __typename
+          font_value: value
+        }
+        ... on Vermin {
+          __typename
+          v_value: value
+        }
+        ... on YosemiteDecimal {
+          __typename
+          yds_value: value
+        }
       }
       parent {
         __typename
@@ -37,7 +58,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return <div>There was an error generating the page.</div>
   }
 
-  const { climb }: { climb: Climb } = data;
+  const { climb }: { climb: CustomClimb } = data;
 
   let parentHref: string | null = null;
   if (climb?.parent?.__typename == "Formation") {
@@ -46,9 +67,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     parentHref = `/areas/${climb.parent.id}`
   }
 
+  const fontGrades: FontainebleauGrade[] = climb.grades?.map(grade =>
+    grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
+  )?.filter((g): g is FontainebleauGrade => !!g) ?? [];
+
   const verminGrades: VerminGrade[] = climb.grades?.map(grade =>
-    grade.value ? VerminGrade.fromString(grade.value) : undefined
+    grade.__typename == "Vermin" && grade.v_value ? VerminGrade.fromString(grade.v_value) : undefined
   )?.filter((g): g is VerminGrade => !!g) ?? [];
+
+  const ydsGrades: YosemiteDecimalGrade[] = climb.grades?.map(grade =>
+    grade.__typename == "YosemiteDecimal" && grade.yds_value ? YosemiteDecimalGrade.fromString(grade.yds_value) : undefined
+  )?.filter((g): g is YosemiteDecimalGrade => !!g) ?? [];
 
   return (
     <div>
@@ -80,9 +109,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href={`/climbs/${climb.id}/describe`}>Describe</Link>
       </div>
       <h3>Grades</h3>
-      {verminGrades.length > 0 && (
+      {(fontGrades.length > 0 || verminGrades.length > 0 || ydsGrades.length > 0) && (
         <ul>
+        {fontGrades.length > 0 && (
+          <li>{FontainebleauGrade.slashString(fontGrades)}</li>
+        )}
+        {verminGrades.length > 0 && (
           <li>{VerminGrade.slashString(verminGrades)}</li>
+        )}
+        {ydsGrades.length > 0 && (
+          <li>{YosemiteDecimalGrade.slashString(ydsGrades)}</li>
+        )}
         </ul>
       )}
     </div>
