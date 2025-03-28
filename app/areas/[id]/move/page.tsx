@@ -82,7 +82,7 @@ function buildTree(parents: PotentialAreaParents, disabledId: string) {
 // an id
 export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
-  const id = parseInt(params.id);
+  const id = params.id
 
   const data = await graphqlQuery(potentialAreaParents)
 
@@ -97,7 +97,7 @@ export default async (props: { params: Promise<{ id: string }> }) => {
     await move(
       id,
       parentId ?
-        { __typename: 'Area', id: parentId } :
+        { area: parentId } :
         null
     );
 

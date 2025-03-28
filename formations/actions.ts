@@ -1,39 +1,20 @@
-import { GRAPHQL_ENDPOINT } from "@/constants";
-import { query } from "@/graphql";
-import { FormationParent } from "@/graphql/schema";
+import { graphql } from "@/gql";
+import { CoordinateInput, FormationParentInput, InputMaybe, Scalars } from "@/gql/graphql";
+import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
 export async function create(
   name?: string,
-  parent?: {
-    area?: number
-    formation?: number
-  }
+  parent?: FormationParentInput
 ) {
-  // TODO Raise error on failure
-  const mutationParameters = [];
-  const actionParameters = [];
-
-  if (name) {
-    mutationParameters.push('$name: String');
-    actionParameters.push('name: $name');
-  }
-
-  if (parent?.area) {
-    mutationParameters.push('$area: Int!');
-    actionParameters.push('parent: { area: $area }');
-  } else if (parent?.formation) {
-    mutationParameters.push('$formation: Int!');
-    actionParameters.push('parent: { formation: $formation }');
-  }
-
-  // TODO The () shouldn't be there if parameters are empty
-  const mutation = `
-    mutation(
-      ${mutationParameters.join(' ')}
+  const mutation = graphql(`
+    mutation addFormation(
+      $name: String
+      $parent: FormationParentInput
     ) {
       action: addFormation(
-        ${actionParameters.join(' ')}
+        name: $name
+        parent: $parent
       ) {
         id
         parent {
@@ -43,24 +24,20 @@ export async function create(
         }
       }
     }
-  `
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, mutation, {
-    name: name,
-    area: parent?.area,
-    formation: parent?.formation,
-  })
-    .then(r => r.json());
+  const data = await graphqlQuery(
+    mutation,
+    {
+      name: name,
+      area: parent?.area,
+      formation: parent?.formation,
+    }
+  );
 
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(errors);
-  }
-
-  let id = data?.action?.id;
-  let parentId = data?.action?.parent?.id;
-  let parentType = data?.action?.parent?.__typename;
+  let id = data.action.id;
+  let parentId = data.action.parent?.id;
+  let parentType = data.action.parent?.__typename;
 
   if (id) {
     revalidatePath(`/areas/${id}`);
@@ -81,12 +58,12 @@ export async function create(
   return id;
 }
 
-export async function move(formationId: number, parent: FormationParent | null) {
+export async function move(formationId: Scalars["ID"]["input"], parent: InputMaybe<FormationParentInput>) {
   // TODO Raise error on failure
 
-  const dataQuery = `
-    mutation(
-      $id: Int!
+  const mutation = graphql(`
+    mutation moveFormation(
+      $id: ID!
       $parent: FormationParentInput
     ) {
       action: moveFormation(
@@ -96,26 +73,15 @@ export async function move(formationId: number, parent: FormationParent | null) 
         id
       }
     }
-  `;
+  `);
 
-  var formationParentInput = null;
-  if (parent?.__typename == 'Area') {
-    formationParentInput = { area: parent.id };
-  } else if (parent?.__typename == 'Formation') {
-    formationParentInput = { formation: parent.id };
-  }
-
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: formationId,
-    parent: formationParentInput
-  })
-    .then(r => r.json());
-
-  const { errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  await graphqlQuery(
+    mutation,
+    {
+      id: formationId,
+      parent: parent
+    }
+  );
 
   // TODO revalidate
   // - revalidate path of old parent
@@ -124,10 +90,10 @@ export async function move(formationId: number, parent: FormationParent | null) 
   revalidatePath(`/formations/${formationId}`)
 }
 
-export async function rename(formationId: number, name: string) {
-  const dataQuery = `
-    mutation(
-      $id: Int!
+export async function rename(formationId: Scalars["ID"]["input"], name: string) {
+  const mutation = graphql(`
+    mutation renameFormation(
+      $id: ID!
       $name: String
     ) {
       action: renameFormation(
@@ -148,58 +114,54 @@ export async function rename(formationId: number, name: string) {
         climbs { id }
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: formationId,
-    name: name || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: formationId,
+      name: name || null,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/formations/${formationId}`)
 
-  if (data?.action?.parent?.__typename == "Area") {
-    const parentAreaId = data?.action?.parent?.id;
+  if (data.action.parent?.__typename == "Area") {
+    const parentAreaId = data.action.parent.id;
     if (parentAreaId) {
       revalidatePath(`/areas/${parentAreaId}`)
     }
-  } else if (data?.action?.parent?.__typename == "Formation") {
-    const parentFormationId = data?.action?.parent?.id;
+  } else if (data.action.parent?.__typename == "Formation") {
+    const parentFormationId = data.action.parent.id;
     if (parentFormationId) {
       revalidatePath(`/formations/${parentFormationId}`)
     }
   }
 
-  const childFormations = data?.action?.formations ?? []
+  const childFormations = data.action.formations
   for (const child of childFormations) {
-    const childFormationId = child?.id
+    const childFormationId = child.id
     if (childFormationId) {
       revalidatePath(`/formations/${childFormationId}`)
     }
   }
 
-  const childClimbs = data?.action?.climbs ?? []
+  const childClimbs = data.action.climbs
   for (const child of childClimbs) {
-    const childClimbId = child?.id
+    const childClimbId = child.id
     if (childClimbId) {
       revalidatePath(`/climbs/${childClimbId}`)
     }
   }
 
-  return data?.action?.name ?? "";
+  return data.action.name;
 }
 
-export async function describe(formationId: number, description: string) {
-  const dataQuery = `
-    mutation(
-      $id: Int!
+export async function describe(formationId: Scalars["ID"]["input"], description: string) {
+  const mutation = graphql(`
+    mutation describeFormation(
+      $id: ID!
       $description: String
     ) {
       action: describeFormation(
@@ -209,30 +171,26 @@ export async function describe(formationId: number, description: string) {
         description
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: formationId,
-    description: description || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: formationId,
+      description: description || null,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/formations/${formationId}`)
 
-  return data?.action?.description ?? "";
+  return data.action.description ?? "";
 }
 
-export async function relocate(formationId: number, location: { latitude: number, longitude: number } | null) {
-  const dataQuery = `
-    mutation(
-      $id: Int!
+export async function relocate(formationId: Scalars["ID"]["input"], location: InputMaybe<CoordinateInput>) {
+  const mutation = graphql(`
+    mutation relocateFormation(
+      $id: ID!
       $location: CoordinateInput
     ) {
       action: relocateFormation(
@@ -242,22 +200,18 @@ export async function relocate(formationId: number, location: { latitude: number
         location { latitude longitude }
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: formationId,
-    location: location,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: formationId,
+      location: location,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/formations/${formationId}`)
 
-  return data?.action?.location ?? null;
+  return data.action.location;
 }

@@ -1,39 +1,22 @@
-import { GRAPHQL_ENDPOINT } from "@/constants";
-import { query } from "@/graphql";
-import { ClimbParent } from "@/graphql/schema";
+import { graphql } from "@/gql";
+import { ClimbParentInput, InputMaybe, Scalars } from "@/gql/graphql";
+import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
 export async function create(
   name?: string,
-  parent?: {
-    area?: number
-    formation?: number
-  }
+  parent?: ClimbParentInput
 ) {
   // TODO Raise error on failure
-  const mutationParameters = [];
-  const actionParameters = [];
 
-  if (name) {
-    mutationParameters.push('$name: String');
-    actionParameters.push('name: $name');
-  }
-
-  if (parent?.area) {
-    mutationParameters.push('$area: Int!');
-    actionParameters.push('parent: { area: $area }');
-  } else if (parent?.formation) {
-    mutationParameters.push('$formation: Int!');
-    actionParameters.push('parent: { formation: $formation }');
-  }
-
-  // TODO The () shouldn't be there if parameters are empty
-  const mutation = `
-    mutation(
-      ${mutationParameters.join(' ')}
+  const mutation = graphql(`
+    mutation addClimb(
+      $name: String
+      $parent: ClimbParentInput
     ) {
       action: addClimb(
-        ${actionParameters.join(' ')}
+        name: $name
+        parent: $parent
       ) {
         id
         parent {
@@ -43,24 +26,19 @@ export async function create(
         }
       }
     }
-  `
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, mutation, {
-    name: name,
-    area: parent?.area,
-    formation: parent?.formation,
-  })
-    .then(r => r.json());
+  const data = await graphqlQuery(
+    mutation,
+    {
+      name: name,
+      parent: parent
+    }
+  );
 
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(errors);
-  }
-
-  let id = data?.action?.id;
-  let parentId = data?.action?.parent?.id;
-  let parentType = data?.action?.parent?.__typename;
+  let id = data.action.id;
+  let parentId = data.action.parent?.id;
+  let parentType = data.action.parent?.__typename;
 
   if (id) {
     revalidatePath(`/areas/${id}`);
@@ -81,12 +59,12 @@ export async function create(
   return id;
 }
 
-export async function move(climbId: number, parent: ClimbParent | null) {
+export async function move(climbId: Scalars["ID"]["input"], parent: InputMaybe<ClimbParentInput>) {
   // TODO Raise error on failure
 
-  const dataQuery = `
-    mutation(
-      $id: Int!
+  const mutation = graphql(`
+    mutation moveClimb(
+      $id: ID!
       $parent: ClimbParentInput
     ) {
       action: moveClimb(
@@ -96,26 +74,15 @@ export async function move(climbId: number, parent: ClimbParent | null) {
         id
       }
     }
-  `;
+  `);
 
-  var climbParentInput = null;
-  if (parent?.__typename == 'Area') {
-    climbParentInput = { area: parent.id };
-  } else if (parent?.__typename == 'Formation') {
-    climbParentInput = { formation: parent.id };
-  }
-
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: climbId,
-    parent: climbParentInput
-  })
-    .then(r => r.json());
-
-  const { errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  await graphqlQuery(
+    mutation,
+    {
+      id: climbId,
+      parent: parent
+    }
+  );
 
   // TODO revalidate
   // - revalidate path of old parent
@@ -124,10 +91,10 @@ export async function move(climbId: number, parent: ClimbParent | null) {
   revalidatePath(`/climbs/${climbId}`)
 }
 
-export async function rename(climbId: number, name: string) {
-  const dataQuery = `
-    mutation(
-      $id: Int!
+export async function rename(climbId: Scalars["ID"]["input"], name: string) {
+  const mutation = graphql(`
+    mutation renameClimb(
+      $id: ID!
       $name: String
     ) {
       action: renameClimb(
@@ -135,44 +102,45 @@ export async function rename(climbId: number, name: string) {
         name: $name
       ) {
         name
+        parent {
+          __typename
+          ... on Area { id }
+          ... on Formation { id }
+        }
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: climbId,
-    name: name || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: climbId,
+      name: name || null,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/climbs/${climbId}`)
 
-  if (data?.action?.parent?.__typename == "Area") {
-    const parentAreaId = data?.action?.parent?.id;
+  if (data.action.parent?.__typename == "Area") {
+    const parentAreaId = data.action.parent.id;
     if (parentAreaId) {
       revalidatePath(`/areas/${parentAreaId}`)
     }
-  } else if (data?.action?.parent?.__typename == "Formation") {
-    const parentFormationId = data?.action?.parent?.id;
+  } else if (data.action.parent?.__typename == "Formation") {
+    const parentFormationId = data.action.parent.id;
     if (parentFormationId) {
       revalidatePath(`/formations/${parentFormationId}`)
     }
   }
 
-  return data?.action?.name ?? "";
+  return data.action.name;
 }
 
-export async function describe(climbId: number, description: string) {
-  const dataQuery = `
-    mutation(
-      $id: Int!
+export async function describe(climbId: Scalars["ID"]["input"], description: string) {
+  const mutation = graphql(`
+    mutation describeClimb(
+      $id: ID!
       $description: String
     ) {
       action: describeClimb(
@@ -182,22 +150,18 @@ export async function describe(climbId: number, description: string) {
         description
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: climbId,
-    description: description || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: climbId,
+      description: description || null,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/climbs/${climbId}`)
 
-  return data?.action?.description ?? "";
+  return data.action.description;
 }

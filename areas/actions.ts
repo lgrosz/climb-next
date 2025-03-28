@@ -1,33 +1,22 @@
-import { GRAPHQL_ENDPOINT } from "@/constants";
-import { query } from "@/graphql";
-import { AreaParent } from "@/graphql/schema";
+import { graphql } from "@/gql";
+import { InputMaybe, AreaParentInput, Scalars } from "@/gql/graphql";
+import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
 export async function create(
   name?: string,
-  parent?: { area?: number }
+  parent?: AreaParentInput
 ) {
   // TODO Raise error on failure
-  const mutationParameters = [];
-  const actionParameters = [];
 
-  if (name) {
-    mutationParameters.push('$name: String');
-    actionParameters.push('name: $name');
-  }
-
-  if (parent?.area) {
-    mutationParameters.push('$area: Int!');
-    actionParameters.push('parent: { area: $area }');
-  }
-
-  // TODO The () shouldn't be there if parameters are empty
-  const mutation = `
-    mutation(
-      ${mutationParameters.join(' ')}
+  const mutation = graphql(`
+    mutation addArea(
+      $name: String
+      $parent: AreaParentInput
     ) {
       action: addArea(
-        ${actionParameters.join(' ')}
+        name: $name
+        parent: $parent
       ) {
         id
         parent {
@@ -35,22 +24,18 @@ export async function create(
         }
       }
     }
-  `
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, mutation, {
-    name: name,
-    area: parent?.area,
-  })
-    .then(r => r.json());
+  const data = await graphqlQuery(
+    mutation,
+    {
+      name: name,
+      parent: parent
+    }
+  );
 
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(errors);
-  }
-
-  let id = data?.action?.id;
-  let parentId = data?.action?.parent?.id;
+  let id = data.action.id;
+  let parentId = data.action.parent?.id;
 
   if (id) {
     revalidatePath(`/areas/${id}`);
@@ -68,9 +53,9 @@ export async function create(
 export async function rename(areaId: number, name: string) {
   // TODO Raise error on failure
 
-  const dataQuery = `
-    mutation(
-      $id: Int!
+  const mutation = graphql(`
+    mutation renameArea(
+      $id: ID!
       $name: String
     ) {
       action: renameArea(
@@ -89,63 +74,59 @@ export async function rename(areaId: number, name: string) {
         climbs { id }
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: areaId,
-    name: name || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: `${areaId}`,
+      name: name || null
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/areas/${areaId}`)
 
-  if (data?.action?.parent?.__typename == "Area") {
-    const parentAreaId = data?.action?.parent?.id;
+  if (data.action.parent?.__typename == "Area") {
+    const parentAreaId = data.action.parent.id;
     if (parentAreaId) {
       revalidatePath(`/areas/${parentAreaId}`)
     }
   }
 
-  const childAreas = data?.action?.areas ?? []
+  const childAreas = data.action.areas
   for (const child of childAreas) {
-    const childAreaId = child?.id
+    const childAreaId = child.id
     if (childAreaId) {
       revalidatePath(`/areas/${childAreaId}`)
     }
   }
 
-  const childFormations = data?.action?.formations ?? []
+  const childFormations = data.action.formations
   for (const child of childFormations) {
-    const childFormationId = child?.id
+    const childFormationId = child.id
     if (childFormationId) {
       revalidatePath(`/formations/${childFormationId}`)
     }
   }
 
-  const childClimbs = data?.action?.climbs ?? []
+  const childClimbs = data.action.climbs
   for (const child of childClimbs) {
-    const childClimbId = child?.id
+    const childClimbId = child.id
     if (childClimbId) {
       revalidatePath(`/climbs/${childClimbId}`)
     }
   }
 
-  return data?.action?.name ?? "";
+  return data.action.name;
 }
 
 export async function describe(areaId: number, description: string) {
   // TODO Raise error on failure
 
-  const dataQuery = `
-    mutation(
-      $id: Int!
+  const mutation = graphql(`
+    mutation describeArea(
+      $id: ID!
       $description: String
     ) {
       action: describeArea(
@@ -155,32 +136,28 @@ export async function describe(areaId: number, description: string) {
         description
       }
     }
-  `;
+  `);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: areaId,
-    description: description || null,
-  })
-    .then(r => r.json());
-
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: `${areaId}`,
+      description: description || null,
+    }
+  );
 
   revalidatePath('/')
   revalidatePath(`/areas/${areaId}`)
 
-  return data?.action?.description ?? "";
+  return data.action.description;
 }
 
-export async function move(areaId: number, parent: AreaParent | null) {
+export async function move(areaId: Scalars['ID']['input'], parent: InputMaybe<AreaParentInput>) {
   // TODO Raise error on failure
 
-  const dataQuery = `
-    mutation(
-      $id: Int!
+  const mutation = graphql(`
+    mutation moveArea(
+      $id: ID!
       $parent: AreaParentInput
     ) {
       action: moveArea(
@@ -190,24 +167,15 @@ export async function move(areaId: number, parent: AreaParent | null) {
         id
       }
     }
-  `;
+  `);
 
-  var areaParentInput = null;
-  if (parent) {
-    areaParentInput = { area: parent.id };
-  }
-
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, {
-    id: areaId,
-    parent: areaParentInput
-  })
-    .then(r => r.json());
-
-  const { errors } = result;
-
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-  }
+  await graphqlQuery(
+    mutation,
+    {
+      id: `${areaId}`,
+      parent: parent
+    }
+  );
 
   // TODO revalidate
   // - revalidate path of old parent area

@@ -100,7 +100,7 @@ function buildTree(parents: (Area | Formation)[]) {
 // an id
 export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
-  const id = parseInt(params.id);
+  const id = params.id;
 
   const data = await graphqlQuery(potentialClimbParents);
 
@@ -117,11 +117,13 @@ export default async (props: { params: Promise<{ id: string }> }) => {
     type ValidType = 'Area' | 'Formation';
 
     const isValidType = (type: string): type is ValidType =>
-      type === 'Area' || type === 'Formation';
+    type === 'Area' || type === 'Formation';
 
     const parent = match && isValidType(match[1])
-      ? { __typename: match[1], id: parseInt(match[2], 10) }
-      : null;
+      ? {
+        [match[1].toLowerCase()]: parseInt(match[2], 10),
+      }
+        : null;
 
     await move(id, parent);
 

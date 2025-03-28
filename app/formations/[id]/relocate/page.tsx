@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
-  const id = parseInt(params.id);
+  const id = params.id;
   const action = async (data: FormData) => {
     'use server';
     const latitude = Number(data.get('latitude') || NaN);

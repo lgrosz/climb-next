@@ -52,7 +52,7 @@ type Formation = {
     } | null;
 };
 
-function buildTree(parents: (Area | Formation)[], disabledId: number) {
+function buildTree(parents: (Area | Formation)[], disabledId: string) {
   const roots: RadioTreeNode[] = [];
   const map = new Map<string, RadioTreeNode>();
 
@@ -111,7 +111,7 @@ function buildTree(parents: (Area | Formation)[], disabledId: number) {
 // an id
 export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
-  const id = parseInt(params.id);
+  const id = params.id;
 
   const data = await graphqlQuery(potentialFormationParents);
   const { potentialParentAreas, potentialParentFormations } = data;
@@ -127,11 +127,14 @@ export default async (props: { params: Promise<{ id: string }> }) => {
     type ValidType = 'Area' | 'Formation';
 
     const isValidType = (type: string): type is ValidType =>
-      type === 'Area' || type === 'Formation';
+    type === 'Area' || type === 'Formation';
 
+    // Adjust the parent structure
     const parent = match && isValidType(match[1])
-      ? { __typename: match[1], id: parseInt(match[2], 10) }
-      : null;
+      ? {
+        [match[1].toLowerCase()]: parseInt(match[2], 10), // Use the type (Area or Formation) to create the key and parse the id
+      }
+        : null;
 
     await move(id, parent);
 
