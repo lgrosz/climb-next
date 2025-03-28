@@ -1,8 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import { GRAPHQL_ENDPOINT } from '@/constants'
-import { Area, Climb, Formation } from '@/graphql/schema'
-import { query } from '@/graphql'
+import { graphqlQuery } from '@/graphql'
+import { graphql } from '@/gql'
 
 interface TreeNode {
   id: string,
@@ -14,7 +13,46 @@ interface TreeNode {
   children: TreeNode[]
 }
 
-function buildTree(areas: Area[], formations: Formation[], climbs: Climb[]): TreeNode[] {
+// TODO This can probably come from a graphql-codegen fragment
+type Areas = {
+    __typename?: "Area";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename: "Area";
+        id: string;
+    } | null;
+}[];
+
+// TODO This can probably come from a graphql-codegen fragment
+type Formations = {
+    __typename?: "Formation";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename: "Area";
+        id: string;
+    } | {
+        __typename: "Formation";
+        id: string;
+    } | null;
+}[];
+
+// TODO This can probably come from a graphql-codegen fragment
+type Climbs = {
+    __typename?: "Climb";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename: "Area";
+        id: string;
+    } | {
+        __typename: "Formation";
+        id: string;
+    } | null;
+}[];
+
+function buildTree(areas: Areas, formations: Formations, climbs: Climbs): TreeNode[] {
   const areaMap: Map<string, TreeNode> = new Map();
   const formationMap: Map<string, TreeNode> = new Map();
   const climbMap: Map<string, TreeNode> = new Map();
@@ -132,8 +170,8 @@ async function Node({ node }: { node : TreeNode }) {
   );
 }
 
-const dataQuery = `
-  query {
+const allEntities = graphql(`
+  query allEntities {
     areas {
       id
       name
@@ -161,17 +199,10 @@ const dataQuery = `
       }
     }
   }
-`
+`);
 
 export default async function Page() {
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, null)
-    .then(r => r.json());
-  const { data, errors } = result;
-
-  if (errors) {
-    console.error(errors);
-    return <div>There was an error generating the page.</div>
-  }
+  const data = await graphqlQuery(allEntities)
 
   const { areas, formations, climbs } = data;
   const roots = buildTree(areas, formations, climbs)

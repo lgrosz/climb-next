@@ -1,10 +1,9 @@
-import { GRAPHQL_ENDPOINT } from '@/constants'
-import { query } from '@/graphql';
-import { Area } from '@/graphql/schema';
+import { graphql } from '@/gql';
+import { graphqlQuery } from '@/graphql';
 import Link from 'next/link'
 
-const dataQuery = `
-  query($id: Int!) {
+const areaData = graphql(`
+  query areaData($id: ID!) {
     area(
       id: $id
     ) {
@@ -18,23 +17,19 @@ const dataQuery = `
       }
     }
   }
-`
+`);
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, { id: parseInt(params.id) })
-    .then(r => r.json());
-  const { data, errors } = result;
+  const data = await graphqlQuery(
+    areaData,
+    { id: params.id }
+  );
 
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-    return <div>There was an error generating the page.</div>
-  }
-
-  const { area }: { area: Area } = data;
+  const { area } = data;
 
   let parentHref: string | null = null;
-  if (area?.parent?.__typename == "Area") {
+  if (area.parent?.__typename == "Area") {
     parentHref = `/areas/${area.parent.id}`
   }
 
@@ -72,7 +67,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/areas/new">New area</Link>
       </div>
       <ul>
-        {area.areas?.map((area) => (
+        {area.areas.map((area) => (
           <li key={`area-${area.id}`}>
             <Link href={`/areas/${area.id}`}>{area.name}</Link>
           </li>
@@ -83,7 +78,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/formations/new">New formation</Link>
       </div>
       <ul>
-        {area.formations?.map((formation) => (
+        {area.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
           </li>
@@ -94,7 +89,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/climbs/new">New climb</Link>
       </div>
       <ul>
-        {area.climbs?.map((climb) => (
+        {area.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
           </li>

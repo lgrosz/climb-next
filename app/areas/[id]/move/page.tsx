@@ -1,23 +1,34 @@
 import Form from 'next/form';
 import { move } from '@/areas/actions';
 import { redirect } from 'next/navigation';
-import { query } from '@/graphql';
-import { GRAPHQL_ENDPOINT } from '@/constants';
+import { graphqlQuery } from '@/graphql';
 import RadioTree, { RadioTreeNode } from '@/components/RadioTree';
-import { Area } from '@/graphql/schema';
+import { graphql } from '@/gql';
 
-const dataQuery = `
-  query {
+// TODO this is a snippet copied from the generated graphql types, I think this
+// is where "fragments" are helpful
+const potentialAreaParents = graphql(`
+  query potentialAreaParents {
     potentialParents: areas {
       id name
       parent { ... on Area { id } }
     }
   }
-`
+`);
 
-function buildTree(parents: Area[], disabledId: number) {
+type PotentialAreaParents = {
+    __typename?: "Area";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename?: "Area";
+        id: string;
+    } | null;
+}[];
+
+function buildTree(parents: PotentialAreaParents, disabledId: string) {
   const roots: RadioTreeNode[] = [];
-  const map = new Map<number, RadioTreeNode>();
+  const map = new Map<string, RadioTreeNode>();
 
   // Populate radio-tree nodes
   parents.forEach(parent => {
@@ -73,14 +84,7 @@ export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
   const id = parseInt(params.id);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, null)
-    .then(r => r.json());
-  const { data, errors }: { data: { potentialParents: Area[] }, errors: any } = result;
-
-  if (errors) {
-    console.error(errors);
-    return <div>There was an error generating the page.</div>
-  }
+  const data = await graphqlQuery(potentialAreaParents)
 
   const { potentialParents } = data;
 

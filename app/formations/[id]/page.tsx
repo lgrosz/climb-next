@@ -1,11 +1,10 @@
-import { GRAPHQL_ENDPOINT } from '@/constants'
 import Link from 'next/link'
 import Coordinate from '@/lib/Coordinate'
-import { query } from '@/graphql';
-import { Formation } from '@/graphql/schema';
+import { graphql } from '@/gql';
+import { graphqlQuery } from '@/graphql';
 
-const dataQuery = `
-  query($id: Int!) {
+const formationData = graphql(`
+  query formationData($id: ID!) {
     formation(
       id: $id
     ) {
@@ -20,25 +19,22 @@ const dataQuery = `
       }
     }
   }
-`
+`);
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, { id: parseInt(params.id) })
-    .then(r => r.json());
-  const { data, errors } = result;
 
-  if (errors) {
-    console.error(JSON.stringify(errors, null, 2));
-    return <div>There was an error generating the page.</div>
-  }
+  const data = await graphqlQuery(
+    formationData,
+    { id: params.id }
+  );
 
-  const { formation }: { formation: Formation } = data;
+  const { formation } = data;
 
   let parentHref: string | null = null;
-  if (formation?.parent?.__typename == "Area") {
+  if (formation.parent?.__typename == "Area") {
     parentHref = `/areas/${formation.parent.id}`
-  } else if (formation?.parent?.__typename == "Formation") {
+  } else if (formation.parent?.__typename == "Formation") {
     parentHref = `/formations/${formation.parent.id}`
   }
 
@@ -94,7 +90,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/formations/new">New formation</Link>
       </div>
       <ul>
-        {formation.formations?.map((formation) => (
+        {formation.formations.map((formation) => (
           <li key={`formations-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
           </li>
@@ -105,7 +101,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href="/climbs/new">New climb</Link>
       </div>
       <ul>
-        {formation.climbs?.map((climb) => (
+        {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
           </li>

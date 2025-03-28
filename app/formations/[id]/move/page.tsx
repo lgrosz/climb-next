@@ -1,13 +1,12 @@
 import Form from 'next/form';
 import { move } from '@/formations/actions';
 import { redirect } from 'next/navigation';
-import { GRAPHQL_ENDPOINT } from '@/constants';
 import RadioTree, { RadioTreeNode } from '@/components/RadioTree';
-import { Area, Formation } from '@/graphql/schema';
-import { query } from '@/graphql';
+import { graphqlQuery } from '@/graphql';
+import { graphql } from '@/gql';
 
-const dataQuery = `
-  query {
+const potentialFormationParents = graphql(`
+  query potentialFormationParents {
     potentialParentAreas: areas {
       __typename
       id name
@@ -26,7 +25,32 @@ const dataQuery = `
       }
     }
   }
-`
+`);
+
+// TODO graphql-codegen fragment
+type Area = {
+    __typename: "Area";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename: "Area";
+        id: string;
+    } | null;
+};
+
+// TODO graphql-codegen fragment
+type Formation = {
+    __typename: "Formation";
+    id: string;
+    name?: string | null;
+    parent?: {
+        __typename: "Area";
+        id: string;
+    } | {
+        __typename: "Formation";
+        id: string;
+    } | null;
+};
 
 function buildTree(parents: (Area | Formation)[], disabledId: number) {
   const roots: RadioTreeNode[] = [];
@@ -89,22 +113,7 @@ export default async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
   const id = parseInt(params.id);
 
-  const result = await query(GRAPHQL_ENDPOINT, dataQuery, null)
-    .then(r => r.json());
-  const { data, errors }:
-    {
-      data: {
-        potentialParentAreas: Area[],
-        potentialParentFormations: Formation[],
-      },
-      errors: any
-    } = result;
-
-  if (errors) {
-    console.error(errors);
-    return <div>There was an error generating the page.</div>
-  }
-
+  const data = await graphqlQuery(potentialFormationParents);
   const { potentialParentAreas, potentialParentFormations } = data;
 
   const action = async (data: FormData) => {
