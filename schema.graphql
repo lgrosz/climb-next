@@ -1,0 +1,327 @@
+schema {
+  query: QueryRoot
+  mutation: MutationRoot
+}
+
+type Area {
+  areas: [Area!]!
+  climbs: [Climb!]!
+  description: String
+  formations: [Formation!]!
+  id: ID!
+  name: String
+  parent: AreaParent
+}
+
+union AreaParent = Area
+
+input AreaParentInput {
+  area: Int
+}
+
+type Ascent {
+  climb: Climb!
+  climber: Climber!
+  dateWindow: DateInterval
+  grades: [Grade!]!
+  id: ID!
+}
+
+type Climb {
+  description: String
+  grades: [Grade!]!
+  id: ID!
+  name: String
+  parent: ClimbParent
+}
+
+union ClimbParent = Area | Formation
+
+input ClimbParentInput {
+  area: Int
+  formation: Int
+}
+
+type Climber {
+  firstName: String!
+  id: ID!
+  lastName: String!
+}
+
+type Coordinate {
+  latitude: Float!
+  longitude: Float!
+}
+
+input CoordinateInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+scalar DateInterval
+
+type Fontainebleau {
+  value: FontainebleauGrade!
+}
+
+scalar FontainebleauGrade
+
+type Formation {
+  climbs: [Climb!]!
+  description: String
+  formations: [Formation!]!
+  id: ID!
+  location: Coordinate
+  name: String
+  parent: FormationParent
+}
+
+union FormationParent = Area | Formation
+
+input FormationParentInput {
+  area: Int
+  formation: Int
+}
+
+union Grade = Fontainebleau | Vermin | YosemiteDecimal
+
+input GradeInput {
+  fontainebleau: FontainebleauGrade
+  vermin: VerminGrade
+  yosemiteDecimal: YosemiteDecimalGrade
+}
+
+type Image {
+  id: ID!
+  sources: [ImageSource!]!
+}
+
+union ImageSource = S3ImageSource
+
+type MutationRoot {
+  addArea(
+    """Area name"""
+    name: String
+
+    """Area parent"""
+    parent: AreaParentInput
+  ): Area!
+  addAscent(
+    """Climb ID"""
+    climbId: ID!
+
+    """Climber ID"""
+    climberId: ID!
+  ): Ascent!
+  addAscentGrade(
+    """Grade"""
+    grade: GradeInput!
+
+    """Ascent ID"""
+    id: ID!
+  ): Ascent!
+  addClimb(
+    """Climb name"""
+    name: String
+
+    """Climb parent"""
+    parent: ClimbParentInput
+  ): Climb!
+  addClimbGrade(
+    """Grade"""
+    grade: GradeInput!
+
+    """Climb id"""
+    id: ID!
+  ): Climb!
+  addClimber(
+    """First name"""
+    firstName: String!
+
+    """Last name"""
+    lastName: String!
+  ): Climber!
+  addFormation(
+    """Formation location"""
+    location: CoordinateInput
+
+    """Formation name"""
+    name: String
+
+    """Formation parent"""
+    parent: FormationParentInput
+  ): Formation!
+  createImage: Image!
+  dateAscent(
+    """Area name"""
+    dateInterval: DateInterval
+
+    """Ascent ID"""
+    id: ID!
+  ): Ascent!
+  describeArea(
+    """Area description"""
+    description: String
+
+    """Area id"""
+    id: ID!
+  ): Area!
+  describeClimb(
+    """Climb description"""
+    description: String
+
+    """Climb id"""
+    id: ID!
+  ): Climb!
+  describeFormation(
+    """Formation description"""
+    description: String
+
+    """Formation id"""
+    id: ID!
+  ): Formation!
+  moveArea(
+    """Area id"""
+    id: ID!
+
+    """Area parent"""
+    parent: AreaParentInput
+  ): Area!
+  moveClimb(
+    """Climb id"""
+    id: ID!
+
+    """Climb parent"""
+    parent: ClimbParentInput
+  ): Climb!
+  moveFormation(
+    """Formation id"""
+    id: ID!
+
+    """Formation parent"""
+    parent: FormationParentInput
+  ): Formation!
+  relocateFormation(
+    """Formation id"""
+    id: ID!
+
+    """Formation location"""
+    location: CoordinateInput
+  ): Formation!
+  removeArea(
+    """Area id"""
+    id: ID!
+  ): Area!
+  removeAscent(
+    """Ascent id"""
+    id: ID!
+  ): Ascent!
+  removeAscentGrade(
+    """Grade"""
+    grade: GradeInput!
+
+    """Ascent ID"""
+    id: ID!
+  ): Ascent!
+  removeClimb(
+    """Climb id"""
+    id: ID!
+  ): Climb!
+  removeClimbGrade(
+    """Grade"""
+    grade: GradeInput!
+
+    """Climb id"""
+    id: ID!
+  ): Climb!
+  removeClimber(
+    """Climber id"""
+    id: ID!
+  ): Climber!
+  removeFormation(
+    """Formation id"""
+    id: ID!
+  ): Formation!
+  renameArea(
+    """Area id"""
+    id: ID!
+
+    """Area name"""
+    name: String
+  ): Area!
+  renameClimb(
+    """Climb id"""
+    id: ID!
+
+    """Climb name"""
+    name: String
+  ): Climb!
+  renameFormation(
+    """Formation id"""
+    id: ID!
+
+    """Formation name"""
+    name: String
+  ): Formation!
+  s3Put(bucket: String!, object: String!): String!
+}
+
+type QueryRoot {
+  area(
+    """Area id"""
+    id: ID!
+  ): Area!
+  areas: [Area!]!
+  areasByParent(
+    """Area parent"""
+    parent: AreaParentInput
+  ): [Area!]!
+  ascent(
+    """Ascent id"""
+    id: ID!
+  ): Ascent!
+  ascents: [Ascent!]!
+  climb(
+    """Climb id"""
+    id: ID!
+  ): Climb!
+  climber(
+    """Climber id"""
+    id: ID!
+  ): Climber!
+  climbers: [Climber!]!
+  climbs: [Climb!]!
+  climbsByParent(
+    """Climb parent"""
+    parent: ClimbParentInput
+  ): [Climb!]!
+  formation(
+    """Formation id"""
+    id: ID!
+  ): Formation!
+  formations: [Formation!]!
+  formationsByParent(
+    """Formation parent"""
+    parent: FormationParentInput
+  ): [Formation!]!
+  image(id: ID!): Image!
+  imageSourceUrl(id: ID!, name: String!): String!
+  s3Get(bucket: String!, object: String!): String!
+}
+
+type S3ImageSource {
+  bucket: String!
+  object: String!
+}
+
+type Vermin {
+  value: VerminGrade!
+}
+
+scalar VerminGrade
+
+type YosemiteDecimal {
+  value: YosemiteDecimalGrade!
+}
+
+scalar YosemiteDecimalGrade
