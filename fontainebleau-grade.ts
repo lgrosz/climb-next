@@ -61,11 +61,21 @@ export default class FontainebleauGrade {
     }
 
     public static slashString(grades: FontainebleauGrade[]): string {
-        // TODO
-        // [F8A, F8A+] ==> F8A/+
-        // [F8A, F8A+, F8B] ==> F8A/+/B
-        // [F6C+, F7A] ==> F6C+/7A
-        return grades.map(grade => grade.toString()).join("/");
+        let gradeStrings = [];
+        let last = "";
+        for (const grade of grades) {
+            const gradeString = grade.toString();
+
+            let i = 0;
+            while(last[i] && gradeString[i] === last[i]) {
+                i++;
+            }
+
+            gradeStrings.push(gradeString.slice(i))
+            last = gradeString;
+        }
+
+        return gradeStrings.join("/");
     }
 
     public getValue(): number {
