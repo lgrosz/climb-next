@@ -90,7 +90,7 @@ function buildTree(areas: Areas, formations: Formations, climbs: Climbs): TreeNo
     }
   });
 
-  let roots: TreeNode[] = [];
+  const roots: TreeNode[] = [];
 
   climbs.forEach(climb => {
     if (climb.id === undefined) return;

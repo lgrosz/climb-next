@@ -10,7 +10,7 @@ export default function Page() {
     const parentAreaId = Number(formData.get('parent-area-id')?.toString()) || null;
     const parentFormationId = Number(formData.get('parent-formation-id')?.toString()) || null;
 
-    let id = await create(
+    const id = await create(
       name ?? undefined,
       {
         area: (parentType === "area" ? parentAreaId : null) ?? undefined,

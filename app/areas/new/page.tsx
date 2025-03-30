@@ -8,7 +8,7 @@ export default function Page() {
     const name = formData.get('name')?.toString() || null;
     const parentAreaId = Number(formData.get('parent-area-id')?.toString()) || null;
 
-    let id = await create(name ?? undefined, { area: parentAreaId ?? undefined });
+    const id = await create(name ?? undefined, { area: parentAreaId ?? undefined });
 
     redirect(`/areas/${id}`);
   }
