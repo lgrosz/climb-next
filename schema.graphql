@@ -28,6 +28,7 @@ type Ascent {
 }
 
 type Climb {
+  ascents: [Ascent!]!
   description: String
   grades: [Grade!]!
   id: ID!

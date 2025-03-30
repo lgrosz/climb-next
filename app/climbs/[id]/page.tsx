@@ -30,6 +30,11 @@ const climbData = graphql(`
         ... on Area { id name }
         ... on Formation { id name }
       }
+      ascents {
+        id
+        climber {firstName lastName }
+        dateWindow
+      }
     }
   }
 `);
@@ -61,6 +66,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const ydsGrades = climb.grades.map(grade =>
     grade.__typename == "YosemiteDecimal" && grade.yds_value ? YosemiteDecimalGrade.fromString(grade.yds_value) : undefined
   ).filter((g): g is YosemiteDecimalGrade => !!g);
+
+  const ascents = climb.ascents;
 
   return (
     <div>
@@ -105,6 +112,23 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         )}
         </ul>
       )}
+      <h3>Ascents</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Climber</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ascents.map(ascent => (
+            <tr key={`ascent-${ascent.id}`}>
+              <td>{ascent.climber.firstName} {ascent.climber.lastName}</td>
+              <td>{ascent.dateWindow ?? "-"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
