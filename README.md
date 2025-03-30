@@ -26,5 +26,12 @@ Next, run the development server:
 pnpm dev
 ```
 
+Run tests with
+```sh
+jest
+# or
+pnpm run test
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
