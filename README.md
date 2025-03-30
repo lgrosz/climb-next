@@ -2,6 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Build and Run
+
+```sh
+pnpm run graphql-codegen
+pnpm run build
+pnpm run start
+```
+
+### Development
+
 First, generate the GraphQL code:
 
 ```sh
