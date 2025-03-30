@@ -8,7 +8,7 @@ class Coordinate {
   }
 
   round(num: number, precision: number): number {
-    var base = 10 ** precision;
+    const base = 10 ** precision;
     return Math.round(num * base) / base;
   }
 
