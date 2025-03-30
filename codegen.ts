@@ -49,6 +49,7 @@ async function config() {
               output: 'string',
             },
           },
+          strictScalars: true,
         },
       },
     },
