@@ -29,7 +29,27 @@ async function config() {
     generates: {
       "gql/": {
         preset: "client",
-        plugins: []
+        plugins: [],
+        config: {
+          scalars: {
+            DateInterval: {
+              input: 'string',
+              output: 'string',
+            },
+            FontainebleauGrade: {
+              input: 'string',
+              output: 'string',
+            },
+            VerminGrade: {
+              input: 'string',
+              output: 'string',
+            },
+            YosemiteDecimalGrade: {
+              input: 'string',
+              output: 'string',
+            },
+          },
+        },
       },
     },
   };
