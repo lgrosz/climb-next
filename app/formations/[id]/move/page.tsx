@@ -109,7 +109,7 @@ function buildTree(parents: (Area | Formation)[], disabledId: string) {
 // I think most of this can become an "area" selector.. like it'd be useful
 // when creating an area to select from this tree than it is to just type in
 // an id
-export default async (props: { params: Promise<{ id: string }> }) => {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
 

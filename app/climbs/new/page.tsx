@@ -2,7 +2,7 @@ import Form from 'next/form';
 import { create } from '@/climbs/actions';
 import { redirect } from "next/navigation";
 
-export default () => {
+export default function Page() {
   const action = async (formData: FormData) => {
     'use server';
     const name = formData.get('name')?.toString() || null;
