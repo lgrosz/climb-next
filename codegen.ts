@@ -1,16 +1,16 @@
 
 import type { CodegenConfig } from '@graphql-codegen/cli';
+import { GRAPHQL_ENDPOINT } from './constants'
 
-const GRAPHQL_URL = "http://localhost:4000/graphql";
 const SCHEMA_FILE = "./schema.graphql";
 
 async function schema() {
   try {
-    const response = await fetch(GRAPHQL_URL, { method: 'HEAD' });
+    const response = await fetch(GRAPHQL_ENDPOINT, { method: 'HEAD' });
 
     if (response.ok) {
       console.warn("Using GraphQL server.")
-      return GRAPHQL_URL;
+      return GRAPHQL_ENDPOINT;
     } else {
       console.warn(`GraphQL server responed with "${response.statusText}" (${response.status}), falling back to local schema.`);
       return SCHEMA_FILE;
@@ -35,7 +35,7 @@ async function config() {
   };
 
   // generate new local schema
-  if (config.schema == GRAPHQL_URL) {
+  if (config.schema == GRAPHQL_ENDPOINT) {
     config.generates["schema.graphql"] = { plugins: ["schema-ast"] };
   }
 
