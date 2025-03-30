@@ -34,10 +34,66 @@ const climbData = graphql(`
         id
         climber {firstName lastName }
         dateWindow
+        grades {
+          ... on Fontainebleau {
+            __typename
+            font_value: value
+          }
+          ... on Vermin {
+            __typename
+            v_value: value
+          }
+          ... on YosemiteDecimal {
+            __typename
+            yds_value: value
+          }
+        }
       }
     }
   }
 `);
+
+interface AscentRowProps {
+  climber: {
+    firstName: string,
+    lastName: string,
+  }
+  dateWindow?: string | null
+  grades: {
+    __typename: string,
+    font_value?: string
+    v_value?: string
+    yds_value?: string
+  }[]
+}
+
+function AscentRow(props: AscentRowProps) {
+  const fontGrades = props.grades.map(grade =>
+    grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
+  ).filter((g): g is FontainebleauGrade => !!g);
+
+  const verminGrades = props.grades.map(grade =>
+    grade.__typename == "Vermin" && grade.v_value ? VerminGrade.fromString(grade.v_value) : undefined
+  ).filter((g): g is VerminGrade => !!g);
+
+  const ydsGrades = props.grades.map(grade =>
+    grade.__typename == "YosemiteDecimal" && grade.yds_value ? YosemiteDecimalGrade.fromString(grade.yds_value) : undefined
+  ).filter((g): g is YosemiteDecimalGrade => !!g);
+
+  const gradeString = [
+    FontainebleauGrade.slashString(fontGrades),
+    VerminGrade.slashString(verminGrades),
+    YosemiteDecimalGrade.slashString(ydsGrades),
+  ].filter(s => s).join(", ");
+
+  return (
+    <tr>
+      <td>{props.climber.firstName} {props.climber.lastName}</td>
+      <td>{props.dateWindow ?? "-"}</td>
+      <td>{gradeString ? gradeString : "-" }</td>
+    </tr>
+  );
+}
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -118,14 +174,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <tr>
             <th>Climber</th>
             <th>Date</th>
+            <th>Suggested Grade</th>
           </tr>
         </thead>
         <tbody>
           {ascents.map(ascent => (
-            <tr key={`ascent-${ascent.id}`}>
-              <td>{ascent.climber.firstName} {ascent.climber.lastName}</td>
-              <td>{ascent.dateWindow ?? "-"}</td>
-            </tr>
+            <AscentRow key={`ascent-${ascent.id}`} {...ascent}/>
           ))}
         </tbody>
       </table>
