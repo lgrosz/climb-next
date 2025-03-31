@@ -97,7 +97,7 @@ function intervalDateString(dates: DateInterval | null) {
       return dates.lower.value.toLocaleDateString();
     }
 
-    return `Between ${dates.lower.value.toLocaleDateString()} and ${dates.lower.value.toLocaleDateString()}`
+    return `Between ${dates.lower.value.toLocaleDateString()} and ${dates.upper.value.toLocaleDateString()}`
   }
 
   // NOTE this is not possible, I think Typescript compiler is doing the checking incorrectly, I shouldn't some of the above checks.
