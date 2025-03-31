@@ -56,6 +56,7 @@ const climbData = graphql(`
 `);
 
 interface AscentRowProps {
+  id: string,
   climber: {
     firstName: string,
     lastName: string,
@@ -131,6 +132,7 @@ function AscentRow(props: AscentRowProps) {
       <td>{props.climber.firstName} {props.climber.lastName}</td>
       <td>{dateString}</td>
       <td>{gradeString ? gradeString : "-" }</td>
+      <td><Link href={`/ascents/${props.id}`}>Read more</Link></td>
     </tr>
   );
 }
@@ -215,6 +217,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             <th>Climber</th>
             <th>Date</th>
             <th>Suggested Grade</th>
+            <th>Details</th>
           </tr>
         </thead>
         <tbody>
