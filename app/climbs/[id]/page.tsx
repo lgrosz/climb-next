@@ -4,6 +4,8 @@ import { graphqlQuery } from '@/graphql';
 import FontainebleauGrade from '@/fontainebleau-grade';
 import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
 import { graphql } from '@/gql';
+import { DateInterval } from '@/date-interval';
+import { BoundType } from '@/bound';
 
 const climbData = graphql(`
   query climbData($id: ID!) {
@@ -67,6 +69,41 @@ interface AscentRowProps {
   }[]
 }
 
+function intervalDateString(dates: DateInterval | null) {
+  if (
+    !dates ||
+    (dates.upper.type === BoundType.Unbounded && dates.lower.type === BoundType.Unbounded)
+  ) {
+    return "";
+  }
+
+  // TODO
+  // - nicer strings like...
+  //   - "Winter 2024 - Spring 2025"
+  //   - 1990s
+  //   - Mid February 2024
+  // - Since I am taking Bounds, I should really take into account the included/excluded thing
+
+  if (dates.upper.type === BoundType.Unbounded && dates.lower.type !== BoundType.Unbounded) {
+    return `After ${dates.lower.value.toLocaleDateString()}`
+  }
+
+  if (dates.lower.type === BoundType.Unbounded && dates.upper.type !== BoundType.Unbounded) {
+    return `Before ${dates.upper.value.toLocaleDateString()}`
+  }
+
+  if (dates.lower.type !== BoundType.Unbounded && dates.upper.type !== BoundType.Unbounded) {
+    if (dates.lower.value.getTime() === dates.upper.value.getTime()) {
+      return dates.lower.value.toLocaleDateString();
+    }
+
+    return `Between ${dates.lower.value.toLocaleDateString()} and ${dates.lower.value.toLocaleDateString()}`
+  }
+
+  // NOTE this is not possible, I think Typescript compiler is doing the checking incorrectly, I shouldn't some of the above checks.
+  return "-";
+}
+
 function AscentRow(props: AscentRowProps) {
   const fontGrades = props.grades.map(grade =>
     grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
@@ -86,10 +123,13 @@ function AscentRow(props: AscentRowProps) {
     YosemiteDecimalGrade.slashString(ydsGrades),
   ].filter(s => s).join(", ");
 
+  const dateInterval = props.dateWindow ? DateInterval.fromISO(props.dateWindow) : null;
+  const dateString = intervalDateString(dateInterval);
+
   return (
     <tr>
       <td>{props.climber.firstName} {props.climber.lastName}</td>
-      <td>{props.dateWindow ?? "-"}</td>
+      <td>{dateString}</td>
       <td>{gradeString ? gradeString : "-" }</td>
     </tr>
   );
