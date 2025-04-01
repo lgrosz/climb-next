@@ -1,5 +1,6 @@
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import Link from "next/link";
 
 const query = graphql(`
   query climbers {
@@ -21,7 +22,7 @@ export default async function Page() {
       <ul>
         {climbers.map((climber) => (
           <li key={`climber-${climber.id}`}>
-            {climber.lastName}, {climber.firstName}
+            <Link href={`/climbers/${climber.id}`}>{climber.lastName}, {climber.firstName}</Link>
           </li>
         ))}
       </ul>
