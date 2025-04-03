@@ -1,5 +1,5 @@
 import { graphql } from "@/gql";
-import { ClimbParentInput, InputMaybe, Scalars } from "@/gql/graphql";
+import { ClimbParentInput, GradeInput, InputMaybe, Scalars } from "@/gql/graphql";
 import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
@@ -164,4 +164,29 @@ export async function describe(climbId: Scalars["ID"]["input"], description: str
   revalidatePath(`/climbs/${climbId}`)
 
   return data.action.description;
+}
+
+export async function addGrade(climbId: Scalars["ID"]["input"], grade: GradeInput)
+{
+  const mutation = graphql(`
+    mutation addClimbGrade(
+      $id: ID!
+      $grade: GradeInput!
+    ) {
+      action: addClimbGrade(
+        id: $id
+        grade: $grade
+      ) { id }
+    }
+  `);
+
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: climbId,
+      grade: grade,
+    }
+  )
+
+  return data.action.id;
 }
