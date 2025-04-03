@@ -1,6 +1,6 @@
 import { graphql } from '@/gql';
 import { graphqlQuery } from '@/graphql';
-import { redirect } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 import Form from 'next/form';
 import { create } from '@/ascents/actions';
 import DateIntervalInput from '@/components/DateIntervalInput';
@@ -13,6 +13,11 @@ const query = graphql(`
 `);
 
 export default async function Page() {
+  const searchParams = useSearchParams();
+
+  const climbId = searchParams.get("climb");
+  const climberId = searchParams.get("climber");
+
   const data = await graphqlQuery(query);
   const { climbers, climbs } = data;
 
@@ -42,7 +47,7 @@ export default async function Page() {
     <Form action={action}>
       <div>
         <label htmlFor="climber">Choose climber</label>
-        <select name="climber" id="climber">
+        <select name="climber" id="climber" defaultValue={climberId ?? undefined}>
           {climbers.map(climber => (
             <option key={`climber-${climber.id}`} value={climber.id}>{climber.lastName}, {climber.firstName}</option>
           ))}
@@ -50,7 +55,7 @@ export default async function Page() {
       </div>
       <div>
         <label htmlFor="climb">Choose climb</label>
-        <select name="climb" id="climb">
+        <select name="climb" id="climb" defaultValue={climbId ?? undefined}>
           {climbs.map(climb => (
             <option key={`climb-${climb.id}`} value={climb.id}>{climb.name}</option>
           ))}
