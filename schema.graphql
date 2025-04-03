@@ -113,6 +113,9 @@ type MutationRoot {
 
     """Climber ID"""
     climberId: ID!
+
+    """Date window"""
+    dateWindow: DateInterval
   ): Ascent!
   addAscentGrade(
     """Grade"""
