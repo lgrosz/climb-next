@@ -46,6 +46,53 @@ describe('Date Intervals', () => {
             )
         )
     });
+
+    test('To ISO', () => {
+        expect(
+            new DateInterval(
+                { type: BoundType.Unbounded },
+                { type: BoundType.Unbounded }
+            ).toISOString()
+        ).toBe(
+            "../.."
+        )
+
+        expect(
+            new DateInterval(
+                { type: BoundType.Unbounded },
+                { type: BoundType.Included, value: new Date(2024, 2, 2) }
+            ).toISOString()
+        ).toBe(
+            "../2024-03-02"
+        )
+
+        expect(
+            new DateInterval(
+                { type: BoundType.Included, value: new Date(2024, 2, 2) },
+                { type: BoundType.Unbounded }
+            ).toISOString()
+        ).toBe(
+            "2024-03-02/.."
+        )
+
+        expect(
+            new DateInterval(
+                { type: BoundType.Included, value: new Date(2024, 2, 2) },
+                { type: BoundType.Included, value: new Date(2024, 2, 4) }
+            ).toISOString()
+        ).toStrictEqual(
+            "2024-03-02/2024-03-04"
+        )
+
+        expect(
+            new DateInterval(
+                { type: BoundType.Excluded, value: new Date(2024, 2, 1) },
+                { type: BoundType.Excluded, value: new Date(2024, 2, 5) }
+            ).toISOString()
+        ).toStrictEqual(
+            "2024-03-02/2024-03-04"
+        )
+    });
 });
 
 
