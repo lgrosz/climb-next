@@ -60,4 +60,32 @@ export class DateInterval implements Interval<Date> {
 
     return ret;
   }
+
+  /** To ISO-like string */
+  public toISOString(): string {
+    let lowerStr: string;
+    let upperStr: string;
+
+    if (this.lower.type === BoundType.Included) {
+      lowerStr = this.lower.value.toISOString().split("T")[0];
+    } else if (this.lower.type === BoundType.Excluded) {
+      const excludedLower = new Date(this.lower.value);
+      excludedLower.setDate(excludedLower.getDate() + 1);
+      lowerStr = excludedLower.toISOString().split("T")[0];
+    } else {
+      lowerStr = "..";
+    }
+
+    if (this.upper.type === BoundType.Included) {
+      upperStr = this.upper.value.toISOString().split("T")[0];
+    } else if (this.upper.type === BoundType.Excluded) {
+      const excludedUpper = new Date(this.upper.value);
+      excludedUpper.setDate(excludedUpper.getDate() - 1);
+      upperStr = excludedUpper.toISOString().split("T")[0];
+    } else {
+      upperStr = "..";
+    }
+
+    return `${lowerStr}/${upperStr}`;
+  }
 }
