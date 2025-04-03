@@ -4,14 +4,14 @@ import { BoundType } from './bound';
 
 describe('Date Intervals', () => {
     test('From ISO', () => {
-        expect(() => DateInterval.fromISO("")).toThrow()
-        expect(() => DateInterval.fromISO("2024-03-02")).toThrow()
-        expect(() => DateInterval.fromISO("2024-03-02/")).toThrow()
-        expect(() => DateInterval.fromISO("/2024-03-02")).toThrow()
-        expect(() => DateInterval.fromISO("03-02/2024-03-02")).toThrow()
+        expect(() => DateInterval.fromISOString("")).toThrow()
+        expect(() => DateInterval.fromISOString("2024-03-02")).toThrow()
+        expect(() => DateInterval.fromISOString("2024-03-02/")).toThrow()
+        expect(() => DateInterval.fromISOString("/2024-03-02")).toThrow()
+        expect(() => DateInterval.fromISOString("03-02/2024-03-02")).toThrow()
 
         expect(
-            DateInterval.fromISO("../..")
+            DateInterval.fromISOString("../..")
         ).toStrictEqual(
             new DateInterval(
                 { type: BoundType.Unbounded },
@@ -20,7 +20,7 @@ describe('Date Intervals', () => {
         )
 
         expect(
-            DateInterval.fromISO("../2024-03-02")
+            DateInterval.fromISOString("../2024-03-02")
         ).toStrictEqual(
             new DateInterval(
                 { type: BoundType.Unbounded },
@@ -29,7 +29,7 @@ describe('Date Intervals', () => {
         )
 
         expect(
-            DateInterval.fromISO("2024-03-02/..")
+            DateInterval.fromISOString("2024-03-02/..")
         ).toStrictEqual(
             new DateInterval(
                 { type: BoundType.Included, value: new Date(2024, 2, 2) },
@@ -38,7 +38,7 @@ describe('Date Intervals', () => {
         )
 
         expect(
-            DateInterval.fromISO("2024-03-02/2024-03-04")
+            DateInterval.fromISOString("2024-03-02/2024-03-04")
         ).toStrictEqual(
             new DateInterval(
                 { type: BoundType.Included, value: new Date(2024, 2, 2) },
