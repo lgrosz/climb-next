@@ -3,8 +3,7 @@ import { graphqlQuery } from '@/graphql';
 import { redirect } from 'next/navigation';
 import Form from 'next/form';
 import { create } from '@/ascents/actions';
-import { DateInterval } from '@/date-interval';
-import { BoundType } from '@/bound';
+import DateIntervalInput from '@/components/DateIntervalInput';
 
 const query = graphql(`
   query newAscentData {
@@ -22,20 +21,12 @@ export default async function Page() {
 
     const climbId = formData.get('climb')?.toString() || null;
     const climberId = formData.get('climber')?.toString() || null;
+    let dateWindow = formData.get('date-window')?.toString() || null;
 
-    let dateWindow: DateInterval | null = null;
-
-    const start = formData.get('interval-start')?.toString() || null;
-    const end = formData.get('interval-end')?.toString() || null;
-
-    if (start || end) {
-      dateWindow = new DateInterval;
-      dateWindow.lower = start
-        ? { type: BoundType.Included, value: new Date(start) }
-        : { type: BoundType.Unbounded };
-      dateWindow.upper = end
-        ? { type: BoundType.Included, value: new Date(end) }
-        : { type: BoundType.Unbounded };
+    // Currently, there's no real use for this data and I'd just prefer it to
+    // end up being "no date window," represented by null
+    if (dateWindow == "../..") {
+      dateWindow = null;
     }
 
     if (climbId && climberId) {
@@ -66,22 +57,10 @@ export default async function Page() {
         </select>
       </div>
       <div>
-        <label htmlFor="interval-start">Date window start</label>
-        <input
-          type="date"
-          id="interval-start"
-          name="interval-start"
-          /* TODO max should be max of today and value of the interval-end */
-          max={today.toISOString().split("T")[0]}
-        />
-      </div>
-      <div>
-        <label htmlFor="interval-end">Date window end</label>
-        <input
-          type="date"
-          id="interval-end"
-          name="interval-end"
-          /* TODO min should be the value of interval-start */
+        <label>Date window</label>
+        <DateIntervalInput
+          id="date-window"
+          name="date-window"
           max={today.toISOString().split("T")[0]}
         />
       </div>
