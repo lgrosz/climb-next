@@ -190,3 +190,28 @@ export async function addGrade(climbId: Scalars["ID"]["input"], grade: GradeInpu
 
   return data.action.id;
 }
+
+export async function removeGrade(climbId: Scalars["ID"]["input"], grade: GradeInput)
+{
+  const mutation = graphql(`
+    mutation removeClimbGrade(
+      $id: ID!
+      $grade: GradeInput!
+    ) {
+      action: removeClimbGrade(
+        id: $id
+        grade: $grade
+      ) { id }
+    }
+  `);
+
+  const data = await graphqlQuery(
+    mutation,
+    {
+      id: climbId,
+      grade: grade,
+    }
+  )
+
+  return data.action.id;
+}
