@@ -124,7 +124,7 @@ function AscentRow(props: AscentRowProps) {
     YosemiteDecimalGrade.slashString(ydsGrades),
   ].filter(s => s).join(", ");
 
-  const dateInterval = props.dateWindow ? DateInterval.fromISO(props.dateWindow) : null;
+  const dateInterval = props.dateWindow ? DateInterval.fromISOString(props.dateWindow) : null;
   const dateString = intervalDateString(dateInterval);
 
   return (

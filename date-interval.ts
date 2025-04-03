@@ -39,7 +39,7 @@ export class DateInterval implements Interval<Date> {
   }
 
   /** Parse from ISO-like string */
-    public static fromISO(s: string): DateInterval {
+  public static fromISOString(s: string): DateInterval {
     const [lowerStr, upperStr] = s.split("/");
 
     let ret = new DateInterval;
