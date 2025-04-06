@@ -93,11 +93,9 @@ input GradeInput {
 }
 
 type Image {
+  downloadUrl: String
   id: ID!
-  sources: [ImageSource!]!
 }
-
-union ImageSource = S3ImageSource
 
 type MutationRoot {
   addArea(
@@ -155,7 +153,6 @@ type MutationRoot {
     """Formation parent"""
     parent: FormationParentInput
   ): Formation!
-  createImage: Image!
   dateAscent(
     """Area name"""
     dateInterval: DateInterval
@@ -205,6 +202,10 @@ type MutationRoot {
     """Formation parent"""
     parent: FormationParentInput
   ): Formation!
+  prepareImageUpload(
+    """Name of image file"""
+    name: String!
+  ): PrepareImageUploadResult!
   relocateFormation(
     """Formation id"""
     id: ID!
@@ -267,7 +268,11 @@ type MutationRoot {
     """Formation name"""
     name: String
   ): Formation!
-  s3Put(bucket: String!, object: String!): String!
+}
+
+type PrepareImageUploadResult {
+  image: Image!
+  uploadUrl: String!
 }
 
 type QueryRoot {
@@ -309,13 +314,6 @@ type QueryRoot {
     parent: FormationParentInput
   ): [Formation!]!
   image(id: ID!): Image!
-  imageSourceUrl(id: ID!, name: String!): String!
-  s3Get(bucket: String!, object: String!): String!
-}
-
-type S3ImageSource {
-  bucket: String!
-  object: String!
 }
 
 type Vermin {
