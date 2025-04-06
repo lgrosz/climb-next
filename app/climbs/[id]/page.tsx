@@ -108,15 +108,15 @@ function intervalDateString(dates: DateInterval | null) {
 function AscentRow(props: AscentRowProps) {
   const fontGrades = props.grades.map(grade =>
     grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
-  ).filter((g): g is FontainebleauGrade => !!g);
+  ).filter((g): g is FontainebleauGrade => !!g).sort(FontainebleauGrade.compare);
 
   const verminGrades = props.grades.map(grade =>
     grade.__typename == "Vermin" && grade.v_value ? VerminGrade.fromString(grade.v_value) : undefined
-  ).filter((g): g is VerminGrade => !!g);
+  ).filter((g): g is VerminGrade => !!g).sort(VerminGrade.compare);
 
   const ydsGrades = props.grades.map(grade =>
     grade.__typename == "YosemiteDecimal" && grade.yds_value ? YosemiteDecimalGrade.fromString(grade.yds_value) : undefined
-  ).filter((g): g is YosemiteDecimalGrade => !!g);
+  ).filter((g): g is YosemiteDecimalGrade => !!g).sort(YosemiteDecimalGrade.compare);
 
   const gradeString = [
     FontainebleauGrade.slashString(fontGrades),
@@ -155,15 +155,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const fontGrades = climb.grades.map(grade =>
     grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
-  ).filter((g): g is FontainebleauGrade => !!g);
+  ).filter((g): g is FontainebleauGrade => !!g).sort(FontainebleauGrade.compare);
 
   const verminGrades = climb.grades.map(grade =>
     grade.__typename == "Vermin" && grade.v_value ? VerminGrade.fromString(grade.v_value) : undefined
-  ).filter((g): g is VerminGrade => !!g);
+  ).filter((g): g is VerminGrade => !!g).sort(VerminGrade.compare);
 
   const ydsGrades = climb.grades.map(grade =>
     grade.__typename == "YosemiteDecimal" && grade.yds_value ? YosemiteDecimalGrade.fromString(grade.yds_value) : undefined
-  ).filter((g): g is YosemiteDecimalGrade => !!g);
+  ).filter((g): g is YosemiteDecimalGrade => !!g).sort(YosemiteDecimalGrade.compare);
 
   const ascents = climb.ascents;
 
