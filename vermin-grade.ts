@@ -38,6 +38,10 @@ export default class VerminGrade {
         return [first, ...remaining].join("/")
     }
 
+    public static compare(left: VerminGrade, right: VerminGrade) {
+        return left.value - right.value;
+    }
+
     public getValue(): number {
         return this.value;
     }

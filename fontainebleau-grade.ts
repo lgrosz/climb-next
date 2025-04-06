@@ -78,6 +78,21 @@ export default class FontainebleauGrade {
         return gradeStrings.join("/");
     }
 
+    public static compare(left: FontainebleauGrade, right: FontainebleauGrade) {
+        if (left.value != right.value) {
+            return left.value - right.value;
+        }
+
+        if (left.modifier != right.modifier) {
+            if (left.modifier != null && right.modifier != null) {
+                const order = ["A", "B", "C"];
+                return order.indexOf(left.modifier) - order.indexOf(right.modifier);
+            }
+        }
+
+        return Number(left.plus) - Number(right.plus);
+    }
+
     public getValue(): number {
         return this.value;
     }

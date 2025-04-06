@@ -61,6 +61,27 @@ export default class YosemiteDecimalGrade {
         return grades.map(grade => grade.toString()).join("/");
     }
 
+    public static compare(left: YosemiteDecimalGrade, right: YosemiteDecimalGrade) {
+        if (left.value != right.value) {
+            return left.value - right.value;
+        }
+
+        // Since we've established the `value`s are equal, if there is no
+        // modifier, there is nothing left to check.
+        if (left.modifier == null) {
+            return 0;
+        }
+
+        // this should never happen, but just in case
+        if (right.modifier == null) {
+            return 0;
+        }
+
+        const order = ["a", "b", "c", "d"];
+
+        return order.indexOf(left.modifier) - order.indexOf(right.modifier);
+    }
+
     public getValue(): number {
         return this.value;
     }
