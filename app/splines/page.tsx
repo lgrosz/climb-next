@@ -30,10 +30,13 @@ export default function Page() {
         [0.9, 0.6],
       ], 2
     );
-    const points = spline.sample();
-    const flatPoints = new Float32Array(points.flat());
 
-    // Create the buffer for the points
+    const points = spline.sample();
+    const controlPoints = spline.getControlPoints();
+    const flatPoints = new Float32Array(points.flat());
+    const flatControlPoints = new Float32Array(controlPoints.flat());
+
+    // Create the buffer for the B-spline points
     const vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
       console.error('ERROR creating buffer');
@@ -41,6 +44,14 @@ export default function Page() {
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.STATIC_DRAW);
+
+    const controlPointsBuffer = gl.createBuffer();
+    if (!controlPointsBuffer) {
+      console.error('ERROR creating control points buffer');
+      return;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatControlPoints, gl.STATIC_DRAW);
 
     // Vertex shader
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -87,14 +98,23 @@ export default function Page() {
 
     gl.useProgram(shaderProgram);
 
-    // Bind position attribute
+    // Bind position attribute for B-spline
     const positionAttributeLocation = gl.getAttribLocation(shaderProgram, 'a_position');
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionAttributeLocation);
 
-    // Clear the canvas and draw the B-spline as a line strip
+    // Draw B-spline curve
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.LINE_STRIP, 0, points.length);
+
+    // Bind position attribute for control points
+    gl.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionAttributeLocation);
+
+    // Draw control points as points
+    gl.drawArrays(gl.POINTS, 0, controlPoints.length);
 
   }, []);
 
