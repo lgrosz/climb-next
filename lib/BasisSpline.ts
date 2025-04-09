@@ -40,6 +40,7 @@ export function deBoor(
   return d[degree];
 }
 
+// TODO May need to make this immutable so I can better use it in React state hooks...
 export class BasisSpline {
   private control: [number, number][];
   private knots: number[];
