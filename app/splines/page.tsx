@@ -1,74 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { BasisSpline } from '@/lib/BasisSpline';
 import vertexShaderSource from "./spline.vert.glsl";
 import fragmentShaderSource from "./spline.frag.glsl";
-
-type Point = [number, number];
-
-// De Boor's algorithm for B-spline evaluation
-function deBoor(
-  t: number,
-  degree: number,
-  controlPoints: Point[],
-  knots: number[]
-): Point {
-  const n = controlPoints.length - 1;
-
-  // Find the knot span index `k`
-  let k = -1;
-  for (let i = degree; i <= n; i++) {
-    if (t >= knots[i] && t < knots[i + 1]) {
-      k = i;
-      break;
-    }
-  }
-  if (t === knots[knots.length - 1]) {
-    k = n;
-  }
-  if (k === -1) throw new Error(`t=${t} is out of bounds`);
-
-  // Copy affected control points
-  const d: Point[] = [];
-  for (let j = 0; j <= degree; j++) {
-    d[j] = [...controlPoints[k - degree + j]];
-  }
-
-  // De Boor iterations
-  for (let r = 1; r <= degree; r++) {
-    for (let j = degree; j >= r; j--) {
-      const i = k - degree + j;
-      const alpha =
-        (t - knots[i]) / (knots[i + degree - r + 1] - knots[i]) || 0;
-
-      d[j][0] = (1 - alpha) * d[j - 1][0] + alpha * d[j][0];
-      d[j][1] = (1 - alpha) * d[j - 1][1] + alpha * d[j][1];
-    }
-  }
-
-  return d[degree];
-}
-
-// Function to sample the B-spline curve at several points
-function sampleBSpline(
-  controlPoints: Point[],
-  knots: number[],
-  degree: number,
-  sampleCount: number = 100
-): Point[] {
-  const tMin = knots[degree];
-  const tMax = knots[knots.length - degree - 1];
-
-  const samples: Point[] = [];
-
-  for (let i = 0; i <= sampleCount; i++) {
-    const t = tMin + (tMax - tMin) * (i / sampleCount);
-    const pt = deBoor(t, degree, controlPoints, knots);
-    samples.push(pt);
-  }
-
-  return samples;
-}
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -86,23 +21,17 @@ export default function Page() {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Example control points, degree, and knot vector
-    const controlPoints: Point[] = [
-      [0.1, 0.7],
-      [0.3, 0.9],
-      [0.5, 0.5],
-      [0.7, 0.9],
-      [0.9, 0.6],
-    ];
-
-    const knots: number[] = [0, 0, 0, 1, 2, 3, 3, 3]; // Open knot vector
-    const degree = 2; // Quadratic B-spline
-
-    // Sample the B-spline curve
-    const splinePoints = sampleBSpline(controlPoints, knots, degree);
-
-    // Flatten spline points into a buffer
-    const flatPoints = new Float32Array(splinePoints.flat());
+    const spline = new BasisSpline(
+      [
+        [0.1, 0.7],
+        [0.3, 0.9],
+        [0.5, 0.5],
+        [0.7, 0.9],
+        [0.9, 0.6],
+      ], 2
+    );
+    const points = spline.sample();
+    const flatPoints = new Float32Array(points.flat());
 
     // Create the buffer for the points
     const vertexBuffer = gl.createBuffer();
@@ -165,7 +94,7 @@ export default function Page() {
 
     // Clear the canvas and draw the B-spline as a line strip
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.LINE_STRIP, 0, splinePoints.length);
+    gl.drawArrays(gl.LINE_STRIP, 0, points.length);
 
   }, []);
 
