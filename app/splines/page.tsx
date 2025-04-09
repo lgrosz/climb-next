@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import vertexShaderSource from "./spline.vert.glsl";
+import fragmentShaderSource from "./spline.frag.glsl";
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -35,12 +37,6 @@ export default function Page() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    const vertexShaderSource = `
-      attribute vec2 a_position;
-      void main() {
-        gl_Position = vec4(a_position, 0.0, 1.0);
-      }
-    `;
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShader) {
       console.error('ERROR creating vertex shader');
@@ -54,11 +50,6 @@ export default function Page() {
       return;
     }
 
-    const fragmentShaderSource = `
-      void main() {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // red color
-      }
-    `;
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     if (!fragmentShader) {
       console.error('ERROR creating fragment shader');
