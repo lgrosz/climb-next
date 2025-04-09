@@ -11,10 +11,13 @@
     "graphql-codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.3",
     "graphql": "^16.10.0",
     "next": "15.1.3",
+    "postcss": "^8.5.3",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "tailwindcss": "^4.1.3"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.5",
