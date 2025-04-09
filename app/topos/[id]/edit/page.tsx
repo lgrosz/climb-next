@@ -1,4 +1,4 @@
-import TopoEditor from "@/components/TopoEditor";
+import TopoEditor from "@/components/TopoEditor/TopoEditor";
 
 export default function Page() {
   return (
