@@ -2,8 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 import { BasisSpline } from '@/lib/BasisSpline';
-import vertexShaderSource from "./spline.vert.glsl";
-import fragmentShaderSource from "./spline.frag.glsl";
+import vertexShaderSource from './spline.vert.glsl';
+import fragmentShaderSource from './spline.frag.glsl';
+
+type Point = [number, number];
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -14,123 +16,157 @@ export default function Page() {
 
     const gl = canvas.getContext('webgl');
     if (!gl) {
-      alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+      alert('Unable to initialize WebGL. Your browser or machine may not support it.');
       return;
     }
 
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const spline = new BasisSpline(
-      [
-        [0.1, 0.7],
-        [0.3, 0.9],
-        [0.5, 0.5],
-        [0.7, 0.9],
-        [0.9, 0.6],
-      ], 2
-    );
+    let controlPoints: Point[] = [
+      [0.1, 0.7],
+      [0.3, 0.9],
+      [0.5, 0.5],
+      [0.7, 0.9],
+      [0.9, 0.6],
+    ];
 
-    const points = spline.sample();
-    const controlPoints = spline.getControlPoints();
-    const flatPoints = new Float32Array(points.flat());
-    const flatControlPoints = new Float32Array(controlPoints.flat());
+    const spline = new BasisSpline(controlPoints, 2);
 
-    // Create the buffer for the B-spline points
     const vertexBuffer = gl.createBuffer();
-    if (!vertexBuffer) {
-      console.error('ERROR creating buffer');
-      return;
-    }
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.STATIC_DRAW);
-
     const controlPointsBuffer = gl.createBuffer();
-    if (!controlPointsBuffer) {
-      console.error('ERROR creating control points buffer');
-      return;
-    }
-    gl.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatControlPoints, gl.STATIC_DRAW);
-
-    // Vertex shader
-    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    if (!vertexShader) {
-      console.error('ERROR creating vertex shader');
-      return;
-    }
-    gl.shaderSource(vertexShader, vertexShaderSource);
-    gl.compileShader(vertexShader);
-
-    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-      console.error('ERROR compiling vertex shader', gl.getShaderInfoLog(vertexShader));
+    if (!vertexBuffer || !controlPointsBuffer) {
+      console.error('ERROR creating buffers');
       return;
     }
 
-    // Fragment shader
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    if (!fragmentShader) {
-      console.error('ERROR creating fragment shader');
-      return;
-    }
-    gl.shaderSource(fragmentShader, fragmentShaderSource);
-    gl.compileShader(fragmentShader);
-
-    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-      console.error('ERROR compiling fragment shader', gl.getShaderInfoLog(fragmentShader));
-      return;
+    function updateBuffers(): void {
+      const points = spline.sample();
+      gl?.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(points.flat()), gl.STATIC_DRAW);
+      gl?.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
+      gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(controlPoints.flat()), gl.STATIC_DRAW);
     }
 
-    // Shader program
+    function compileShader(type: number, source: string): WebGLShader {
+      const shader = gl?.createShader(type);
+      if (!shader) throw new Error('Failed to create shader');
+      gl?.shaderSource(shader, source);
+      gl?.compileShader(shader);
+      if (!gl?.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const error = gl?.getShaderInfoLog(shader);
+        gl?.deleteShader(shader);
+        throw new Error(`Shader compile error: ${error}`);
+      }
+      return shader;
+    }
+
+    const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+
     const shaderProgram = gl.createProgram();
-    if (!shaderProgram) {
-      console.error('ERROR creating shader program');
-      return;
-    }
+    if (!shaderProgram) throw new Error('Failed to create shader program');
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
-
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      console.error('ERROR linking program', gl.getProgramInfoLog(shaderProgram));
-      return;
+      throw new Error(gl.getProgramInfoLog(shaderProgram) ?? 'Unknown program link error');
     }
-
     gl.useProgram(shaderProgram);
 
-    // Bind position attribute for B-spline
     const positionAttributeLocation = gl.getAttribLocation(shaderProgram, 'a_position');
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionAttributeLocation);
 
-    // Draw B-spline curve
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.LINE_STRIP, 0, points.length);
+    function drawScene(): void {
+      gl?.clear(gl.COLOR_BUFFER_BIT);
 
-    // Bind position attribute for control points
-    gl.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionAttributeLocation);
+      // Draw spline
+      const points = spline.sample();
+      gl?.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+      gl?.drawArrays(gl.LINE_STRIP, 0, points.length);
 
-    // Draw control points as points
-    gl.drawArrays(gl.POINTS, 0, controlPoints.length);
+      // Draw control points
+      gl?.bindBuffer(gl.ARRAY_BUFFER, controlPointsBuffer);
+      gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+      gl?.drawArrays(gl.POINTS, 0, controlPoints.length);
+      gl?.drawArrays(gl.LINE_STRIP, 0, controlPoints.length);
+    }
 
-    // Draw lines connecting control points
-    gl.drawArrays(gl.LINE_STRIP, 0, controlPoints.length);
+    updateBuffers();
+    drawScene();
 
+    // --- Dragging Logic ---
+
+    let isDragging = false;
+    let draggingIndex: number | null = null;
+
+    function getClipSpaceCoords(event: MouseEvent): Point {
+      if (!canvas) return [0, 0];
+      const rect = canvas.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
+      const y = -(((event.clientY - rect.top) / canvas.height) * 2 - 1);
+      return [x, y];
+    }
+
+    function getNearestControlPoint(pos: Point, threshold = 0.05): number | null {
+      for (let i = 0; i < controlPoints.length; i++) {
+        const [px, py] = controlPoints[i];
+        const dx = pos[0] - px;
+        const dy = pos[1] - py;
+        if (dx * dx + dy * dy < threshold * threshold) return i;
+      }
+      return null;
+    }
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const pos = getClipSpaceCoords(e);
+      const idx = getNearestControlPoint(pos);
+      if (idx !== null) {
+        draggingIndex = idx;
+        isDragging = true;
+        canvas.style.cursor = 'grabbing';
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || draggingIndex === null) return;
+      const pos = getClipSpaceCoords(e);
+      controlPoints[draggingIndex] = pos;
+      spline.setControlPoints(controlPoints);
+      updateBuffers();
+      drawScene();
+    };
+
+    const stopDragging = () => {
+      isDragging = false;
+      draggingIndex = null;
+      canvas.style.cursor = 'default';
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', stopDragging);
+    canvas.addEventListener('mouseleave', stopDragging);
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseup', stopDragging);
+      canvas.removeEventListener('mouseleave', stopDragging);
+    };
   }, []);
 
   return (
     <div>
-      <h1>WebGL B-Spline Example</h1>
+      <h1>Basis Spline Editor</h1>
       <canvas
         ref={canvasRef}
-        width="500"
-        height="500"
-        style={{ border: '1px solid black' }}
+        width={500}
+        height={500}
+        style={{ border: '1px solid black', cursor: 'default' }}
       />
     </div>
   );
-};
+}
 
