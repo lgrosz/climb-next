@@ -116,6 +116,9 @@ export default function Page() {
     // Draw control points as points
     gl.drawArrays(gl.POINTS, 0, controlPoints.length);
 
+    // Draw lines connecting control points
+    gl.drawArrays(gl.LINE_STRIP, 0, controlPoints.length);
+
   }, []);
 
   return (
