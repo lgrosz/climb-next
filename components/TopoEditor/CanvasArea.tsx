@@ -15,20 +15,23 @@ export default function CanvasArea() {
       return;
     }
 
-    // Basic vertex and fragment shaders
+    gl.clearColor(1, 1, 1, 1); // clear to white
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
     const vertexShaderSource = `
-    attribute vec2 a_position;
-    void main() {
-      // Convert from 0-1 space to clip space (-1 to +1)
-      gl_Position = vec4(a_position * 2.0 - 1.0, 0, 1);
-    }
+      attribute vec2 a_position;
+      void main() {
+        gl_Position = vec4(a_position * 2.0 - 1.0, 0, 1);
+        gl_PointSize = 6.0;
+      }
     `;
 
     const fragmentShaderSource = `
-    precision mediump float;
-    void main() {
-      gl_FragColor = vec4(0.2, 0.7, 0.9, 1); // cyan color
-    }
+      precision mediump float;
+      uniform vec4 u_color;
+      void main() {
+        gl_FragColor = u_color;
+      }
     `;
 
     function createShader(gl: WebGLRenderingContext, type: number, source: string) {
@@ -46,7 +49,6 @@ export default function CanvasArea() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)!;
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource)!;
 
-    // Create program
     const program = gl.createProgram()!;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
@@ -58,20 +60,25 @@ export default function CanvasArea() {
 
     gl.useProgram(program);
     const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+    const colorUniformLocation = gl.getUniformLocation(program, "u_color");
 
-    // Render each spline
+    function drawPoints(points: [number, number][], color: [number, number, number, number], mode: GLenum) {
+      const flat = new Float32Array(points.flat());
+      const buffer = gl?.createBuffer()!;
+      gl?.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl?.bufferData(gl.ARRAY_BUFFER, flat, gl.STATIC_DRAW);
+
+      gl?.enableVertexAttribArray(positionAttributeLocation);
+      gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+      gl?.uniform4fv(colorUniformLocation, color);
+      gl?.drawArrays(mode, 0, points.length);
+    }
+
     for (const spline of splines) {
-      const samples = spline.sample();
-      const positions = new Float32Array(samples.flat());
-
-      const buffer = gl.createBuffer()!;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-      gl.enableVertexAttribArray(positionAttributeLocation);
-      gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-
-      gl.drawArrays(gl.LINE_STRIP, 0, samples.length);
+      drawPoints(spline.sample(), [0.2, 0.7, 0.9, 1.0], gl.LINE_STRIP);  // spline: cyan
+      drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);      // control polygon: gray
+      drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);        // control points: red
     }
 
     gl.flush();
