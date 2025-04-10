@@ -102,7 +102,11 @@ export default function CanvasArea() {
 
       if (isActive) {
         drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);
-        drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);
+        drawPoints(spline.control, [1.0, 1.0, 0.0, 1.0], gl.POINTS);
+
+        // start and end
+        drawPoints([spline.control[0]], [0.0, 1.0, 0.0, 1.0], gl.POINTS);
+        drawPoints([spline.control[spline.control.length - 1]], [1.0, 0.0, 0.0, 1.0], gl.POINTS);
 
         if (draggedControlPointIndex !== null) {
           const selected = spline.control[draggedControlPointIndex];
