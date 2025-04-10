@@ -9,6 +9,23 @@ export default function CanvasArea() {
   const dragOffset = useRef<[number, number] | null>(null);
   const [draggedControlPointIndex, setDraggedControlPointIndex] = useState<number | null>(null);
 
+  function normalizeClientPoint(client: [number, number]): [number, number] | null {
+    const canvas = ref.current;
+    if (!canvas) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    const px = client[0] - rect.left;
+    const py = client[1] - rect.top;
+
+    const canvasWidth = rect.width;
+    const canvasHeight = rect.height;
+
+    // Normalize click coordinates to [0,1]
+    const normX = px / canvasWidth;
+    const normY = py / canvasHeight;
+    return [normX, 1 - normY];
+  }
+
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
@@ -99,16 +116,13 @@ export default function CanvasArea() {
       if (!canvas) return;
 
       const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
 
       const canvasWidth = rect.width;
       const canvasHeight = rect.height;
 
       // Normalize click coordinates to [0,1]
-      const normX = px / canvasWidth;
-      const normY = py / canvasHeight;
-      const clickNorm: [number, number] = [normX, 1 - normY]; // Flip y
+      const clickNorm = normalizeClientPoint([e.clientX, e.clientY]);
+      if (!clickNorm) return;
 
       if (activeSplineIndex === null) {
         // No spline is selected, so don't proceed with dragging
@@ -167,19 +181,8 @@ export default function CanvasArea() {
     function handleMouseMove(e: MouseEvent) {
       if (!canvas || !dragOffset.current || draggedControlPointIndex === null || activeSplineIndex === null) return;
 
-      const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-
-      const canvasWidth = rect.width;
-      const canvasHeight = rect.height;
-
-      const normX = px / canvasWidth;
-      const normY = py / canvasHeight;
-      const updatedControlPoint: [number, number] = [
-        normX - dragOffset.current[0],
-        1 - normY - dragOffset.current[1], // Flip y
-      ];
+      const updatedControlPoint = normalizeClientPoint([e.clientX, e.clientY]);
+      if (!updatedControlPoint) return;
 
       const activeSpline = splines[activeSplineIndex];
       const updatedControlPoints = [...activeSpline.control];
