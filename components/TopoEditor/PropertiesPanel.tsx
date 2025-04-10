@@ -15,7 +15,11 @@ export default function PropertiesPanel() {
   const addSpline = () => {
     setSplines({
       type: SplineReducerActionType.Add,
-      spline: new BasisSpline,
+      spline: new BasisSpline([
+        [0.25, 0.25],
+        [0.5, 0.5],
+        [0.75, 0.25],
+      ], 2),
     })
   }
 
