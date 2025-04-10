@@ -98,8 +98,11 @@ export default function CanvasArea() {
       const isActive = index === activeSplineIndex;
 
       drawPoints(spline.sample(), isActive ? [0, 0.6, 0, 1] : [0.2, 0.7, 0.9, 1.0], gl.LINE_STRIP);
-      drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);
-      drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);
+
+      if (isActive) {
+        drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);
+        drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);
+      }
     }
 
     gl.flush();
