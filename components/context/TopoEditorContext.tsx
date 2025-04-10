@@ -6,6 +6,8 @@ interface TopoEditorContextType {
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   splines: BasisSpline[],
   setSplines: React.ActionDispatch<[action: SplineReducerAction]>,
+  activeSplineIndex: number | null,
+  setActiveSplineIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const TopoEditorContext = createContext<TopoEditorContextType | undefined>(undefined);
@@ -63,6 +65,7 @@ function splinesReducer(state: BasisSpline[], action: SplineReducerAction) {
 export const TopoEditorProvider = ({ children }: TopoEditorProviderProps) => {
   const [title, setTitle] = useState("");
   const [splines, setSplines] = useReducer(splinesReducer, []);
+  const [activeSplineIndex, setActiveSplineIndex] = useState<number | null>(null);
 
   return (
     <TopoEditorContext.Provider
@@ -72,6 +75,8 @@ export const TopoEditorProvider = ({ children }: TopoEditorProviderProps) => {
           setTitle,
           splines,
           setSplines,
+          activeSplineIndex,
+          setActiveSplineIndex,
         }
       }
     >
