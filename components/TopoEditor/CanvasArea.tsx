@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useTopoEditor } from "../context/TopoEditorContext";
 
+const POINT_RADIUS_PX = 8;
+
 export default function CanvasArea() {
-  const { splines } = useTopoEditor();
+  const { splines, activeSplineIndex, setActiveSplineIndex } = useTopoEditor();
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -75,14 +77,61 @@ export default function CanvasArea() {
       gl?.drawArrays(mode, 0, points.length);
     }
 
-    for (const spline of splines) {
-      drawPoints(spline.sample(), [0.2, 0.7, 0.9, 1.0], gl.LINE_STRIP);  // spline: cyan
-      drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);      // control polygon: gray
-      drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);        // control points: red
+    for (const [index, spline] of splines.entries()) {
+      const isActive = index === activeSplineIndex;
+
+      drawPoints(spline.sample(), isActive ? [0, 0.6, 0, 1] : [0.2, 0.7, 0.9, 1.0], gl.LINE_STRIP);
+      drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);
+      drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);
     }
 
     gl.flush();
-  }, [splines]);
+  }, [splines, activeSplineIndex]);
+
+  // Handle click
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    function handleClick(e: MouseEvent) {
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+
+      const canvasWidth = rect.width;
+      const canvasHeight = rect.height;
+
+      // Normalize click coordinates to [0,1]
+      const normX = px / canvasWidth;
+      const normY = py / canvasHeight;
+      const clickNorm: [number, number] = [normX, 1 - normY]; // Flip y
+
+      let found: number | null = null;
+      const radiusNorm = POINT_RADIUS_PX / Math.min(canvasWidth, canvasHeight);
+
+      for (const [index, spline] of splines.entries()) {
+        for (const pt of spline.control) {
+          const dx = pt[0] - clickNorm[0];
+          const dy = pt[1] - clickNorm[1];
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < radiusNorm) {
+            found = index;
+            break;
+          }
+        }
+
+        if (found !== null) break;
+      }
+
+      setActiveSplineIndex(found);
+    }
+
+    canvas.addEventListener("click", handleClick);
+    return () => canvas.removeEventListener("click", handleClick);
+  }, [splines, activeSplineIndex]);
 
   return (
     <div className="flex-1 bg-gray-100 overflow-hidden relative">
