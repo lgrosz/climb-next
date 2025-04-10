@@ -5,6 +5,7 @@ export default function CanvasArea() {
   const { splines, activeSplineIndex, setActiveSplineIndex, setSplines } = useTopoEditor();
   const ref = useRef<HTMLCanvasElement | null>(null);
   const dragOffset = useRef<[number, number] | null>(null);
+  const wasDragging = useRef(false);
   const [draggedControlPointIndex, setDraggedControlPointIndex] = useState<number | null>(null);
 
   function normalizeClientPoint(client: [number, number]): [number, number] | null {
@@ -117,6 +118,8 @@ export default function CanvasArea() {
     function handleClick(e: MouseEvent) {
       if (!canvas) return;
 
+      if (wasDragging.current) return;
+
       const clickNorm = normalizeClientPoint([e.clientX, e.clientY]);
       if (!clickNorm) return;
 
@@ -139,6 +142,8 @@ export default function CanvasArea() {
     // selects control points
     function handleMouseDown(e: MouseEvent) {
       if (!canvas) return;
+
+      wasDragging.current = false;
 
       if (activeSplineIndex === null) return;
 
@@ -170,7 +175,11 @@ export default function CanvasArea() {
 
     // drag the active control point
     function handleMouseMove(e: MouseEvent) {
-      if (!canvas || !dragOffset.current || draggedControlPointIndex === null || activeSplineIndex === null) return;
+      if (!canvas) return;
+
+      wasDragging.current = true;
+
+      if (!dragOffset.current || draggedControlPointIndex === null || activeSplineIndex === null) return;
 
       let updatedControlPoint = normalizeClientPoint([e.clientX, e.clientY]);
       if (!updatedControlPoint) return;
