@@ -1,11 +1,13 @@
-import { useEffect, useRef } from "react";
-import { useTopoEditor } from "../context/TopoEditorContext";
+import { useEffect, useRef, useState } from "react";
+import { SplineReducerActionType, useTopoEditor } from "../context/TopoEditorContext";
 
 const POINT_RADIUS_PX = 8;
 
 export default function CanvasArea() {
-  const { splines, activeSplineIndex, setActiveSplineIndex } = useTopoEditor();
+  const { splines, activeSplineIndex, setActiveSplineIndex, setSplines } = useTopoEditor();
   const ref = useRef<HTMLCanvasElement | null>(null);
+  const dragOffset = useRef<[number, number] | null>(null);
+  const [draggedControlPointIndex, setDraggedControlPointIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -88,12 +90,12 @@ export default function CanvasArea() {
     gl.flush();
   }, [splines, activeSplineIndex]);
 
-  // Handle click
+  // Handle mouse down, move, and up for dragging control points
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
 
-    function handleClick(e: MouseEvent) {
+    function handleMouseDown(e: MouseEvent) {
       if (!canvas) return;
 
       const rect = canvas.getBoundingClientRect();
@@ -108,30 +110,106 @@ export default function CanvasArea() {
       const normY = py / canvasHeight;
       const clickNorm: [number, number] = [normX, 1 - normY]; // Flip y
 
-      let found: number | null = null;
-      const radiusNorm = POINT_RADIUS_PX / Math.min(canvasWidth, canvasHeight);
+      if (activeSplineIndex === null) {
+        // No spline is selected, so don't proceed with dragging
+        let foundSpline: number | null = null;
+        const radiusNorm = POINT_RADIUS_PX / Math.min(canvasWidth, canvasHeight);
 
-      for (const [index, spline] of splines.entries()) {
-        for (const pt of spline.control) {
+        // Check all splines to see if the click is inside any control point
+        for (const [index, spline] of splines.entries()) {
+          for (const pt of spline.control) {
+            const dx = pt[0] - clickNorm[0];
+            const dy = pt[1] - clickNorm[1];
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < radiusNorm) {
+              foundSpline = index;
+              break;
+            }
+          }
+          if (foundSpline !== null) break;
+        }
+
+        if (foundSpline !== null) {
+          // Select the spline when clicked on a control point
+          setActiveSplineIndex(foundSpline);
+        }
+      } else {
+        // If a spline is already selected, check if we are clicking on a control point
+        const activeSpline = splines[activeSplineIndex];
+        let foundPoint: number | null = null;
+        const radiusNorm = POINT_RADIUS_PX / Math.min(canvasWidth, canvasHeight);
+
+        // Only check control points of the active spline
+        for (const [pointIndex, pt] of activeSpline.control.entries()) {
           const dx = pt[0] - clickNorm[0];
           const dy = pt[1] - clickNorm[1];
           const dist = Math.sqrt(dx * dx + dy * dy);
-
           if (dist < radiusNorm) {
-            found = index;
+            foundPoint = pointIndex;
             break;
           }
         }
 
-        if (found !== null) break;
+        if (foundPoint !== null) {
+          // Start dragging
+          dragOffset.current = [
+            clickNorm[0] - activeSpline.control[foundPoint][0],
+            clickNorm[1] - activeSpline.control[foundPoint][1],
+          ];
+          setDraggedControlPointIndex(foundPoint); // Track the dragged control point index
+        } else {
+          // Deselect the spline if clicked outside of its control points
+          setActiveSplineIndex(null);
+        }
       }
-
-      setActiveSplineIndex(found);
     }
 
-    canvas.addEventListener("click", handleClick);
-    return () => canvas.removeEventListener("click", handleClick);
-  }, [splines, activeSplineIndex]);
+    function handleMouseMove(e: MouseEvent) {
+      if (!canvas || !dragOffset.current || draggedControlPointIndex === null || activeSplineIndex === null) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+
+      const canvasWidth = rect.width;
+      const canvasHeight = rect.height;
+
+      const normX = px / canvasWidth;
+      const normY = py / canvasHeight;
+      const updatedControlPoint: [number, number] = [
+        normX - dragOffset.current[0],
+        1 - normY - dragOffset.current[1], // Flip y
+      ];
+
+      const activeSpline = splines[activeSplineIndex];
+      const updatedControlPoints = [...activeSpline.control];
+      updatedControlPoints[draggedControlPointIndex] = updatedControlPoint;
+
+      // Create a new spline with the updated control points
+      const updatedSpline = activeSpline.withControlPoints(updatedControlPoints);
+
+      setSplines({
+        type: SplineReducerActionType.Update,
+        index: activeSplineIndex,
+        spline: updatedSpline,
+      });
+    }
+
+    function handleMouseUp() {
+      dragOffset.current = null;
+      setDraggedControlPointIndex(null); // Reset the dragged control point index
+    }
+
+    canvas.addEventListener("mousedown", handleMouseDown);
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      canvas.removeEventListener("mousedown", handleMouseDown);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [splines, activeSplineIndex, draggedControlPointIndex, setSplines, setActiveSplineIndex]);
 
   return (
     <div className="flex-1 bg-gray-100 overflow-hidden relative">
