@@ -114,5 +114,24 @@ export class BasisSpline {
     }
     return new BasisSpline(this.control, this.degree, knots);
   }
+
+  isPointOnSpline(target: [number, number], tolerance: number = 1e-6): boolean {
+    const samples = this.sample();
+
+    let closestDistance: number | null = null;
+
+    for (const sample of samples) {
+      const distance = Math.sqrt(Math.pow(sample[0] - target[0], 2) + Math.pow(sample[1] - target[1], 2));
+      if (closestDistance === null || distance < closestDistance) {
+        closestDistance = distance;
+      }
+
+      if (distance <= tolerance) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }
 
