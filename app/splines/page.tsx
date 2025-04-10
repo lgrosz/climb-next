@@ -31,7 +31,7 @@ export default function Page() {
       [0.9, 0.6],
     ];
 
-    const spline = new BasisSpline(controlPoints, 2);
+    let spline = new BasisSpline(controlPoints, 2);
 
     const vertexBuffer = gl.createBuffer();
     const controlPointsBuffer = gl.createBuffer();
@@ -133,7 +133,7 @@ export default function Page() {
       if (!isDragging || draggingIndex === null) return;
       const pos = getClipSpaceCoords(e);
       controlPoints[draggingIndex] = pos;
-      spline.setControlPoints(controlPoints);
+      spline = spline.withControlPoints(controlPoints);
       updateBuffers();
       drawScene();
     };
