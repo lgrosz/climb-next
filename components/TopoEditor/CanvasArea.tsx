@@ -103,11 +103,16 @@ export default function CanvasArea() {
       if (isActive) {
         drawPoints(spline.control, [0.5, 0.5, 0.5, 1.0], gl.LINE_STRIP);
         drawPoints(spline.control, [1.0, 0.0, 0.0, 1.0], gl.POINTS);
+
+        if (draggedControlPointIndex !== null) {
+          const selected = spline.control[draggedControlPointIndex];
+          drawPoints([selected], [1.0, 0.5, 0.0, 1.0], gl.POINTS);
+        }
       }
     }
 
     gl.flush();
-  }, [splines, activeSplineIndex]);
+  }, [splines, activeSplineIndex, draggedControlPointIndex]);
 
   // Handle mouse down, move, and up for dragging control points
   useEffect(() => {
