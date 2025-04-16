@@ -1,7 +1,13 @@
 import { createContext, Dispatch, useContext } from "react";
 
+interface Climb {
+  id: string,
+  name: string,
+}
+
 export interface TopoWorld {
   title: string,
+  climbs: Climb[],
 }
 
 interface TopoWorldContextType {
