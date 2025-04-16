@@ -7,6 +7,7 @@ export default function ClimbProperties({ id }: { id: string }) {
   const { world, setWorld } = useTopoWorld();
 
   const name = world.climbs.find(climb => climb.id === id)?.name;
+  const geometries = world.climbs.find(climb => climb.id === id)?.geometries;
 
   const remove = useCallback(() => {
     if (confirm("Remove climb?")) {
@@ -24,6 +25,14 @@ export default function ClimbProperties({ id }: { id: string }) {
         <button onClick={remove}>
           Remove
         </button>
+      </div>
+      <h5>Geometries</h5>
+      <div>
+      {geometries?.map((_, i) => (
+        <div key={`climb-${id}-geom-${i}`}>
+          Spline {i + 1}
+        </div>
+      ))}
       </div>
     </div>
   );

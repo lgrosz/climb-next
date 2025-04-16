@@ -22,6 +22,12 @@ export default function TopoEditor(
     climbs: [],
   });
 
+  // TODO I can either define the interaction between the session and the world
+  // here, or I can do so within the session by defining a custom "provider"
+  // component. Doing so would reduce the overhead of creating another
+  // World->Session combination down the line, but could mask the granularity of
+  // doing so based on the context they're used.
+
   return (
     <TopoWorldContext.Provider
       value={{

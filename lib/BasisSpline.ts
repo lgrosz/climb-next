@@ -1,3 +1,45 @@
+export function deBoor(
+  t: number,
+  degree: number,
+  controlPoints: [number, number][],
+  knots: number[]
+): [number, number] {
+  const n = controlPoints.length - 1;
+
+  // Find the knot span index `k`
+  let k = -1;
+  for (let i = degree; i <= n; i++) {
+    if (t >= knots[i] && t < knots[i + 1]) {
+      k = i;
+      break;
+    }
+  }
+  if (t === knots[knots.length - 1]) {
+    k = n;
+  }
+  if (k === -1) throw new Error(`t=${t} is out of bounds`);
+
+  // Copy affected control points
+  const d: [number, number][] = [];
+  for (let j = 0; j <= degree; j++) {
+    d[j] = [...controlPoints[k - degree + j]];
+  }
+
+  // De Boor iterations
+  for (let r = 1; r <= degree; r++) {
+    for (let j = degree; j >= r; j--) {
+      const i = k - degree + j;
+      const alpha =
+        (t - knots[i]) / (knots[i + degree - r + 1] - knots[i]) || 0;
+
+      d[j][0] = (1 - alpha) * d[j - 1][0] + alpha * d[j][0];
+      d[j][1] = (1 - alpha) * d[j - 1][1] + alpha * d[j][1];
+    }
+  }
+
+  return d[degree];
+}
+
 export class BasisSpline {
   readonly control: [number, number][];
   readonly knots: number[];
@@ -25,5 +67,19 @@ export class BasisSpline {
     const left = Array(k).fill(inner[0]);
     const right = Array(k).fill(inner[inner.length - 1]);
     return [...left, ...inner, ...right];
+  }
+
+  sample(f = deBoor, n: number = 100): [number, number][] {
+    const tMin = this.knots[this.degree];
+    const tMax = this.knots[this.knots.length - this.degree - 1];
+    const samples: [number, number][] = [];
+
+    for (let i = 0; i <= n; i++) {
+      const t = tMin + (tMax - tMin) * (i / n);
+      const pt = f(t, this.degree, this.control, this.knots);
+      samples.push(pt);
+    }
+
+    return samples;
   }
 }

@@ -1,8 +1,13 @@
+import { BasisSpline } from "@/lib/BasisSpline";
 import { createContext, Dispatch, useContext } from "react";
+
+type Geometry = 
+  | BasisSpline;
 
 interface Climb {
   id: string,
   name: string,
+  geometries: Geometry[],
 }
 
 export interface TopoWorld {

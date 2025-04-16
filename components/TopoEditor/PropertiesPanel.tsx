@@ -25,7 +25,7 @@ export default function PropertiesPanel() {
             const climbId = formData.get("climb");
             const climb = availableClimbs.find((c) => c.id === climbId);
             if (!climb) return;
-            setWorld({ ...world, climbs: [...world.climbs, { ...climb } ] })
+            setWorld({ ...world, climbs: [...world.climbs, { ...climb, geometries: [] } ] })
           }}
         >
           <select name="climb">
