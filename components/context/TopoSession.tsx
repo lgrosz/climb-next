@@ -1,4 +1,5 @@
-import { createContext, useContext } from "react";
+import { CreateSplineTool } from "@/lib/tools";
+import { createContext, Dispatch, SetStateAction, useContext } from "react";
 
 interface Climb {
   id: string,
@@ -10,6 +11,16 @@ interface TopoSessionContextType {
    * Climbs that are available in the session context
    */
   availableClimbs: Climb[],
+
+  /**
+   * The active tool
+   */
+  tool: CreateSplineTool | null,
+
+  /**
+   * Set the active tool
+   */
+  setTool: Dispatch<SetStateAction<CreateSplineTool | null>>;
 }
 
 export const TopoSessionContext = createContext<TopoSessionContextType | undefined>(undefined);

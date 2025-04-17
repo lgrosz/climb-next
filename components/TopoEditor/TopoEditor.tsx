@@ -6,6 +6,7 @@ import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
 import { useState } from 'react';
 import { TopoSessionContext } from '../context/TopoSession';
+import { CreateSplineTool } from '@/lib/tools';
 
 export default function TopoEditor(
   {
@@ -22,6 +23,8 @@ export default function TopoEditor(
     climbs: [],
   });
 
+  const [tool, setTool] = useState<CreateSplineTool | null>(null);
+
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
   // component. Doing so would reduce the overhead of creating another
@@ -37,6 +40,8 @@ export default function TopoEditor(
       <TopoSessionContext.Provider
         value={{
           availableClimbs,
+          tool,
+          setTool,
         }}>
         <div className="w-full h-full flex flex-col bg-white">
           <Header />
