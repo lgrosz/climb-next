@@ -1,5 +1,5 @@
 import { BasisSpline } from "@/lib/BasisSpline";
-import { createContext, Dispatch, useContext } from "react";
+import { createContext, Dispatch, SetStateAction, useContext } from "react";
 
 type Geometry = 
   | BasisSpline;
@@ -17,7 +17,7 @@ export interface TopoWorld {
 
 interface TopoWorldContextType {
   world: TopoWorld,
-  setWorld: Dispatch<TopoWorld>,
+  setWorld: Dispatch<SetStateAction<TopoWorld>>,
 }
 
 export const TopoWorldContext = createContext<TopoWorldContextType | undefined>(undefined);
