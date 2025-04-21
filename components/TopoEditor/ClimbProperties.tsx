@@ -1,10 +1,9 @@
 'use client';
 
-import { CreateSplineTool } from "@/lib/tools";
+import { CreateSplineTool, NewGeometryEvent } from "@/lib/tools";
 import { useTopoSession } from "../context/TopoSession";
 import { useTopoWorld } from "../context/TopoWorld";
 import { useCallback, useEffect, useRef } from "react";
-import { BasisSpline } from "@/lib/BasisSpline";
 
 export default function ClimbProperties({ id }: { id: string }) {
   const { world, setWorld } = useTopoWorld();
@@ -14,7 +13,7 @@ export default function ClimbProperties({ id }: { id: string }) {
   const name = world.climbs.find(climb => climb.id === id)?.name;
   const geometries = world.climbs.find(climb => climb.id === id)?.geometries;
 
-  const addSplineGeometry = useCallback((spline: BasisSpline) => {
+  const addSplineGeometry = useCallback((event: NewGeometryEvent) => {
     setWorld(prev => ({
       ...prev,
       climbs: prev.climbs.map(climb => {
@@ -22,7 +21,7 @@ export default function ClimbProperties({ id }: { id: string }) {
 
         return {
           ...climb,
-          geometries: [...climb.geometries, spline],
+          geometries: [...climb.geometries, event.geometry],
         };
       }),
     }));
@@ -30,10 +29,10 @@ export default function ClimbProperties({ id }: { id: string }) {
 
   useEffect(() => {
     const tool = addSplineTool.current;
-    tool.subscribe(addSplineGeometry);
+    tool.subscribe("newgeometry", addSplineGeometry);
 
     return () => {
-      tool.unsubscribe(addSplineGeometry);
+      tool.unsubscribe("newgeometry", addSplineGeometry);
     }
   }, [addSplineGeometry]);
 
