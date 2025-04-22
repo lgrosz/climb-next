@@ -18,10 +18,18 @@ export interface WorldEvent {
 type Listener<T> = (event: T) => void;
 
 export class CreateSplineTool {
-  private points: [number, number][] = []
+  private _points: [number, number][] = []
   private listeners: {
     [K in keyof EventMap]?: Set<Listener<EventMap[K]>>
   } = {};
+
+  private set points(list: [number, number][]) {
+    this._points = list;
+  }
+
+  private get points() {
+    return this._points;
+  }
 
   handle(e: WorldEvent) {
     switch (e.type) {
