@@ -3,6 +3,7 @@ import { BasisSpline } from "@/lib/BasisSpline";
 import { useTopoWorld } from "../context/TopoWorld";
 import { useTopoSession } from "../context/TopoSession";
 import { WorldEvent } from "@/lib/tools";
+import useTool from "@/hooks/useTool";
 
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
@@ -32,6 +33,10 @@ const draw = {
 }
 
 const style = {
+  frame: function(ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = "#0000ff";
+    ctx.lineWidth = 2;
+  },
   geometry: {
     spline: {
       fixed: function(ctx: CanvasRenderingContext2D) {
@@ -54,6 +59,7 @@ const style = {
 export default function CanvasArea() {
   const { world } = useTopoWorld();
   const { tool } = useTopoSession();
+  const { data } = useTool(tool);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
 
@@ -83,6 +89,22 @@ export default function CanvasArea() {
     return () => observer.disconnect();
   }, [ref]);
 
+  const renderToolOverlay = useCallback((ctx: CanvasRenderingContext2D) => {
+    ctx.save();
+
+    if (data) {
+      // TODO translate date from-world to context
+      style.frame(ctx);
+      draw.line(ctx, data);
+
+      if (data.length > 2) {
+        draw.spline(ctx, new BasisSpline(data, 2));
+      }
+    }
+
+    ctx.restore();
+  }, [data]);
+
   // Render method
   useEffect(() => {
     const canvas = ref.current;
@@ -105,7 +127,10 @@ export default function CanvasArea() {
         ctx.restore();
       }
     }
-  }, [world.climbs]);
+
+    renderToolOverlay(ctx);
+
+  }, [world.climbs, renderToolOverlay]);
 
   const toWorld = useCallback((e: MouseEvent): WorldEvent | null => {
     const validTypes: WorldEvent["type"][] = ["click", "dblclick", "contextmenu"];

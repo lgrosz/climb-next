@@ -5,8 +5,14 @@ export interface NewGeometryEvent {
   geometry: BasisSpline
 }
 
+export interface DataEvent {
+  type: "data"
+  data: [number, number][]
+}
+
 interface EventMap {
   "newgeometry": NewGeometryEvent
+  "data": DataEvent
 }
 
 export interface WorldEvent {
@@ -25,6 +31,7 @@ export class CreateSplineTool {
 
   private set points(list: [number, number][]) {
     this._points = list;
+    this.publish("data", { type: "data", data: list });
   }
 
   private get points() {
@@ -76,7 +83,8 @@ export class CreateSplineTool {
 
   subscribe<K extends keyof EventMap>(type: K, handler: Listener<EventMap[K]>) {
     if (!this.listeners[type]) {
-      this.listeners[type] = new Set();
+      // the compiler cannot see that this is okay, so assert
+      this.listeners[type] = new Set as never;
     }
 
     this.listeners[type].add(handler);
