@@ -16,7 +16,7 @@ interface EventMap {
 }
 
 export interface WorldEvent {
-  type: "click" | "dblclick" | "contextmenu"
+  type: "click" | "dblclick" | "contextmenu" | "mousemove"
   x: number
   y: number
 }
@@ -46,6 +46,8 @@ export class CreateSplineTool {
         return this.doubleClick(e);
       case "contextmenu":
         return this.contextMenu(e);
+      case "mousemove":
+        return this.mouseMove(e);
       default:
         return false;
     }
@@ -66,6 +68,15 @@ export class CreateSplineTool {
   private contextMenu(_: WorldEvent) {
     if (this.complete()) {
       this.points = [];
+      return true;
+    }
+
+    return false;
+  }
+
+  private mouseMove(e: WorldEvent) {
+    if (this.points.length) {
+      this.publish("data", { type: "data", data: [...this.points, [e.x, e.y]] });
       return true;
     }
 

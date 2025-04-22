@@ -133,7 +133,7 @@ export default function CanvasArea() {
   }, [world.climbs, renderToolOverlay]);
 
   const toWorld = useCallback((e: MouseEvent): WorldEvent | null => {
-    const validTypes: WorldEvent["type"][] = ["click", "dblclick", "contextmenu"];
+    const validTypes: WorldEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
 
     if (!validTypes.includes(e.type as WorldEvent["type"])) {
       return null;
@@ -164,11 +164,13 @@ export default function CanvasArea() {
     canvas.addEventListener("click", handle);
     canvas.addEventListener("dblclick", handle);
     canvas.addEventListener("contextmenu", handle);
+    canvas.addEventListener("mousemove", handle);
 
     return () => {
       canvas.removeEventListener("click", handle);
       canvas.removeEventListener("dblclick", handle);
       canvas.removeEventListener("contextmenu", handle);
+      canvas.removeEventListener("mousemove", handle);
     };
   }, [tool, toWorld]);
 
