@@ -16,14 +16,19 @@ const draw = {
       points = spline.sample();
     }
 
+    draw.line(ctx, points);
+  },
+  line: function(ctx: CanvasRenderingContext2D, line: [number, number][]) {
+    if (line.length < 1) return;
+
     ctx.beginPath();
-    ctx.moveTo(points[0][0], points[0][1]);
-    for (const [x, y] of points.slice(1)) {
+    ctx.moveTo(line[0][0], line[0][1]);
+    for (const [x, y] of line.slice(1)) {
       ctx.lineTo(x, y);
     }
 
     ctx.stroke();
-  },
+  }
 }
 
 const style = {
