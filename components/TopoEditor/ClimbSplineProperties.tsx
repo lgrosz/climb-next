@@ -45,6 +45,9 @@ export default function ClimbSplineProperties({
           Remove
         </button>
       </div>
+      <div className="space-y-1 text-sm font-medium">
+        Degree {spline.degree}
+      </div>
     </div>
   );
 }
