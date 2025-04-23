@@ -4,6 +4,7 @@ import { CreateSplineTool, NewGeometryEvent } from "@/lib/tools";
 import { useTopoSession } from "../context/TopoSession";
 import { useTopoWorld } from "../context/TopoWorld";
 import { useCallback, useEffect, useRef } from "react";
+import ClimbSplineProperties from "./ClimbSplineProperties";
 
 export default function ClimbProperties({ id }: { id: string }) {
   const { world, setWorld } = useTopoWorld();
@@ -56,9 +57,11 @@ export default function ClimbProperties({ id }: { id: string }) {
       <h5>Geometries</h5>
       <div>
       {geometries?.map((_, i) => (
-        <div key={`climb-${id}-geom-${i}`}>
-          Spline {i + 1}
-        </div>
+        <ClimbSplineProperties
+          key={`climb-${id}-geom-${i}`}
+          climbId={id}
+          index={i}
+        />
       ))}
       </div>
       <button
