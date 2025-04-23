@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useTopoWorld } from "../context/TopoWorld";
 
 export default function ClimbSplineProperties({
@@ -9,7 +10,26 @@ export default function ClimbSplineProperties({
   climbId: string,
   index: number,
 }) {
-  const { world } = useTopoWorld();
+  const { world, setWorld } = useTopoWorld();
+
+  const remove = useCallback(() => {
+    if (confirm("Remove geometry?")) {
+      setWorld({
+        ...world,
+        climbs:world.climbs.map(climb => {
+          if (climb.id !== climbId) return climb;
+
+          return {
+            ...climb,
+            geometries: [
+              ...climb.geometries.slice(0, index),
+              ...climb.geometries.slice(index + 1),
+            ]
+          }
+        }),
+      });
+    }
+  }, [world, setWorld, climbId, index]);
 
   const climb = world.climbs.find(climb => climb.id === climbId);
   if (!climb) return;
@@ -19,7 +39,12 @@ export default function ClimbSplineProperties({
 
   return (
     <div>
-      <h6>Spline { index + 1 }</h6>
+      <div className="flex items-center gap-2">
+        <h6>Spline { index + 1 }</h6>
+        <button onClick={remove}>
+          Remove
+        </button>
+      </div>
     </div>
   );
 }
