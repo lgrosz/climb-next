@@ -48,6 +48,10 @@ export default function ClimbSplineProperties({
       <div className="space-y-1 text-sm font-medium">
         Degree {spline.degree}
       </div>
+      <div className="space-y-1 text-sm">
+        <div className="font-medium">Knots</div>
+        <div className="break-all">{spline.knots.join(', ')}</div>
+      </div>
     </div>
   );
 }
