@@ -82,4 +82,32 @@ export class BasisSpline {
 
     return samples;
   }
+
+  isOpen() {
+    const left = this.knots[0];
+    const right = this.knots[this.knots.length - 1];
+    const order = this.degree + 1;
+
+    return (
+      this.knots.slice(0, order).every(k => k === left) &&
+      this.knots.slice(-order).every(k => k === right)
+    );
+  }
+
+  isUniform() {
+    const innerStart = this.degree;
+    const innerEnd = this.knots.length - this.degree - 1;
+
+    if (innerEnd <= innerStart) return true; // Too short to tell
+
+    const delta = this.knots[innerStart + 1] - this.knots[innerStart];
+
+    for (let i = innerStart + 1; i <= innerEnd; i++) {
+      if (this.knots[i] - this.knots[i - 1] !== delta) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }

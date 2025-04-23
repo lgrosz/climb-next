@@ -28,4 +28,50 @@ describe("Basis Splines", () => {
       [0, 0, 0, 1, 2, 2, 2]
     )
   });
+  test('Is Uniform', () => {
+    expect(
+      new BasisSpline([
+        [0, 0], // these don't matter
+        [1, 1],
+        [2, 1],
+        [3, 0],
+      ], 2, [0, 0, 0, 1, 2, 2, 2]).isUniform()
+    ).toBe(
+      true
+    )
+
+    expect(
+      new BasisSpline([
+        [0, 0], // these don't matter
+        [1, 1],
+        [2, 1],
+        [3, 0],
+      ], 2, [0, 0, 0, 0.5, 2, 2, 2]).isUniform()
+    ).toBe(
+      false
+    )
+  });
+  test('Is Open', () => {
+    expect(
+      new BasisSpline([
+        [0, 0], // these don't matter
+        [1, 1],
+        [2, 1],
+        [3, 0],
+      ], 2, [0, 0, 0, 1, 2, 2, 2]).isOpen()
+    ).toBe(
+      true
+    )
+
+    expect(
+      new BasisSpline([
+        [0, 0], // these don't matter
+        [1, 1],
+        [2, 1],
+        [3, 0],
+      ], 2, [0, 0, 1, 1, 2, 2, 2]).isOpen()
+    ).toBe(
+      false
+    )
+  });
 });
