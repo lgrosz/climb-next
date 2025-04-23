@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useTopoWorld } from "../context/TopoWorld";
+import { BasisSpline } from "@/lib/BasisSpline";
 
 export default function ClimbSplineProperties({
   climbId,
@@ -31,6 +32,37 @@ export default function ClimbSplineProperties({
     }
   }, [world, setWorld, climbId, index]);
 
+  const updateDegree = useCallback((degree: number) => {
+    const climb = world.climbs.find(climb => climb.id === climbId);
+    const spline = climb?.geometries.at(index);
+
+    if (!spline) return;
+
+    let updated;
+    try {
+      updated = new BasisSpline(spline.control, degree);
+    } catch {
+      return;
+    }
+
+    setWorld({
+      ...world,
+      climbs: world.climbs.map(climb => {
+        if (climb.id !== climbId) return climb;
+
+        return {
+          ...climb,
+          geometries: [
+            ...climb.geometries.slice(0, index),
+            updated,
+            ...climb.geometries.slice(index + 1),
+          ]
+        }
+      }),
+    })
+
+  }, [climbId, index, world, setWorld]);
+
   const climb = world.climbs.find(climb => climb.id === climbId);
   if (!climb) return;
 
@@ -45,8 +77,16 @@ export default function ClimbSplineProperties({
           Remove
         </button>
       </div>
-      <div className="space-y-1 text-sm font-medium">
-        Degree {spline.degree}
+      <div className="flex items-center space-x-2">
+        <span className="text-sm">Degree</span>
+        <input
+          type="number"
+          className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
+          value={spline.degree}
+          min={1}
+          max={spline.control.length - 1}
+          onChange={(e) => updateDegree(parseInt(e.target.value))}
+        />
       </div>
       <div className="space-y-1 text-sm">
         <div className="font-medium">Knots</div>
