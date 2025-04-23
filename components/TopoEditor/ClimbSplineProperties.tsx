@@ -51,6 +51,18 @@ export default function ClimbSplineProperties({
       <div className="space-y-1 text-sm">
         <div className="font-medium">Knots</div>
         <div className="break-all">{spline.knots.join(', ')}</div>
+        <div className="flex items-center gap-2 mt-2">
+          <span>Open:</span>
+          <span>
+            {spline.isOpen() ? 'Yes' : 'No'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>Uniform:</span>
+          <span>
+            {spline.isUniform() ? 'Yes' : 'No'}
+          </span>
+        </div>
       </div>
     </div>
   );
