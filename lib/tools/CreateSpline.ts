@@ -18,11 +18,18 @@ interface EventMap {
 
 type Listener<T> = (event: T) => void;
 
+type SplineHandler = (spline: BasisSpline) => void;
+
 export class CreateSplineTool {
+  private onComplete?: SplineHandler
   private _points: [number, number][] = []
   private listeners: {
     [K in keyof EventMap]?: Set<Listener<EventMap[K]>>
   } = {};
+
+  constructor(handler?: SplineHandler) {
+    this.onComplete = handler;
+  }
 
   private set points(list: [number, number][]) {
     this._points = list;
@@ -102,10 +109,13 @@ export class CreateSplineTool {
 
   private complete() {
     if (this.points.length > 1) {
+      const spline = new BasisSpline(this.points, this.points.length > 2 ? 2 : 1);
       this.publish("newgeometry", {
         type: "newgeometry",
-        geometry: new BasisSpline(this.points, this.points.length > 2 ? 2 : 1)
+        geometry: spline,
       });
+
+      this.onComplete?.(spline)
 
       return true;
     }
