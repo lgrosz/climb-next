@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { BasisSpline } from "@/lib/BasisSpline";
 import { useTopoWorld } from "../context/TopoWorld";
-import { useTopoSession } from "../context/TopoSession";
-import { WorldEvent } from "@/lib/tools";
+import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 
 const draw = {
@@ -58,7 +57,7 @@ const style = {
 
 export default function CanvasArea() {
   const { world } = useTopoWorld();
-  const { tool } = useTopoSession();
+  const { tool, dispatch } = useTopoSession();
   const { data } = useTool(tool);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -132,15 +131,15 @@ export default function CanvasArea() {
 
   }, [world.climbs, renderToolOverlay]);
 
-  const toWorld = useCallback((e: MouseEvent): WorldEvent | null => {
-    const validTypes: WorldEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
+  const toSession = useCallback((e: MouseEvent): SessionEvent | null => {
+    const validTypes: SessionEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
 
-    if (!validTypes.includes(e.type as WorldEvent["type"])) {
+    if (!validTypes.includes(e.type as SessionEvent["type"])) {
       return null;
     }
 
     return {
-      type: e.type as WorldEvent["type"],
+      type: e.type as SessionEvent["type"],
       x: e.offsetX,
       y: e.offsetY,
     };
@@ -151,12 +150,10 @@ export default function CanvasArea() {
     if (!canvas) return;
 
     const handle = (e: MouseEvent) => {
-      const worldEvent = toWorld(e);
+      const worldEvent = toSession(e);
       if (!worldEvent) return;
 
-      const handled = tool?.handle?.(worldEvent);
-
-      if (handled) {
+      if (dispatch(worldEvent)) {
         e.preventDefault();
       }
     };
@@ -172,7 +169,7 @@ export default function CanvasArea() {
       canvas.removeEventListener("contextmenu", handle);
       canvas.removeEventListener("mousemove", handle);
     };
-  }, [tool, toWorld]);
+  }, [toSession, dispatch]);
 
   return (
     <div className="flex-1 bg-gray-100 overflow-hidden relative">

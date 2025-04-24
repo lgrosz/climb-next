@@ -4,8 +4,8 @@ import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
-import { useState } from 'react';
-import { TopoSessionContext } from '../context/TopoSession';
+import { useCallback, useState } from 'react';
+import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
 import { CreateSplineTool } from '@/lib/tools';
 
 export default function TopoEditor(
@@ -25,6 +25,14 @@ export default function TopoEditor(
 
   const [tool, setTool] = useState<CreateSplineTool | null>(null);
 
+  const dispatch = useCallback((e: SessionEvent) => {
+    if (tool?.handle(e)) {
+      return true;
+    }
+
+    return false;
+  }, [tool]);
+
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
   // component. Doing so would reduce the overhead of creating another
@@ -42,6 +50,7 @@ export default function TopoEditor(
           availableClimbs,
           tool,
           setTool,
+          dispatch,
         }}>
         <div className="w-full h-full flex flex-col bg-white">
           <Header />

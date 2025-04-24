@@ -1,3 +1,4 @@
+import { SessionEvent } from "@/components/context/TopoSession";
 import { BasisSpline } from "../BasisSpline";
 
 export interface NewGeometryEvent {
@@ -13,12 +14,6 @@ export interface DataEvent {
 interface EventMap {
   "newgeometry": NewGeometryEvent
   "data": DataEvent
-}
-
-export interface WorldEvent {
-  type: "click" | "dblclick" | "contextmenu" | "mousemove"
-  x: number
-  y: number
 }
 
 type Listener<T> = (event: T) => void;
@@ -38,7 +33,7 @@ export class CreateSplineTool {
     return this._points;
   }
 
-  handle(e: WorldEvent) {
+  handle(e: SessionEvent) {
     switch (e.type) {
       case "click":
         return this.click(e);
@@ -53,7 +48,7 @@ export class CreateSplineTool {
     }
   }
 
-  private click(e: WorldEvent) {
+  private click(e: SessionEvent) {
     const newPoint: [number, number] = [e.x, e.y];
     const lastPoint = this.points[this.points.length - 1];
 
@@ -65,7 +60,7 @@ export class CreateSplineTool {
     return false;
   }
 
-  private contextMenu(_: WorldEvent) {
+  private contextMenu(_: SessionEvent) {
     if (this.complete()) {
       this.points = [];
       return true;
@@ -74,7 +69,7 @@ export class CreateSplineTool {
     return false;
   }
 
-  private mouseMove(e: WorldEvent) {
+  private mouseMove(e: SessionEvent) {
     if (this.points.length) {
       this.publish("data", { type: "data", data: [...this.points, [e.x, e.y]] });
       return true;
@@ -83,7 +78,7 @@ export class CreateSplineTool {
     return false;
   }
 
-  private doubleClick(_: WorldEvent) {
+  private doubleClick(_: SessionEvent) {
     if (this.complete()) {
       this.points = [];
       return true;

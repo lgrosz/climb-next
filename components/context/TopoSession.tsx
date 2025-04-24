@@ -6,6 +6,12 @@ interface Climb {
   name: string,
 }
 
+export interface SessionEvent {
+  type: "click" | "dblclick" | "contextmenu" | "mousemove"
+  x: number
+  y: number
+}
+
 interface TopoSessionContextType {
   /**
    * Climbs that are available in the session context
@@ -21,6 +27,11 @@ interface TopoSessionContextType {
    * Set the active tool
    */
   setTool: Dispatch<SetStateAction<CreateSplineTool | null>>;
+
+  /**
+   * Dispatches event
+   */
+   dispatch: (event: SessionEvent) => boolean;
 }
 
 export const TopoSessionContext = createContext<TopoSessionContextType | undefined>(undefined);
