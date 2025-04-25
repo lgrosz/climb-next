@@ -11,7 +11,7 @@ interface Event {
 }
 
 interface CursorEvent extends Event {
-  type: "click" | "dblclick" | "contextmenu" | "mousemove"
+  type: "click" | "dblclick" | "contextmenu" | "mousemove" | "mousedown" | "mouseup"
   x: number
   y: number
 }

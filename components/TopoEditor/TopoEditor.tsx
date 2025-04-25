@@ -4,9 +4,10 @@ import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
 import { Tool } from '@/lib/tools';
+import { SelectionTool } from '@/lib/tools/Select';
 
 export default function TopoEditor(
   {
@@ -32,6 +33,30 @@ export default function TopoEditor(
 
     return false;
   }, [tool]);
+
+  useEffect(() => {
+    const handle = (e: KeyboardEvent) => {
+      if (e.key === "s") {
+        setTool(new SelectionTool);
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
+      if (e.key === "Escape") {
+        if (tool) {
+          setTool(null);
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }
+    }
+
+    addEventListener("keydown", handle);
+
+    return () => {
+      removeEventListener("keydown", handle);
+    }
+  }, [onSelect, tool]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"

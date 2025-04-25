@@ -28,7 +28,12 @@ const draw = {
     }
 
     ctx.stroke();
-  }
+  },
+  box: function(ctx: CanvasRenderingContext2D, box: [[number, number], [number, number]]) {
+    ctx.beginPath();
+    ctx.rect(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1]);
+    ctx.stroke();
+  },
 }
 
 const style = {
@@ -58,7 +63,10 @@ const style = {
 export default function CanvasArea() {
   const { world } = useTopoWorld();
   const { tool, dispatch } = useTopoSession();
-  const { data } = useTool(tool);
+  const {
+    data,
+    selection,
+  } = useTool(tool);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
 
@@ -117,8 +125,13 @@ export default function CanvasArea() {
       }
     }
 
+    if (selection && selection.type == "box") {
+      style.frame(ctx);
+      draw.box(ctx, selection.data);
+    }
+
     ctx.restore();
-  }, [data]);
+  }, [data, selection]);
 
   // Render method
   useEffect(() => {
@@ -150,7 +163,7 @@ export default function CanvasArea() {
   const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
     // TODO I can see this blowing up
     if (e instanceof MouseEvent) {
-      const validTypes: SessionEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
+      const validTypes: SessionEvent["type"][] = ["click", "dblclick", "contextmenu", "mousedown", "mousemove", "mouseup"];
 
       if (!validTypes.includes(e.type as SessionEvent["type"])) {
         return null;
@@ -188,14 +201,18 @@ export default function CanvasArea() {
     canvas.addEventListener("click", handle);
     canvas.addEventListener("dblclick", handle);
     canvas.addEventListener("contextmenu", handle);
+    canvas.addEventListener("mousedown", handle);
     canvas.addEventListener("mousemove", handle);
+    canvas.addEventListener("mouseup", handle);
     canvas.addEventListener("keydown", handle);
 
     return () => {
       canvas.removeEventListener("click", handle);
       canvas.removeEventListener("dblclick", handle);
       canvas.removeEventListener("contextmenu", handle);
+      canvas.removeEventListener("mousedown", handle);
       canvas.removeEventListener("mousemove", handle);
+      canvas.removeEventListener("mouseup", handle);
       canvas.removeEventListener("keydown", handle);
     };
   }, [toSession, dispatch]);
