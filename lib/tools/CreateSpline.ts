@@ -1,20 +1,6 @@
 import { SessionEvent } from "@/components/context/TopoSession";
 import { BasisSpline } from "../BasisSpline";
-
-export interface NewGeometryEvent {
-  type: "newgeometry"
-  geometry: BasisSpline
-}
-
-export interface DataEvent {
-  type: "data"
-  data: [number, number][]
-}
-
-interface EventMap {
-  "newgeometry": NewGeometryEvent
-  "data": DataEvent
-}
+import { EventMap } from "./Event";
 
 type Listener<T> = (event: T) => void;
 
