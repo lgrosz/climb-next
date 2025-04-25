@@ -134,25 +134,36 @@ export default function CanvasArea() {
 
   }, [world.climbs, renderToolOverlay]);
 
-  const toSession = useCallback((e: MouseEvent): SessionEvent | null => {
-    const validTypes: SessionEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
+  const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
+    // TODO I can see this blowing up
+    if (e instanceof MouseEvent) {
+      const validTypes: SessionEvent["type"][] = ["click", "dblclick", "contextmenu", "mousemove"];
 
-    if (!validTypes.includes(e.type as SessionEvent["type"])) {
-      return null;
+      if (!validTypes.includes(e.type as SessionEvent["type"])) {
+        return null;
+      }
+
+      return {
+        type: e.type as SessionEvent["type"],
+        x: e.offsetX,
+        y: e.offsetY,
+      };
+    } else if (e instanceof KeyboardEvent) {
+      if (e.key === "Escape") {
+        return {
+          type: "cancel",
+        }
+      }
     }
 
-    return {
-      type: e.type as SessionEvent["type"],
-      x: e.offsetX,
-      y: e.offsetY,
-    };
+    return null;
   }, []);
 
   useEffect(() => {
     const canvas = ref.current!;
     if (!canvas) return;
 
-    const handle = (e: MouseEvent) => {
+    const handle = (e: MouseEvent | KeyboardEvent) => {
       const worldEvent = toSession(e);
       if (!worldEvent) return;
 
@@ -165,12 +176,14 @@ export default function CanvasArea() {
     canvas.addEventListener("dblclick", handle);
     canvas.addEventListener("contextmenu", handle);
     canvas.addEventListener("mousemove", handle);
+    canvas.addEventListener("keydown", handle);
 
     return () => {
       canvas.removeEventListener("click", handle);
       canvas.removeEventListener("dblclick", handle);
       canvas.removeEventListener("contextmenu", handle);
       canvas.removeEventListener("mousemove", handle);
+      canvas.removeEventListener("keydown", handle);
     };
   }, [toSession, dispatch]);
 

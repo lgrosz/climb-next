@@ -6,11 +6,21 @@ interface Climb {
   name: string,
 }
 
-export interface SessionEvent {
+interface Event {
+  type: string;
+}
+
+interface CursorEvent extends Event {
   type: "click" | "dblclick" | "contextmenu" | "mousemove"
   x: number
   y: number
 }
+
+interface CancelEvent extends Event {
+  type: "cancel";
+}
+
+export type SessionEvent = CursorEvent | CancelEvent;
 
 interface TopoSessionContextType {
   /**

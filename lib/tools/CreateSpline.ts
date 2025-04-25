@@ -50,12 +50,15 @@ export class CreateSplineTool {
         return this.contextMenu(e);
       case "mousemove":
         return this.mouseMove(e);
+      case "cancel":
+        return this.cancel(e);
       default:
         return false;
     }
   }
 
   private click(e: SessionEvent) {
+    if (e.type !== "click") return false;
     const newPoint: [number, number] = [e.x, e.y];
     const lastPoint = this.points[this.points.length - 1];
 
@@ -67,7 +70,8 @@ export class CreateSplineTool {
     return false;
   }
 
-  private contextMenu(_: SessionEvent) {
+  private contextMenu(e: SessionEvent) {
+    if (e.type !== "contextmenu") return false;
     if (this.complete()) {
       this.points = [];
       return true;
@@ -77,6 +81,7 @@ export class CreateSplineTool {
   }
 
   private mouseMove(e: SessionEvent) {
+    if (e.type !== "mousemove") return false;
     if (this.points.length) {
       this.publish("data", { type: "data", data: [...this.points, [e.x, e.y]] });
       return true;
@@ -85,8 +90,19 @@ export class CreateSplineTool {
     return false;
   }
 
-  private doubleClick(_: SessionEvent) {
+  private doubleClick(e: SessionEvent) {
+    if (e.type !== "dblclick") return false;
     if (this.complete()) {
+      this.points = [];
+      return true;
+    }
+
+    return false;
+  }
+
+  private cancel(e: SessionEvent) {
+    if (e.type !== "cancel") return false;
+    if (this.points.length) {
       this.points = [];
       return true;
     }
