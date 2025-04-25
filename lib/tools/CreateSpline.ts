@@ -1,20 +1,16 @@
 import { SessionEvent } from "@/components/context/TopoSession";
 import { BasisSpline } from "../BasisSpline";
-import { EventMap } from "./Event";
 import { Tool } from "./Tool";
-
-type Listener<T> = (event: T) => void;
+import { BaseTool } from "./Base";
 
 type SplineHandler = (spline: BasisSpline) => void;
 
-export class CreateSplineTool implements Tool {
+export class CreateSplineTool extends BaseTool implements Tool {
   private onComplete?: SplineHandler
   private _points: [number, number][] = []
-  private listeners: {
-    [K in keyof EventMap]?: Set<Listener<EventMap[K]>>
-  } = {};
 
   constructor(handler?: SplineHandler) {
+    super();
     this.onComplete = handler;
   }
 
@@ -97,19 +93,6 @@ export class CreateSplineTool implements Tool {
     return false;
   }
 
-  subscribe<K extends keyof EventMap>(type: K, handler: Listener<EventMap[K]>) {
-    if (!this.listeners[type]) {
-      // the compiler cannot see that this is okay, so assert
-      this.listeners[type] = new Set as never;
-    }
-
-    this.listeners[type].add(handler);
-  }
-
-  unsubscribe<K extends keyof EventMap>(type: K, handler: Listener<EventMap[K]>) {
-    this.listeners[type]?.delete(handler);
-  }
-
   private complete() {
     if (this.points.length > 1) {
       const spline = new BasisSpline(this.points, this.points.length > 2 ? 2 : 1);
@@ -124,9 +107,5 @@ export class CreateSplineTool implements Tool {
     }
 
     return false;
-  }
-
-  private publish<K extends keyof EventMap>(type: K, event: EventMap[K]) {
-    this.listeners[type]?.forEach(fn => fn(event));
   }
 }
