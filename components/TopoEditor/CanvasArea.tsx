@@ -66,6 +66,9 @@ export default function CanvasArea() {
     const canvas = ref.current;
     if (!canvas) return;
 
+    // Allows canvas to be focusable, necessary for things like keyboard events
+    canvas.tabIndex = 0;
+
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       const { clientWidth, clientHeight } = canvas;
