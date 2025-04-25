@@ -1,12 +1,13 @@
 import { SessionEvent } from "@/components/context/TopoSession";
 import { BasisSpline } from "../BasisSpline";
 import { EventMap } from "./Event";
+import { Tool } from "./Tool";
 
 type Listener<T> = (event: T) => void;
 
 type SplineHandler = (spline: BasisSpline) => void;
 
-export class CreateSplineTool {
+export class CreateSplineTool implements Tool {
   private onComplete?: SplineHandler
   private _points: [number, number][] = []
   private listeners: {

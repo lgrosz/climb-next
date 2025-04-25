@@ -1,4 +1,4 @@
-import { CreateSplineTool } from "@/lib/tools";
+import { Tool } from "@/lib/tools";
 import { createContext, Dispatch, SetStateAction, useContext } from "react";
 
 interface Climb {
@@ -31,12 +31,12 @@ interface TopoSessionContextType {
   /**
    * The active tool
    */
-  tool: CreateSplineTool | null,
+  tool: Tool | null,
 
   /**
    * Set the active tool
    */
-  setTool: Dispatch<SetStateAction<CreateSplineTool | null>>;
+  setTool: Dispatch<SetStateAction<Tool | null>>;
 
   /**
    * Dispatches event

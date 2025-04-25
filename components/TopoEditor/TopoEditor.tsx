@@ -6,7 +6,7 @@ import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
 import { useCallback, useState } from 'react';
 import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
-import { CreateSplineTool } from '@/lib/tools';
+import { Tool } from '@/lib/tools';
 
 export default function TopoEditor(
   {
@@ -23,7 +23,7 @@ export default function TopoEditor(
     climbs: [],
   });
 
-  const [tool, setTool] = useState<CreateSplineTool | null>(null);
+  const [tool, setTool] = useState<Tool | null>(null);
 
   const dispatch = useCallback((e: SessionEvent) => {
     if (tool?.handle(e)) {

@@ -1,7 +1,7 @@
-import { CreateSplineTool, DataEvent } from "@/lib/tools";
+import { DataEvent, Tool } from "@/lib/tools";
 import { useEffect, useState } from "react";
 
-export default function useTool(tool?: CreateSplineTool | null) {
+export default function useTool(tool?: Tool | null) {
   const [data, setData] = useState<[number, number][]>();
 
   useEffect(() => {
