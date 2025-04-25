@@ -14,6 +14,7 @@ interface CursorEvent extends Event {
   type: "click" | "dblclick" | "contextmenu" | "mousemove" | "mousedown" | "mouseup"
   x: number
   y: number
+  shiftKey: boolean
 }
 
 interface CancelEvent extends Event {

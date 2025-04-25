@@ -173,6 +173,7 @@ export default function CanvasArea() {
         type: e.type as SessionEvent["type"],
         x: e.offsetX,
         y: e.offsetY,
+        shiftKey: e.shiftKey,
       };
     } else if (e instanceof KeyboardEvent) {
       if (e.key === "Escape") {

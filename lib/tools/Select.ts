@@ -7,8 +7,9 @@ type Box = [[number, number], [number, number]];
 
 type PointSelection = { type: "point", data: Point };
 type BoxSelection = { type: "box", data: Box };
+type MergeSelection = { merge?: boolean };
 
-export type Selection = PointSelection | BoxSelection;
+export type Selection = (PointSelection | BoxSelection) & MergeSelection;
 
 type SelectionCallback = (selection: Selection) => void;
 
@@ -91,7 +92,13 @@ export class SelectionTool extends BaseTool implements Tool {
   private mouseUp(e: SessionEvent): boolean {
     if (e.type !== "mouseup") return false;
     if (!this.start || !this.current) return false;
-    this.callback?.({ type: "box", data: [this.start, this.current] });
+
+    this.callback?.({
+      type: "box",
+      data: [this.start, this.current],
+      merge: e.shiftKey
+    });
+
     this.start = null;
     return true;
   }
@@ -103,7 +110,11 @@ export class SelectionTool extends BaseTool implements Tool {
     if (this.current || this.cancelled) return true;
 
     const data: Point = [e.x, e.y];
-    this.callback?.({ type: "point", data });
+    this.callback?.({
+      type: "point",
+      merge: e.shiftKey,
+      data,
+    });
     this.start = null;
 
     return true;
