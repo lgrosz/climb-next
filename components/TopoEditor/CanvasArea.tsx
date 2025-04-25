@@ -195,6 +195,7 @@ export default function CanvasArea() {
 
       if (dispatch(worldEvent)) {
         e.preventDefault();
+        e.stopPropagation();
       }
     };
 
