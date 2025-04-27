@@ -13,6 +13,12 @@ export type Selection = (PointSelection | BoxSelection) & MergeSelection;
 
 type SelectionCallback = (selection: Selection) => void;
 
+function normalizePoints(p1: Point, p2: Point): Box {
+  const min: Point = [Math.min(p1[0], p2[0]), Math.min(p1[1], p2[1])];
+  const max: Point = [Math.max(p1[0], p2[0]), Math.max(p1[1], p2[1])];
+  return [min, max];
+}
+
 export class SelectionTool extends BaseTool implements Tool {
   private _start: Point | null = null;
   private _current: Point | null = null;
@@ -42,11 +48,13 @@ export class SelectionTool extends BaseTool implements Tool {
     this._current = point;
 
     if (point && this.start) {
+      const data = normalizePoints(this.start, point);
+
       this.publish("selection", {
         type: "selection",
         selection: {
           type: "box",
-          data: [this.start, point]
+          data,
         },
       });
     }
@@ -93,9 +101,11 @@ export class SelectionTool extends BaseTool implements Tool {
     if (e.type !== "mouseup") return false;
     if (!this.start || !this.current) return false;
 
+    const data = normalizePoints(this.start, this.current);
+
     this.callback?.({
       type: "box",
-      data: [this.start, this.current],
+      data,
       merge: e.shiftKey
     });
 
