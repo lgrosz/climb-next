@@ -83,6 +83,20 @@ export class BasisSpline {
     return samples;
   }
 
+  bounds(): [[number, number], [number, number]] {
+    let minX = Infinity, minY = Infinity;
+    let maxX = -Infinity, maxY = -Infinity;
+
+    for (const [x, y] of this.sample()) {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+
+    return [[minX, minY], [maxX, maxY]];
+  }
+
   isOpen() {
     const left = this.knots[0];
     const right = this.knots[this.knots.length - 1];

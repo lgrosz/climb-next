@@ -32,6 +32,21 @@ function isPointOnBasisSpline(
   return false;
 }
 
+function boxContains(
+  container: [[number, number], [number, number]],
+  contained: [[number, number], [number, number]]
+) {
+  const [containerMin, containerMax] = container;
+  const [containedMin, containedMax] = contained;
+
+  return (
+    containerMin[0] <= containedMin[0] &&
+    containerMin[1] <= containedMin[1] &&
+    containerMax[0] >= containedMax[0] &&
+    containerMax[1] >= containedMax[1]
+  );
+}
+
 export default function TopoEditor(
   {
     availableClimbs
@@ -72,10 +87,13 @@ export default function TopoEditor(
     worldRef.current.climbs.forEach(climb => {
       climb.geometries.forEach((geometry, index) => {
         if (selection.type === "point" && isPointOnBasisSpline(geometry, selection.data)) {
+          // TODO this should only select the first one
           newSelection.climbs.push({ id: climb.id, geometries: [{ index }] });
         }
 
-        // TODO handle box selection
+        if (selection.type === "box" && boxContains(selection.data, geometry.bounds())) {
+          newSelection.climbs.push({ id: climb.id, geometries: [{ index }] });
+        }
       });
     });
 
