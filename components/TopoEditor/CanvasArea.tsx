@@ -41,6 +41,11 @@ const style = {
     ctx.strokeStyle = "#0000ff";
     ctx.lineWidth = 2;
   },
+  sketch: function(ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = "#60a5fa";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+  },
   geometry: {
     spline: {
       fixed: function(ctx: CanvasRenderingContext2D) {
@@ -62,7 +67,7 @@ const style = {
 
 export default function CanvasArea() {
   const { world } = useTopoWorld();
-  const { tool, dispatch } = useTopoSession();
+  const { tool, dispatch, selection: sessionSelection } = useTopoSession();
   const {
     data,
     selection,
@@ -147,6 +152,24 @@ export default function CanvasArea() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // draw bounding boxes for the selected items
+    for (const sClimb of sessionSelection.climbs) {
+      const climb = world.climbs.find(c => c.id === sClimb.id);
+      if (!climb) continue;
+
+      for (const { index } of sClimb.geometries) {
+        const geom = climb.geometries.at(index);
+        if (!geom) continue;
+
+        const box = geom.bounds();
+
+        ctx.save();
+        style.sketch(ctx);
+        draw.box(ctx, box);
+        ctx.restore();
+      }
+    }
+
     for (const climb of world.climbs) {
       for (const geom of climb.geometries ?? []) {
         ctx.save();
@@ -158,7 +181,7 @@ export default function CanvasArea() {
 
     renderToolOverlay(ctx);
 
-  }, [world.climbs, renderToolOverlay]);
+  }, [world.climbs, sessionSelection.climbs, renderToolOverlay]);
 
   const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
     // TODO I can see this blowing up
