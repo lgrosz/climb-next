@@ -11,7 +11,7 @@ type MergeSelection = { merge?: boolean };
 
 export type Selection = (PointSelection | BoxSelection) & MergeSelection;
 
-type SelectionCallback = (selection: Selection) => void;
+export type SelectionCallback = (selection: Selection) => void;
 
 function normalizePoints(p1: Point, p2: Point): Box {
   const min: Point = [Math.min(p1[0], p2[0]), Math.min(p1[1], p2[1])];

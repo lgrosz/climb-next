@@ -6,8 +6,8 @@ import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
-import { Tool } from '@/lib/tools';
-import { Selection, SelectionTool } from '@/lib/tools/Select';
+import { Tool, TransformObjects } from '@/lib/tools';
+import { Selection } from '@/lib/tools/Select';
 import { Selection as SessionSelection } from '../context/TopoSession';
 import { BasisSpline } from '@/lib/BasisSpline';
 
@@ -66,12 +66,17 @@ export default function TopoEditor(
   const [tool, setTool] = useState<Tool | null>(null);
 
   const [selection, setSelection] = useState<SessionSelection>({ climbs: [] });
+  const selectionRef = useRef(selection);
+
   // keep refs up-to-date, this is necessary for methods being passed
   // to tools..
   useEffect(() => {
     worldRef.current = world;
   }, [world]);
 
+  useEffect(() => {
+    selectionRef.current = selection;
+  }, [selection]);
 
   const dispatch = useCallback((e: SessionEvent) => {
     if (tool?.handle(e)) {
@@ -103,10 +108,52 @@ export default function TopoEditor(
     // - selection.merge determines if the selection should be merged instead of replaced
   }, []);
 
+  const selectionHitTest = useCallback((point: [number, number]) => {
+    for (const sClimb of selectionRef.current.climbs) {
+      const climb = worldRef.current.climbs.find(c => c.id === sClimb.id);
+      if (!climb) continue;
+
+      for (const { index } of sClimb.geometries) {
+        const geometry = climb.geometries.at(index);
+        if (!geometry) continue;
+
+        if (isPointOnBasisSpline(geometry, point)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }, []);
+
+  const onTransform = useCallback((offset: [number, number]) => {
+    setWorld(prev => ({
+      ...prev,
+      climbs: prev.climbs.map(climb => {
+        const sClimb = selectionRef.current.climbs.find(c => c.id === climb.id);
+        if (!sClimb) return climb;
+
+        return {
+          ...climb,
+          geometries: climb.geometries.map((geom, i) => {
+            const sGeom = sClimb.geometries.find(g => g.index === i);
+            if (!sGeom) return geom;
+
+            const controls: [number, number][] = geom.control.map(control => {
+              return [control[0] + offset[0], control[1] + offset[1]];
+            });
+
+            return new BasisSpline(controls, geom.degree, geom.knots);
+          })
+        }
+      }),
+    }));
+  }, []);
+
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (e.key === "s") {
-        setTool(new SelectionTool(onSelect));
+        setTool(new TransformObjects(selectionHitTest, onSelect, onTransform));
         e.stopPropagation();
         e.preventDefault();
       }
@@ -125,7 +172,7 @@ export default function TopoEditor(
     return () => {
       removeEventListener("keydown", handle);
     }
-  }, [onSelect, tool]);
+  }, [onSelect, tool, onTransform, selectionHitTest]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
