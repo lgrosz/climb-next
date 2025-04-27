@@ -6,7 +6,7 @@ import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
-import { EditPaths, Tool, TransformObjects } from '@/lib/tools';
+import { CreateSplineTool, EditPaths, Tool, TransformObjects } from '@/lib/tools';
 import { Selection } from '@/lib/tools/Select';
 import { Selection as SessionSelection } from '../context/TopoSession';
 import { BasisSpline } from '@/lib/BasisSpline';
@@ -48,22 +48,16 @@ function boxContains(
 }
 
 function selectObjects(world: TopoWorld, selection: Selection) {
-  const ret: SessionSelection = { climbs: {} };
+  const ret: SessionSelection = { lines: {} };
 
-  world.climbs.forEach(climb => {
-    climb.geometries.forEach((geometry, index) => {
-      if (selection.type === "point" && isPointOnBasisSpline(geometry, selection.data)) {
-        ret.climbs[climb.id] = ({ geometries: [{ index }] });
-      }
+  world.lines.forEach(({ geometry }, index) => {
+    if (selection.type === "point" && isPointOnBasisSpline(geometry, selection.data)) {
+      ret.lines[index] = { geometry: { index } };
+    }
 
-      if (selection.type === "box" && boxContains(selection.data, geometry.bounds())) {
-        if (!ret.climbs[climb.id]) {
-          ret.climbs[climb.id] = { geometries: [] };
-        }
-
-        ret.climbs[climb.id].geometries.push({ index });
-      }
-    });
+    if (selection.type === "box" && boxContains(selection.data, geometry.bounds())) {
+      ret.lines[index] = { geometry: { index } };
+    }
   });
 
   return ret;
@@ -94,11 +88,11 @@ function isNodeSelected(node: [number, number], selection: Selection) {
 
 function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selection: Selection) {
   const ret: SessionSelection = {
-    climbs: Object.fromEntries(
-      Object.entries(sessionSelection.climbs).map(([id, cs]) => {
+    lines: Object.fromEntries(
+      Object.entries(sessionSelection.lines).map(([id, cs]) => {
         return [id, {
-          geometries: cs.geometries.map(gs => {
-            const geom = world.climbs.find(c => c.id === id)?.geometries.at(gs.index)
+          geometry: (gs => {
+            const geom = world.lines.at(gs.index)?.geometry;
 
             if (!geom) return gs;
 
@@ -112,7 +106,7 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
               ...gs,
               nodes: hitNodes,
             };
-          })
+          })(cs.geometry)
         }]
       })
     )
@@ -133,13 +127,13 @@ export default function TopoEditor(
 ) {
   const [world, setWorld] = useState<TopoWorld>({
     title: "",
-    climbs: [],
+    lines: [],
   });
   const worldRef = useRef(world);
 
   const [tool, setTool] = useState<Tool | null>(null);
 
-  const [selection, setSelection] = useState<SessionSelection>({ climbs: { } });
+  const [selection, setSelection] = useState<SessionSelection>({ lines: { } });
   const selectionRef = useRef(selection);
 
   // keep refs up-to-date, this is necessary for methods being passed
@@ -165,17 +159,13 @@ export default function TopoEditor(
   }, []);
 
   const selectionHitTest = useCallback((point: [number, number]) => {
-    for (const [climbId, { geometries }] of Object.entries(selectionRef.current.climbs)) {
-      const climb = worldRef.current.climbs.find(c => c.id === climbId);
-      if (!climb) continue;
+    for (const index of Object.keys(selectionRef.current.lines)) {
+      const geometry = worldRef.current.lines.at(Number(index))?.geometry;
 
-      for (const { index } of geometries) {
-        const geometry = climb.geometries.at(index);
-        if (!geometry) continue;
+      if (!geometry) continue;
 
-        if (isPointOnBasisSpline(geometry, point)) {
-          return true;
-        }
+      if (isPointOnBasisSpline(geometry, point)) {
+        return true;
       }
     }
 
@@ -185,22 +175,19 @@ export default function TopoEditor(
   const onTransform = useCallback((offset: [number, number]) => {
     setWorld(prev => ({
       ...prev,
-      climbs: prev.climbs.map(climb => {
-        const sClimb = selectionRef.current.climbs[climb.id];
-        if (!sClimb) return climb;
+      lines: prev.lines.map((line, index) => {
+        const sLine = selectionRef.current.lines[index];
+        if (!sLine) return line;
 
         return {
-          ...climb,
-          geometries: climb.geometries.map((geom, i) => {
-            const sGeom = sClimb.geometries.find(g => g.index === i);
-            if (!sGeom) return geom;
-
+          ...line,
+          geometry: ((geom) => {
             const controls: [number, number][] = geom.control.map(control => {
               return [control[0] + offset[0], control[1] + offset[1]];
             });
 
             return new BasisSpline(controls, geom.degree, geom.knots);
-          })
+          })(line.geometry)
         }
       }),
     }));
@@ -208,15 +195,13 @@ export default function TopoEditor(
 
   const onNodeSelect = useCallback((selection: Selection) => {
     const hasSelectedNodes = (s: SessionSelection) =>
-      Object.values(s.climbs).some(climb =>
-        climb.geometries.some(geom =>
-          Array.isArray(geom.nodes) && geom.nodes.length > 0
-        )
+      Object.values(s.lines).some(line =>
+        line.geometry.nodes && line.geometry.nodes.length > 0
       );
 
     let sessionSelection: SessionSelection;
 
-    if (Object.keys(selectionRef.current.climbs).length < 1) {
+    if (Object.keys(selectionRef.current.lines).length < 1) {
       sessionSelection = selectObjects(worldRef.current, selection);
     } else {
       sessionSelection = selectNodes(worldRef.current, selectionRef.current, selection);
@@ -226,7 +211,7 @@ export default function TopoEditor(
         !hasSelectedNodes(selectionRef.current) &&
         !hasSelectedNodes(sessionSelection)
       ) {
-        sessionSelection = { climbs: {} };
+        sessionSelection = { lines: {} };
       }
     }
 
@@ -234,21 +219,18 @@ export default function TopoEditor(
   }, []);
 
   const selectedNodeHitTest = useCallback((point: [number, number]) => {
-    for (const [climbId, { geometries }] of Object.entries(selectionRef.current.climbs)) {
-      const climb = worldRef.current.climbs.find(c => c.id === climbId);
-      if (!climb) continue;
+    for (const [index, { geometry: gs }] of Object.entries(selectionRef.current.lines)) {
+      const geometry = worldRef.current.lines.at(Number(index))?.geometry;
+      if (!geometry) continue;
 
-      for (const { index: gi, nodes } of geometries) {
-        const geometry = climb.geometries.at(gi);
-        if (!geometry || !nodes) continue;
+      if (!geometry || !gs.nodes) continue;
 
-        for (const { index: ni }  of nodes) {
-          const node = geometry.control.at(ni);
-          if (!node) continue;
+      for (const { index: ni } of gs.nodes) {
+        const node = geometry.control.at(ni);
+        if (!node) continue;
 
-          if (pointIsOnPoint(node, point)) {
-            return true;
-          }
+        if (pointIsOnPoint(node, point)) {
+          return true;
         }
       }
     }
@@ -259,15 +241,15 @@ export default function TopoEditor(
   const onNodeTransform = useCallback((offset: [number, number]) => {
     setWorld(prev => ({
       ...prev,
-      climbs: prev.climbs.map(climb => {
-        const sClimb = selectionRef.current.climbs[climb.id];
-        if (!sClimb) return climb;
+      lines: prev.lines.map((line, index) => {
+        const sLine = selectionRef.current.lines[index];
+        if (!sLine) return line;
 
         return {
-          ...climb,
-          geometries: climb.geometries.map((geom, i) => {
-            const sGeom = sClimb.geometries.find(g => g.index === i);
-            if (!sGeom || !sGeom.nodes) return geom;
+          ...line,
+          geometry: (geom => {
+            const sGeom = sLine.geometry;
+            if (!sGeom.nodes) return geom;
 
             const controls: [number, number][] = geom.control.map((control, index) => {
               const selected = sGeom.nodes?.some(n => n.index === index);
@@ -280,11 +262,18 @@ export default function TopoEditor(
             });
 
             return new BasisSpline(controls, geom.degree, geom.knots);
-          })
+          })(line.geometry)
         }
       }),
     }));
   }, []);
+
+  const addSplineGeometry = useCallback((spline: BasisSpline) => {
+    setWorld(prev => ({
+      ...prev,
+      lines: [...prev.lines, { geometry: spline }],
+    }));
+  }, [setWorld]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -294,6 +283,10 @@ export default function TopoEditor(
         e.preventDefault();
       } else if (e.key === "n") {
         setTool(new EditPaths(selectedNodeHitTest, onNodeSelect, onNodeTransform));
+        e.stopPropagation();
+        e.preventDefault();
+      } else if (e.key === "b") {
+        setTool(new CreateSplineTool(addSplineGeometry))
         e.stopPropagation();
         e.preventDefault();
       }
@@ -312,7 +305,7 @@ export default function TopoEditor(
     return () => {
       removeEventListener("keydown", handle);
     }
-  }, [onSelect, tool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform]);
+  }, [onSelect, tool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"

@@ -155,25 +155,23 @@ export default function CanvasArea() {
     }
 
     if (tool instanceof EditPaths) {
-      for (const [id, cs] of Object.entries(sessionSelection.climbs)) {
-        for (const gs of cs.geometries) {
-          const geom = world.climbs.find(c => c.id === id)?.geometries.at(gs.index);
-          if (!geom) continue;
+      for (const [index, cs] of Object.entries(sessionSelection.lines)) {
+        const geom = world.lines.at(Number(index))?.geometry;
+        if (!geom) continue;
+
+        ctx.save();
+        style.frame(ctx);
+        draw.line(ctx, geom.control);
+        ctx.restore();
+
+        for (const [index, point] of geom.control.entries()) {
+          const selected = cs.geometry.nodes?.some(n => n.index === index);
 
           ctx.save();
-          style.frame(ctx);
-          draw.line(ctx, geom.control);
+          style.diamond(ctx);
+          if (selected) ctx.fillStyle = "#0000ff";
+          draw.node(ctx, point);
           ctx.restore();
-
-          for (const [index, point] of geom.control.entries()) {
-            const selected = gs.nodes?.some(n => n.index === index);
-
-            ctx.save();
-            style.diamond(ctx);
-            if (selected) ctx.fillStyle = "#0000ff";
-            draw.node(ctx, point);
-            ctx.restore();
-          }
         }
       }
     }
@@ -181,52 +179,44 @@ export default function CanvasArea() {
     if (transform) {
       // TODO if `TransformObjects` selected all nodes, the logic here could be identical
       if (tool instanceof EditPaths) {
-        for (const climb of world.climbs) {
-          const sClimb = sessionSelection.climbs[climb.id];
+        for (const [index, line] of world.lines.entries()) {
+          const sClimb = sessionSelection.lines[index];
           if (!sClimb) continue;
 
-          for (const [index, geom] of climb.geometries.entries()) {
-            const cGeom = sClimb.geometries.find(g => g.index === index);
-            if (!cGeom || !cGeom.nodes) continue;
+          const geom = line.geometry;
+          const control: [number, number][] = geom.control.map((c, i) => {
+            const selected = sClimb.geometry.nodes?.some((n => n.index === i));
 
-            const control: [number, number][] = geom.control.map((c, i) => {
-              const selected = cGeom.nodes?.some((n => n.index === i));
+            if (selected) {
+              return [c[0] + transform[0], c[1] + transform[1]]
+            } else {
+              return c;
+            }
+          });
 
-              if (selected) {
-                return [c[0] + transform[0], c[1] + transform[1]]
-              } else {
-                return c;
-              }
-            });
+          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
 
-            const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
-
-            style.ghost(ctx);
-            draw.spline(ctx, transformedGeom);
-            draw.line(ctx, transformedGeom.control);
-          }
+          style.ghost(ctx);
+          draw.spline(ctx, transformedGeom);
+          draw.line(ctx, transformedGeom.control);
         }
       } else if (tool instanceof TransformObjects) {
-        for (const climb of world.climbs) {
-          const sClimb = sessionSelection.climbs[climb.id];
+        for (const [index, line] of world.lines.entries()) {
+          const sClimb = sessionSelection.lines[index];
           if (!sClimb) continue;
 
-          for (const [index, geom] of climb.geometries.entries()) {
-            const cGeom = sClimb.geometries.find(g => g.index === index);
-            if (!cGeom) continue;
+          const geom = line.geometry;
+          const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
+          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
 
-            const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
-            const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
-
-            style.ghost(ctx);
-            draw.spline(ctx, transformedGeom);
-          }
+          style.ghost(ctx);
+          draw.spline(ctx, transformedGeom);
         }
       }
     }
 
     ctx.restore();
-  }, [data, selection, sessionSelection, transform, world.climbs, tool]);
+  }, [data, selection, sessionSelection, transform, world.lines, tool]);
 
   // Render method
   useEffect(() => {
@@ -243,35 +233,29 @@ export default function CanvasArea() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw bounding boxes for the selected items
-    for (const [climbId, { geometries }] of Object.entries(sessionSelection.climbs)) {
-      const climb = world.climbs.find(c => c.id === climbId);
-      if (!climb) continue;
+    for (const [index] of Object.entries(sessionSelection.lines)) {
+      const line = world.lines.at(Number(index));
+      if (!line) continue;
 
-      for (const { index } of geometries) {
-        const geom = climb.geometries.at(index);
-        if (!geom) continue;
+      const geom = line.geometry;
+      const box = geom.bounds();
 
-        const box = geom.bounds();
-
-        ctx.save();
-        style.sketch(ctx);
-        draw.box(ctx, box);
-        ctx.restore();
-      }
+      ctx.save();
+      style.sketch(ctx);
+      draw.box(ctx, box);
+      ctx.restore();
     }
 
-    for (const climb of world.climbs) {
-      for (const geom of climb.geometries ?? []) {
-        ctx.save();
-        style.geometry.spline.fixed(ctx);
-        draw.spline(ctx, geom);
-        ctx.restore();
-      }
+    for (const line of world.lines) {
+      ctx.save();
+      style.geometry.spline.fixed(ctx);
+      draw.spline(ctx, line.geometry);
+      ctx.restore();
     }
 
     renderToolOverlay(ctx);
 
-  }, [world.climbs, sessionSelection.climbs, renderToolOverlay]);
+  }, [world.lines, sessionSelection.lines, renderToolOverlay]);
 
   const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
     // TODO I can see this blowing up
