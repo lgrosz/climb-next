@@ -23,6 +23,19 @@ interface CancelEvent extends Event {
 
 export type SessionEvent = CursorEvent | CancelEvent;
 
+interface GeometrySelection {
+  index: number;
+}
+
+interface ClimbSelection {
+  id: string;
+  geometries: GeometrySelection[];
+}
+
+export interface Selection {
+  climbs: ClimbSelection[];
+}
+
 interface TopoSessionContextType {
   /**
    * Climbs that are available in the session context
@@ -43,6 +56,16 @@ interface TopoSessionContextType {
    * Dispatches event
    */
    dispatch: (event: SessionEvent) => boolean;
+
+   /**
+    * Currently selected objects and nodes
+    */
+   selection: Selection;
+
+   /**
+    * Set the current selection
+    */
+   setSelection: Dispatch<SetStateAction<Selection>>;
 }
 
 export const TopoSessionContext = createContext<TopoSessionContextType | undefined>(undefined);
