@@ -19,6 +19,7 @@ export class TransformObjects extends SelectionTool implements Tool {
   private hitTest: HitTest;
   private transform: TransformCallback;
   private origin: Point | null;
+  private canceled: boolean;
 
   constructor(hitTest: HitTest, selectionCallback: SelectionCallback, transform: TransformCallback) {
     super(selectionCallback);
@@ -26,6 +27,7 @@ export class TransformObjects extends SelectionTool implements Tool {
     this.hitTest = hitTest;
     this.transform = transform;
     this.origin = null;
+    this.canceled = false;
   }
 
   override handle(e: SessionEvent): boolean {
@@ -52,6 +54,21 @@ export class TransformObjects extends SelectionTool implements Tool {
           this.transform([e.x - this.origin[0], e.y - this.origin[1]]);
           this.publish("transform", { type: "transform", transform: null });
           this.origin = null;
+          return true;
+        }
+
+        if (this.canceled) {
+          this.canceled = false;
+          return true;
+        }
+
+        return super.handle(e);
+
+      case "cancel":
+        if (this.origin) {
+          this.publish("transform", { type: "transform", transform: null });
+          this.origin = null;
+          this.canceled = true;
           return true;
         }
 
