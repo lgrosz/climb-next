@@ -46,6 +46,11 @@ const style = {
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 5]);
   },
+  ghost: function(ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.lineWidth = 4;
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
+  },
   geometry: {
     spline: {
       fixed: function(ctx: CanvasRenderingContext2D) {
@@ -55,11 +60,6 @@ const style = {
         ctx.shadowBlur = 8;
         ctx.shadowOffsetX = 4;
         ctx.shadowOffsetY = 4;
-      },
-      ghost: function(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
-        ctx.lineWidth = 4;
-        ctx.shadowColor = "rgba(0, 0, 0, 0)";
       },
     },
   },
@@ -71,6 +71,7 @@ export default function CanvasArea() {
   const {
     data,
     selection,
+    transform,
   } = useTool(tool);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -135,8 +136,26 @@ export default function CanvasArea() {
       draw.box(ctx, selection.data);
     }
 
+    if (transform) {
+      for (const climb of world.climbs) {
+        const sClimb = sessionSelection.climbs.find(c => c.id === climb.id);
+        if (!sClimb) continue;
+
+        for (const [index, geom] of climb.geometries.entries()) {
+          const cGeom = sClimb.geometries.find(g => g.index === index);
+          if (!cGeom) continue;
+
+          const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
+          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
+
+          style.ghost(ctx);
+          draw.spline(ctx, transformedGeom);
+        }
+      }
+    }
+
     ctx.restore();
-  }, [data, selection]);
+  }, [data, selection, sessionSelection, transform, world.climbs]);
 
   // Render method
   useEffect(() => {

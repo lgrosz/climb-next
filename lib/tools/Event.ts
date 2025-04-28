@@ -16,8 +16,14 @@ export interface SelectionEvent {
   selection: Selection | null,
 }
 
+export interface TransformEvent {
+  type: "transform";
+  transform: [number, number] | null;
+}
+
 export interface EventMap {
   "newgeometry": NewGeometryEvent
   "data": DataEvent
   "selection": SelectionEvent
+  "transform": TransformEvent
 }

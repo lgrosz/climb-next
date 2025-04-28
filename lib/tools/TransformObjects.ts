@@ -41,7 +41,7 @@ export class TransformObjects extends SelectionTool implements Tool {
 
       case "mousemove":
         if (this.origin) {
-          // TODO publish transform and return early
+          this.publish("transform", { type: "transform", transform: [e.x - this.origin[0], e.y - this.origin[1]] });
           return true;
         }
 
@@ -50,6 +50,8 @@ export class TransformObjects extends SelectionTool implements Tool {
       case "mouseup":
         if (this.origin) {
           this.transform([e.x - this.origin[0], e.y - this.origin[1]]);
+          this.publish("transform", { type: "transform", transform: null });
+          this.origin = null;
           return true;
         }
 
