@@ -28,12 +28,12 @@ interface GeometrySelection {
 }
 
 interface ClimbSelection {
-  id: string;
   geometries: GeometrySelection[];
 }
 
 export interface Selection {
-  climbs: ClimbSelection[];
+  // TODO TypeScript thinks that _every_ string is valid with this typing
+  climbs: Record<string, ClimbSelection>;
 }
 
 interface TopoSessionContextType {

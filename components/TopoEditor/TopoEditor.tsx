@@ -65,7 +65,7 @@ export default function TopoEditor(
 
   const [tool, setTool] = useState<Tool | null>(null);
 
-  const [selection, setSelection] = useState<SessionSelection>({ climbs: [] });
+  const [selection, setSelection] = useState<SessionSelection>({ climbs: { } });
   const selectionRef = useRef(selection);
 
   // keep refs up-to-date, this is necessary for methods being passed
@@ -87,17 +87,20 @@ export default function TopoEditor(
   }, [tool]);
 
   const onSelect = useCallback((selection: Selection) => {
-    const newSelection: SessionSelection = { climbs: [] };
+    const newSelection: SessionSelection = { climbs: { } };
 
     worldRef.current.climbs.forEach(climb => {
       climb.geometries.forEach((geometry, index) => {
         if (selection.type === "point" && isPointOnBasisSpline(geometry, selection.data)) {
-          // TODO this should only select the first one
-          newSelection.climbs.push({ id: climb.id, geometries: [{ index }] });
+          newSelection.climbs[climb.id] = ({ geometries: [{ index }] });
         }
 
         if (selection.type === "box" && boxContains(selection.data, geometry.bounds())) {
-          newSelection.climbs.push({ id: climb.id, geometries: [{ index }] });
+          if (!newSelection.climbs[climb.id]) {
+            newSelection.climbs[climb.id] = { geometries: [] };
+          }
+
+          newSelection.climbs[climb.id].geometries.push({ index });
         }
       });
     });
@@ -109,11 +112,11 @@ export default function TopoEditor(
   }, []);
 
   const selectionHitTest = useCallback((point: [number, number]) => {
-    for (const sClimb of selectionRef.current.climbs) {
-      const climb = worldRef.current.climbs.find(c => c.id === sClimb.id);
+    for (const [climbId, { geometries }] of Object.entries(selectionRef.current.climbs)) {
+      const climb = worldRef.current.climbs.find(c => c.id === climbId);
       if (!climb) continue;
 
-      for (const { index } of sClimb.geometries) {
+      for (const { index } of geometries) {
         const geometry = climb.geometries.at(index);
         if (!geometry) continue;
 
@@ -130,7 +133,7 @@ export default function TopoEditor(
     setWorld(prev => ({
       ...prev,
       climbs: prev.climbs.map(climb => {
-        const sClimb = selectionRef.current.climbs.find(c => c.id === climb.id);
+        const sClimb = selectionRef.current.climbs[climb.id];
         if (!sClimb) return climb;
 
         return {

@@ -138,7 +138,7 @@ export default function CanvasArea() {
 
     if (transform) {
       for (const climb of world.climbs) {
-        const sClimb = sessionSelection.climbs.find(c => c.id === climb.id);
+        const sClimb = sessionSelection.climbs[climb.id];
         if (!sClimb) continue;
 
         for (const [index, geom] of climb.geometries.entries()) {
@@ -172,11 +172,11 @@ export default function CanvasArea() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw bounding boxes for the selected items
-    for (const sClimb of sessionSelection.climbs) {
-      const climb = world.climbs.find(c => c.id === sClimb.id);
+    for (const [climbId, { geometries }] of Object.entries(sessionSelection.climbs)) {
+      const climb = world.climbs.find(c => c.id === climbId);
       if (!climb) continue;
 
-      for (const { index } of sClimb.geometries) {
+      for (const { index } of geometries) {
         const geom = climb.geometries.at(index);
         if (!geom) continue;
 
