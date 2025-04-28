@@ -3,6 +3,7 @@ import { BasisSpline } from "@/lib/BasisSpline";
 import { useTopoWorld } from "../context/TopoWorld";
 import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
+import { EditPaths, TransformObjects } from "@/lib/tools";
 
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
@@ -29,6 +30,18 @@ const draw = {
 
     ctx.stroke();
   },
+  node: function(ctx: CanvasRenderingContext2D, point: [number, number]) {
+    const [x, y] = point;
+    const size = 5;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x + size, y);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x - size, y);
+    ctx.closePath();
+    ctx.fill();
+  },
   box: function(ctx: CanvasRenderingContext2D, box: [[number, number], [number, number]]) {
     ctx.beginPath();
     ctx.rect(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1]);
@@ -37,6 +50,11 @@ const draw = {
 }
 
 const style = {
+  diamond: function(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "#d1d5db";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1;
+  },
   frame: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#0000ff";
     ctx.lineWidth = 2;
@@ -136,26 +154,79 @@ export default function CanvasArea() {
       draw.box(ctx, selection.data);
     }
 
+    if (tool instanceof EditPaths) {
+      for (const [id, cs] of Object.entries(sessionSelection.climbs)) {
+        for (const gs of cs.geometries) {
+          const geom = world.climbs.find(c => c.id === id)?.geometries.at(gs.index);
+          if (!geom) continue;
+
+          ctx.save();
+          style.frame(ctx);
+          draw.line(ctx, geom.control);
+          ctx.restore();
+
+          for (const [index, point] of geom.control.entries()) {
+            const selected = gs.nodes?.some(n => n.index === index);
+
+            ctx.save();
+            style.diamond(ctx);
+            if (selected) ctx.fillStyle = "#0000ff";
+            draw.node(ctx, point);
+            ctx.restore();
+          }
+        }
+      }
+    }
+
     if (transform) {
-      for (const climb of world.climbs) {
-        const sClimb = sessionSelection.climbs[climb.id];
-        if (!sClimb) continue;
+      // TODO if `TransformObjects` selected all nodes, the logic here could be identical
+      if (tool instanceof EditPaths) {
+        for (const climb of world.climbs) {
+          const sClimb = sessionSelection.climbs[climb.id];
+          if (!sClimb) continue;
 
-        for (const [index, geom] of climb.geometries.entries()) {
-          const cGeom = sClimb.geometries.find(g => g.index === index);
-          if (!cGeom) continue;
+          for (const [index, geom] of climb.geometries.entries()) {
+            const cGeom = sClimb.geometries.find(g => g.index === index);
+            if (!cGeom || !cGeom.nodes) continue;
 
-          const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
-          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
+            const control: [number, number][] = geom.control.map((c, i) => {
+              const selected = cGeom.nodes?.some((n => n.index === i));
 
-          style.ghost(ctx);
-          draw.spline(ctx, transformedGeom);
+              if (selected) {
+                return [c[0] + transform[0], c[1] + transform[1]]
+              } else {
+                return c;
+              }
+            });
+
+            const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
+
+            style.ghost(ctx);
+            draw.spline(ctx, transformedGeom);
+            draw.line(ctx, transformedGeom.control);
+          }
+        }
+      } else if (tool instanceof TransformObjects) {
+        for (const climb of world.climbs) {
+          const sClimb = sessionSelection.climbs[climb.id];
+          if (!sClimb) continue;
+
+          for (const [index, geom] of climb.geometries.entries()) {
+            const cGeom = sClimb.geometries.find(g => g.index === index);
+            if (!cGeom) continue;
+
+            const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
+            const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
+
+            style.ghost(ctx);
+            draw.spline(ctx, transformedGeom);
+          }
         }
       }
     }
 
     ctx.restore();
-  }, [data, selection, sessionSelection, transform, world.climbs]);
+  }, [data, selection, sessionSelection, transform, world.climbs, tool]);
 
   // Render method
   useEffect(() => {

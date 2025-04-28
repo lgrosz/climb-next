@@ -23,8 +23,13 @@ interface CancelEvent extends Event {
 
 export type SessionEvent = CursorEvent | CancelEvent;
 
+interface NodeSelection {
+  index: number,
+}
+
 interface GeometrySelection {
   index: number;
+  nodes?: NodeSelection[];
 }
 
 interface ClimbSelection {
