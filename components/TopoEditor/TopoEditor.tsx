@@ -275,6 +275,42 @@ export default function TopoEditor(
     }));
   }, [setWorld]);
 
+  const deleteSelection = useCallback(() => {
+    if (Object.keys(selection.lines).length < 1) return false;
+
+    if (tool instanceof EditPaths) {
+      setWorld({
+        ...world,
+        lines: world.lines.map((line, li) => {
+          const lineSelection = selection.lines[li];
+          if (!lineSelection?.geometry?.nodes) return line;
+
+          const toDelete = new Set(lineSelection.geometry.nodes.map(n => n.index));
+          const remaining = line.geometry.control.filter((_, ni) => !toDelete.has(ni));
+
+          // Only apply deletion if at least 2 control points would remain
+          if (remaining.length > 1) {
+            const degree = Math.min(line.geometry.degree, remaining.length - 1);
+
+            return {
+              ...line,
+              geometry: new BasisSpline(remaining, degree)
+            };
+          } else {
+            return line;
+          }
+        })
+      });
+    } else if (tool instanceof TransformObjects) {
+      setWorld({
+        ...world,
+        lines: world.lines.filter((_, li) => !Object.keys(selection.lines).includes(String(li)))
+      });
+    }
+
+    return true;
+  }, [selection.lines, tool, world]);
+
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (e.key === "s") {
@@ -289,6 +325,12 @@ export default function TopoEditor(
         setTool(new CreateSplineTool(addSplineGeometry))
         e.stopPropagation();
         e.preventDefault();
+      } else if (e.key === "Backspace") {
+        if (deleteSelection()) {
+          setSelection({ lines: { } })
+          e.stopPropagation();
+          e.preventDefault();
+        }
       }
 
       if (e.key === "Escape") {
@@ -305,7 +347,7 @@ export default function TopoEditor(
     return () => {
       removeEventListener("keydown", handle);
     }
-  }, [onSelect, tool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry]);
+  }, [onSelect, tool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry, selection.lines, deleteSelection]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
