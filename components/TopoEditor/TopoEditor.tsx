@@ -76,6 +76,35 @@ function pointIsOnPoint(
   return distSq <= toleranceSq;
 }
 
+function pointIsOnLine(
+  point: [number, number],
+  segment: [[number, number], [number, number]],
+  tolerance: number = 5
+): boolean {
+  const [px, py] = point;
+  const [[x1, y1], [x2, y2]] = segment;
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+
+  if (lenSq === 0) {
+    return pointIsOnPoint(point, [x1, y1], tolerance);
+  }
+
+  const t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+  const tClamped = Math.max(0, Math.min(1, t));
+
+  const closestX = x1 + tClamped * dx;
+  const closestY = y1 + tClamped * dy;
+
+  const dxToPoint = px - closestX;
+  const dyToPoint = py - closestY;
+  const distSq = dxToPoint * dxToPoint + dyToPoint * dyToPoint;
+
+  return distSq <= tolerance * tolerance;
+}
+
 function isNodeSelected(node: [number, number], selection: Selection) {
   if (selection.type === "point") {
     return pointIsOnPoint(selection.data, node);
@@ -84,6 +113,11 @@ function isNodeSelected(node: [number, number], selection: Selection) {
   if (selection.type === "box") {
     return boxContains(selection.data, [node, node]);
   }
+}
+
+function isSegmentSelected(segment: [[number, number], [number, number]], selection: Selection) {
+  if (selection.type === "box") return false;
+  return pointIsOnLine(selection.data, segment);
 }
 
 function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selection: Selection) {
@@ -96,11 +130,27 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 
             if (!geom) return gs;
 
-            const hitNodes = geom.control
+            let hitNodes = geom.control
               .map((node, nodeIndex) => {
                 return isNodeSelected(node, selection) ? { index: nodeIndex } : null;
               })
               .filter(nodeSelection => nodeSelection !== null);
+
+            if (hitNodes.length < 1) {
+              hitNodes = geom.control
+                .map((node, i, nodes) => {
+                  const next = nodes.at(i + 1);
+                  if (!next) return null;
+
+                  if (isSegmentSelected([node, next], selection)) {
+                    return [{ index: i }, { index: i + 1}];
+                  }
+
+                  return null;
+                })
+                .filter(n => n !== null)
+                .flat();
+            }
 
             return {
               ...gs,
