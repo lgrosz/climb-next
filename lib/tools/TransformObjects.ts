@@ -20,6 +20,7 @@ export class TransformObjects extends SelectionTool implements Tool {
   private transform: TransformCallback;
   private origin: Point | null;
   private canceled: boolean;
+  private dragged: boolean;
 
   constructor(hitTest: HitTest, selectionCallback: SelectionCallback, transform: TransformCallback) {
     super(selectionCallback);
@@ -28,11 +29,14 @@ export class TransformObjects extends SelectionTool implements Tool {
     this.transform = transform;
     this.origin = null;
     this.canceled = false;
+    this.dragged = false;
   }
 
   override handle(e: SessionEvent): boolean {
     switch (e.type) {
       case "mousedown":
+        this.dragged = false;
+
         if (this.hitTest([e.x, e.y])) {
           this.origin = [e.x, e.y];
           return true;
@@ -44,13 +48,14 @@ export class TransformObjects extends SelectionTool implements Tool {
       case "mousemove":
         if (this.origin) {
           this.publish("transform", { type: "transform", transform: [e.x - this.origin[0], e.y - this.origin[1]] });
+          this.dragged = true;
           return true;
         }
 
         return super.handle(e);
 
       case "mouseup":
-        if (this.origin) {
+        if (this.origin && this.dragged) {
           this.transform([e.x - this.origin[0], e.y - this.origin[1]]);
           this.publish("transform", { type: "transform", transform: null });
           this.origin = null;
@@ -74,7 +79,9 @@ export class TransformObjects extends SelectionTool implements Tool {
 
         return super.handle(e);
 
-      // TODO if dragging, do I stop all other event propagation?
+      case "click":
+        if (this.dragged) return true;
+        return super.handle(e);
 
       default:
         return super.handle(e);
