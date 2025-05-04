@@ -94,48 +94,8 @@ export default function CanvasArea() {
 
   const ref = useRef<HTMLCanvasElement | null>(null);
 
-  // Make canvas focusable
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-
-    canvas.tabIndex = 0;
-
-    const focus = () => canvas.focus();
-
-    canvas.addEventListener("mousedown", focus);
-
-    return () => {
-      canvas.removeEventListener("mousedown", focus);
-    }
-  }, []);
-
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const { clientWidth, clientHeight } = canvas;
-
-      canvas.width = clientWidth * dpr;
-      canvas.height = clientHeight * dpr;
-
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(dpr, dpr);
-      }
-    };
-
-    resize();
-
-    const observer = new ResizeObserver(resize);
-    observer.observe(canvas);
-
-    return () => observer.disconnect();
-  }, [ref]);
-
+  // Renders tool related stuff, this is getting a bit ugly and seems like it'll
+  // continue as more tools are introduced
   const renderToolOverlay = useCallback((ctx: CanvasRenderingContext2D) => {
     ctx.save();
 
@@ -219,14 +179,13 @@ export default function CanvasArea() {
   }, [data, selection, sessionSelection, transform, world.lines, tool]);
 
   // Render method
-  useEffect(() => {
+  const redraw = useCallback(() => {
     const canvas = ref.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
 
     if (!ctx) {
-      alert("Unable to initialize render context. Your browser or machine may not support it.");
       return;
     }
 
@@ -256,6 +215,53 @@ export default function CanvasArea() {
     renderToolOverlay(ctx);
 
   }, [world.lines, sessionSelection.lines, renderToolOverlay]);
+
+
+  // Make canvas focusable
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    canvas.tabIndex = 0;
+    const focus = () => canvas.focus();
+    canvas.addEventListener("mousedown", focus);
+
+    return () => {
+      canvas.removeEventListener("mousedown", focus);
+    }
+  }, []);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const { clientWidth, clientHeight } = canvas;
+
+      canvas.width = clientWidth * dpr;
+      canvas.height = clientHeight * dpr;
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        redraw();
+      }
+    };
+
+    resize();
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+
+    return () => observer.disconnect();
+  }, [ref, redraw]);
+
+  // Redraw as the redraw method changes (world/session changes, etc)
+  useEffect(() => {
+    redraw();
+  }, [redraw]);
 
   const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
     // TODO I can see this blowing up
