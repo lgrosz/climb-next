@@ -232,8 +232,6 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
-    ctx.restore();
-
     // draw bounding boxes for the selected items
     for (const [index] of Object.entries(sessionSelection.lines)) {
       const line = world.lines.at(Number(index));
@@ -257,6 +255,7 @@ export default function CanvasArea() {
 
     renderToolOverlay(ctx);
 
+    ctx.restore();
   }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size]);
 
 
@@ -315,10 +314,15 @@ export default function CanvasArea() {
         return null;
       }
 
+      const canvas = ref.current;
+      if (!canvas) return null;
+
+      const { scale, offset } = computeViewportTransform(canvas, world.size);
+
       return {
         type: e.type as SessionEvent["type"],
-        x: e.offsetX,
-        y: e.offsetY,
+        x: (e.offsetX - offset[0]) / scale,
+        y: (e.offsetY - offset[1]) / scale,
         shiftKey: e.shiftKey,
       };
     } else if (e instanceof KeyboardEvent) {
@@ -330,7 +334,7 @@ export default function CanvasArea() {
     }
 
     return null;
-  }, []);
+  }, [world.size]);
 
   useEffect(() => {
     const canvas = ref.current!;
