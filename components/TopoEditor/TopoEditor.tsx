@@ -178,6 +178,7 @@ export default function TopoEditor(
   const [world, setWorld] = useState<TopoWorld>({
     title: "",
     lines: [],
+    size: { width: 4000, height: 3000 },
   });
   const worldRef = useRef(world);
 

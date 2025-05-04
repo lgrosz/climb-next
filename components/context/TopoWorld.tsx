@@ -1,6 +1,11 @@
 import { BasisSpline } from "@/lib/BasisSpline";
 import { createContext, Dispatch, SetStateAction, useContext } from "react";
 
+interface Size {
+  width: number;
+  height: number;
+}
+
 type Geometry =
   | BasisSpline;
 
@@ -12,6 +17,7 @@ export interface Line {
 export interface TopoWorld {
   title: string,
   lines: Line[],
+  size: Size,
 }
 
 interface TopoWorldContextType {
