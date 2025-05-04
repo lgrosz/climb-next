@@ -2,9 +2,11 @@ import PropertyInput from './PropertyInput';
 import { Line, useTopoWorld } from '../context/TopoWorld';
 import LineProperties from './LineProperties';
 import { useMemo } from 'react';
+import { useTopoSession } from '../context/TopoSession';
 
 export default function PropertiesPanel() {
   const { world, setWorld } = useTopoWorld();
+  const { availableClimbs } = useTopoSession();
 
   const lineAtIndexChanged = useMemo(() => {
     return world.lines.map((_, index) =>
@@ -31,6 +33,7 @@ export default function PropertiesPanel() {
           {world.lines.map((line, index) => (
             <LineProperties
               key={`line-${index}`}
+              availableClimbs={availableClimbs}
               line={line}
               onChange={lineAtIndexChanged[index]}
             />

@@ -5,6 +5,7 @@ type Geometry =
   | BasisSpline;
 
 export interface Line {
+  climbId?: string,
   geometry: Geometry,
 }
 
