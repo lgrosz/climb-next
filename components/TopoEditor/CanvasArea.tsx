@@ -5,6 +5,30 @@ import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 import { EditPaths, TransformObjects } from "@/lib/tools";
 
+function computeViewportTransform(
+  canvas: HTMLCanvasElement,
+  world: { width: number, height: number },
+  padding = 20
+) : {
+  scale: number,
+  offset: [number, number]
+} {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  const scaleX = (width - 2 * padding) / world.width;
+  const scaleY = (height - 2 * padding) / world.height;
+  const scale = Math.min(scaleX, scaleY); // Preserve aspect ratio
+
+  const worldDisplayWidth = world.width * scale;
+  const worldDisplayHeight = world.height * scale;
+
+  const offsetX = (width - worldDisplayWidth) / 2;
+  const offsetY = (height - worldDisplayHeight) / 2;
+
+  return { scale, offset: [offsetX, offsetY] };
+}
+
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
     let points;
@@ -189,7 +213,26 @@ export default function CanvasArea() {
       return;
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+
+    const { scale, offset } = computeViewportTransform(canvas, world.size);
+
+    ctx.fillStyle = "#ccc";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.translate(...offset);
+    ctx.scale(scale, scale);
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, world.size.width, world.size.height);
+    ctx.restore();
+
+    ctx.restore();
 
     // draw bounding boxes for the selected items
     for (const [index] of Object.entries(sessionSelection.lines)) {
@@ -214,7 +257,7 @@ export default function CanvasArea() {
 
     renderToolOverlay(ctx);
 
-  }, [world.lines, sessionSelection.lines, renderToolOverlay]);
+  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size]);
 
 
   // Make canvas focusable
