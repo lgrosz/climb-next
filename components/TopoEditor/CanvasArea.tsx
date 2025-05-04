@@ -32,7 +32,7 @@ const draw = {
   },
   node: function(ctx: CanvasRenderingContext2D, point: [number, number]) {
     const [x, y] = point;
-    const size = 15;
+    const size = 8;
 
     ctx.beginPath();
     ctx.moveTo(x, y - size);
@@ -57,7 +57,7 @@ const style = {
   },
   frame: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#0000ff";
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 3;
   },
   sketch: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#60a5fa";
@@ -66,7 +66,7 @@ const style = {
   },
   ghost: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
-    ctx.lineWidth = 12;
+    ctx.lineWidth = 6;
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
   },
   geometry: {
@@ -99,22 +99,35 @@ export default function CanvasArea() {
 
   // Renders tool related stuff, this is getting a bit ugly and seems like it'll
   // continue as more tools are introduced
-  const renderToolOverlay = useCallback((ctx: CanvasRenderingContext2D) => {
+  const renderToolOverlay = useCallback(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      return;
+    }
+
+    const toScreen = ([x, y]: [number, number]): [number, number] => [
+      x * zoom + pan[0],
+      y * zoom + pan[1],
+    ];
+
     ctx.save();
 
     if (data) {
-      // TODO translate date from-world to context
       style.frame(ctx);
-      draw.line(ctx, data);
+      draw.line(ctx, data.map(toScreen));
 
       if (data.length > 2) {
-        draw.spline(ctx, new BasisSpline(data, 2));
+        draw.spline(ctx, new BasisSpline(data.map(toScreen), 2));
       }
     }
 
-    if (selection && selection.type == "box") {
+    if (selection?.type == "box") {
       style.frame(ctx);
-      draw.box(ctx, selection.data);
+      draw.box(ctx, [toScreen(selection.data[0]), toScreen(selection.data[1])]);
     }
 
     if (tool instanceof EditPaths) {
@@ -122,24 +135,22 @@ export default function CanvasArea() {
         const geom = world.lines.at(Number(index))?.geometry;
         if (!geom) continue;
 
-        ctx.save();
         style.frame(ctx);
-        draw.line(ctx, geom.control);
-        ctx.restore();
+        draw.line(ctx, geom.control.map(toScreen));
 
-        for (const [index, point] of geom.control.entries()) {
-          const selected = cs.geometry.nodes?.some(n => n.index === index);
-
-          ctx.save();
+        for (const [i, point] of geom.control.entries()) {
+          const selected = cs.geometry.nodes?.some(n => n.index === i);
           style.diamond(ctx);
           if (selected) ctx.fillStyle = "#0000ff";
-          draw.node(ctx, point);
-          ctx.restore();
+          draw.node(ctx, toScreen(point));
         }
       }
     }
 
     if (transform) {
+      ctx.save();
+      style.ghost(ctx);
+
       // TODO if `TransformObjects` selected all nodes, the logic here could be identical
       if (tool instanceof EditPaths) {
         for (const [index, line] of world.lines.entries()) {
@@ -147,21 +158,23 @@ export default function CanvasArea() {
           if (!sClimb) continue;
 
           const geom = line.geometry;
-          const control: [number, number][] = geom.control.map((c, i) => {
-            const selected = sClimb.geometry.nodes?.some((n => n.index === i));
 
-            if (selected) {
-              return [c[0] + transform[0], c[1] + transform[1]]
-            } else {
-              return c;
-            }
+          const transformedControl: [number, number][] = geom.control.map((c, i) => {
+            const selected = sClimb.geometry.nodes?.some(n => n.index === i);
+            const world: [number, number] = selected
+              ? [c[0] + transform[0], c[1] + transform[1]]
+              : c;
+            return toScreen(world);
           });
 
-          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
+          const transformedGeom = new BasisSpline(
+            transformedControl,
+            geom.degree,
+            geom.knots
+          );
 
-          style.ghost(ctx);
           draw.spline(ctx, transformedGeom);
-          draw.line(ctx, transformedGeom.control);
+          draw.line(ctx, transformedControl);
         }
       } else if (tool instanceof TransformObjects) {
         for (const [index, line] of world.lines.entries()) {
@@ -169,17 +182,26 @@ export default function CanvasArea() {
           if (!sClimb) continue;
 
           const geom = line.geometry;
-          const control: [number, number][] = geom.control.map(c => [c[0] + transform[0], c[1] + transform[1]]);
-          const transformedGeom = new BasisSpline(control, geom.degree, geom.knots);
 
-          style.ghost(ctx);
+          const transformedControl: [number, number][] = geom.control.map(c =>
+            toScreen([c[0] + transform[0], c[1] + transform[1]])
+          );
+
+          const transformedGeom = new BasisSpline(
+            transformedControl,
+            geom.degree,
+            geom.knots
+          );
+
           draw.spline(ctx, transformedGeom);
         }
       }
+
+      ctx.restore();
     }
 
     ctx.restore();
-  }, [data, selection, sessionSelection, transform, world.lines, tool]);
+  }, [data, selection, sessionSelection, transform, world.lines, tool, pan, zoom]);
 
   // Render method
   const redraw = useCallback(() => {
@@ -210,6 +232,7 @@ export default function CanvasArea() {
     ctx.restore();
 
     // draw bounding boxes for the selected items
+    // TODO these should be fixed sizes
     for (const [index] of Object.entries(sessionSelection.lines)) {
       const line = world.lines.at(Number(index));
       if (!line) continue;
@@ -230,9 +253,9 @@ export default function CanvasArea() {
       ctx.restore();
     }
 
-    renderToolOverlay(ctx);
-
     ctx.restore();
+
+    renderToolOverlay();
   }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom]);
 
 
