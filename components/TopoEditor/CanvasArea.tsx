@@ -1,33 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BasisSpline } from "@/lib/BasisSpline";
 import { useTopoWorld } from "../context/TopoWorld";
 import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 import { EditPaths, TransformObjects } from "@/lib/tools";
-
-function computeViewportTransform(
-  canvas: HTMLCanvasElement,
-  world: { width: number, height: number },
-  padding = 20
-) : {
-  scale: number,
-  offset: [number, number]
-} {
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-
-  const scaleX = (width - 2 * padding) / world.width;
-  const scaleY = (height - 2 * padding) / world.height;
-  const scale = Math.min(scaleX, scaleY); // Preserve aspect ratio
-
-  const worldDisplayWidth = world.width * scale;
-  const worldDisplayHeight = world.height * scale;
-
-  const offsetX = (width - worldDisplayWidth) / 2;
-  const offsetY = (height - worldDisplayHeight) / 2;
-
-  return { scale, offset: [offsetX, offsetY] };
-}
 
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
@@ -115,6 +91,9 @@ export default function CanvasArea() {
     selection,
     transform,
   } = useTool(tool);
+
+  const [pan, setPan] = useState<[number, number]>([0, 0]);
+  const [zoom, setZoom] = useState(1);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
 
@@ -215,13 +194,11 @@ export default function CanvasArea() {
 
     ctx.save();
 
-    const { scale, offset } = computeViewportTransform(canvas, world.size);
-
     ctx.fillStyle = "#ccc";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.translate(...offset);
-    ctx.scale(scale, scale);
+    ctx.translate(...pan);
+    ctx.scale(zoom, zoom);
 
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
@@ -256,7 +233,7 @@ export default function CanvasArea() {
     renderToolOverlay(ctx);
 
     ctx.restore();
-  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size]);
+  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom]);
 
 
   // Make canvas focusable
@@ -272,6 +249,48 @@ export default function CanvasArea() {
       canvas.removeEventListener("mousedown", focus);
     }
   }, []);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    function onWheel(e: WheelEvent) {
+      e.preventDefault();
+      if (!canvas) return;
+
+      const { deltaX, deltaY, ctrlKey } = e;
+
+      if (ctrlKey) {
+        const zoomFactor = 1.05;
+        const scaleDelta = deltaY < 0 ? zoomFactor : 1 / zoomFactor;
+
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const worldX = (mouseX - pan[0]) / zoom;
+        const worldY = (mouseY - pan[1]) / zoom;
+
+        const newScale = zoom * scaleDelta;
+
+        setZoom(newScale);
+        setPan([
+          mouseX - worldX * newScale,
+          mouseY - worldY * newScale,
+        ]);
+      } else {
+        setPan(prev => [
+          prev[0] - deltaX,
+          prev[1] - deltaY,
+        ]);
+      }
+
+      requestAnimationFrame(() => redraw());
+    }
+
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', onWheel);
+  }, [pan, redraw, zoom]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -317,12 +336,10 @@ export default function CanvasArea() {
       const canvas = ref.current;
       if (!canvas) return null;
 
-      const { scale, offset } = computeViewportTransform(canvas, world.size);
-
       return {
         type: e.type as SessionEvent["type"],
-        x: (e.offsetX - offset[0]) / scale,
-        y: (e.offsetY - offset[1]) / scale,
+        x: (e.offsetX - pan[0]) / zoom,
+        y: (e.offsetY - pan[1]) / zoom,
         shiftKey: e.shiftKey,
       };
     } else if (e instanceof KeyboardEvent) {
@@ -334,7 +351,7 @@ export default function CanvasArea() {
     }
 
     return null;
-  }, [world.size]);
+  }, [pan, zoom]);
 
   useEffect(() => {
     const canvas = ref.current!;
