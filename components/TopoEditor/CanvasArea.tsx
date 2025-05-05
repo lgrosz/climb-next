@@ -321,7 +321,7 @@ export default function CanvasArea() {
 
   // Redraw as the redraw method changes (world/session changes, etc)
   useEffect(() => {
-    redraw();
+    requestAnimationFrame(() => redraw());
   }, [redraw]);
 
   const toSession = useCallback((e: MouseEvent | KeyboardEvent): SessionEvent | null => {
