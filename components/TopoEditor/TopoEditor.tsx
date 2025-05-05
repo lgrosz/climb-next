@@ -14,7 +14,7 @@ import { BasisSpline } from '@/lib/BasisSpline';
 function isPointOnBasisSpline(
   spline: BasisSpline,
   point: [number, number],
-  tolerance: number = 5
+  tolerance: number = 15
 ): boolean {
   const samples = spline.sample();
   const [px, py] = point;
@@ -66,7 +66,7 @@ function selectObjects(world: TopoWorld, selection: Selection) {
 function pointIsOnPoint(
   p1: [number, number],
   p2: [number, number],
-  tolerance: number = 5,
+  tolerance: number = 15,
 ) {
   const dx = p1[0] - p2[0];
   const dy = p1[1] - p2[1];
@@ -79,7 +79,7 @@ function pointIsOnPoint(
 function pointIsOnLine(
   point: [number, number],
   segment: [[number, number], [number, number]],
-  tolerance: number = 5
+  tolerance: number = 15,
 ): boolean {
   const [px, py] = point;
   const [[x1, y1], [x2, y2]] = segment;

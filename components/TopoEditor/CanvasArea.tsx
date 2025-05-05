@@ -56,7 +56,7 @@ const draw = {
   },
   node: function(ctx: CanvasRenderingContext2D, point: [number, number]) {
     const [x, y] = point;
-    const size = 5;
+    const size = 15;
 
     ctx.beginPath();
     ctx.moveTo(x, y - size);
@@ -77,27 +77,27 @@ const style = {
   diamond: function(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "#d1d5db";
     ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 3;
   },
   frame: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#0000ff";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 6;
   },
   sketch: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#60a5fa";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 3;
+    ctx.setLineDash([15, 15]);
   },
   ghost: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 12;
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
   },
   geometry: {
     spline: {
       fixed: function(ctx: CanvasRenderingContext2D) {
         ctx.strokeStyle = "#3b82f6";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 12;
         ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
         ctx.shadowBlur = 8;
         ctx.shadowOffsetX = 4;
