@@ -7,17 +7,16 @@ const query = graphql(`
   ){
     image(id: $id) {
       downloadUrl
+      alt
     }
   }
 `)
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
-  const data = await graphqlQuery(query, { id: id });
+  const { image } = await graphqlQuery(query, { id: id });
 
-  // TODO alt text
   return (
-    <img src={data.image.downloadUrl ?? undefined}>
-    </img>
+    <img alt={image.alt ?? undefined} src={image.downloadUrl ?? undefined} />
   );
 }

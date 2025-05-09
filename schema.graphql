@@ -93,6 +93,7 @@ input GradeInput {
 }
 
 type Image {
+  alt: String
   downloadUrl: String
   id: ID!
 }
@@ -203,6 +204,9 @@ type MutationRoot {
     parent: FormationParentInput
   ): Formation!
   prepareImageUpload(
+    """Alternative text"""
+    alt: String
+
     """Name of image file"""
     name: String!
   ): PrepareImageUploadResult!
