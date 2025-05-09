@@ -3,12 +3,13 @@
 import Form from "next/form";
 import { prepareImageUpload } from "@/images/actions";
 import { useRouter } from "next/navigation";
-import { FormEvent, useCallback, useRef } from "react";
+import { FormEvent, useCallback, useRef, useState } from "react";
 
 export default function Page()
 {
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+  const [progress, setProgress] = useState(0);
 
   const handle = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,15 +27,30 @@ export default function Page()
 
     const { image, uploadUrl } = await prepareImageUpload(file.name, alt || undefined);
 
-    const arrayBuffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", uploadUrl);
 
-    await fetch(uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": file.type,
-      },
-      body: bytes,
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          setProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setProgress(100);
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Network error during upload"));
+
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.send(file);
     });
 
     router.push(`/images/${image.id}`);
@@ -46,6 +62,12 @@ export default function Page()
       <label htmlFor="alt">Alternative text</label>
       <input name="alt" type="text" />
       <button type="submit">Upload image</button>
+      { progress > 0 &&
+        <>
+          <label htmlFor="progress">Progress</label>
+          <progress max="100" value={progress}>{progress}%</progress>
+        </>
+      }
     </Form>
   );
 }
