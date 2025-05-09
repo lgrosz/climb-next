@@ -318,6 +318,7 @@ type QueryRoot {
     parent: FormationParentInput
   ): [Formation!]!
   image(id: ID!): Image!
+  images: [Image!]!
 }
 
 type Vermin {

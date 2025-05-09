@@ -14,9 +14,14 @@ export interface Line {
   geometry: Geometry,
 }
 
+export interface Image {
+  id: string,
+}
+
 export interface TopoWorld {
   title: string,
   lines: Line[],
+  background?: Image,
   size: Size,
 }
 

@@ -3,6 +3,7 @@ import { Line, useTopoWorld } from '../context/TopoWorld';
 import LineProperties from './LineProperties';
 import { useMemo } from 'react';
 import { useTopoSession } from '../context/TopoSession';
+import ImageProperties from './ImageProperties';
 
 export default function PropertiesPanel() {
   const { world, setWorld } = useTopoWorld();
@@ -28,6 +29,12 @@ export default function PropertiesPanel() {
           value={world.title}
           onChange={e => setWorld({ ...world, title: e.target.value })}
         />
+        <h3 className="text-lg font-semibold mb-4">Background</h3>
+        <div>
+          {world.background &&
+            <ImageProperties image={world.background} />
+          }
+        </div>
         <h3 className="text-lg font-semibold mb-4">Lines</h3>
         <div>
           {world.lines.map((line, index) => (
