@@ -167,12 +167,18 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 
 export default function TopoEditor(
   {
-    availableClimbs
+    availableClimbs,
+    availableImages,
   }: {
     availableClimbs: {
       id: string,
       name: string,
-    }[]
+    }[],
+    availableImages: {
+      id: string,
+      alt?: string,
+      src?: string,
+    }[],
   }
 ) {
   const [world, setWorld] = useState<TopoWorld>({
@@ -415,6 +421,7 @@ export default function TopoEditor(
       <TopoSessionContext.Provider
         value={{
           availableClimbs,
+          availableImages,
           tool,
           setTool,
           dispatch,
