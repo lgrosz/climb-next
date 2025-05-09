@@ -5,6 +5,26 @@ import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 import { EditPaths, TransformObjects } from "@/lib/tools";
 
+function fitDimensions(
+  width: number,
+  height: number,
+  thingWidth: number,
+  thingHeight: number
+): [number, number] {
+  if (thingWidth === 0 || thingHeight === 0) {
+    return [0, 0];
+  }
+
+  const widthRatio = width / thingWidth;
+  const heightRatio = height / thingHeight;
+  const scale = Math.min(widthRatio, heightRatio);
+
+  const fitWidth = thingWidth * scale;
+  const fitHeight = thingHeight * scale;
+
+  return [fitWidth, fitHeight];
+}
+
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
     let points;
@@ -85,7 +105,14 @@ const style = {
 
 export default function CanvasArea() {
   const { world } = useTopoWorld();
-  const { tool, dispatch, selection: sessionSelection } = useTopoSession();
+
+  const {
+    tool,
+    dispatch,
+    selection: sessionSelection,
+    availableImages
+  } = useTopoSession();
+
   const {
     data,
     selection,
@@ -96,6 +123,20 @@ export default function CanvasArea() {
   const [zoom, setZoom] = useState(1);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
+  const background = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    // Ensures the image is created at the client-level
+    background.current = new Image();
+  }, [])
+
+  useEffect(() => {
+    const sessionImage = availableImages.find(i => i.id === world.background?.id);
+
+    if (sessionImage?.src && background.current) {
+      background.current.src = sessionImage.src;
+    }
+  }, [world.background, availableImages]);
 
   // Renders tool related stuff, this is getting a bit ugly and seems like it'll
   // continue as more tools are introduced
@@ -231,6 +272,11 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
+    if (background.current && background.current.naturalWidth) {
+      const dims = fitDimensions(world.size.width, world.size.height, background.current.naturalWidth, background.current.naturalHeight);
+      ctx.drawImage(background.current, 0, 0, ...dims);
+    }
+
     // draw bounding boxes for the selected items
     // TODO these should be fixed sizes
     for (const [index] of Object.entries(sessionSelection.lines)) {
@@ -258,6 +304,15 @@ export default function CanvasArea() {
     renderToolOverlay();
   }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom]);
 
+  // redraw canvas when background image loads
+  useEffect(() => {
+    const img = background.current;
+    img?.addEventListener("load", redraw);
+
+    return (() => {
+      img?.removeEventListener("load", redraw);
+    });
+  }, [redraw]);
 
   // Make canvas focusable
   useEffect(() => {

@@ -6,6 +6,12 @@ interface Climb {
   name: string,
 }
 
+interface Image {
+  id: string,
+  alt?: string,
+  src?: string,
+}
+
 interface Event {
   type: string;
 }
@@ -46,6 +52,11 @@ interface TopoSessionContextType {
    * Climbs that are available in the session context
    */
   availableClimbs: Climb[],
+
+  /**
+   * Images that are available in the session context
+   */
+  availableImages: Image[],
 
   /**
    * The active tool
