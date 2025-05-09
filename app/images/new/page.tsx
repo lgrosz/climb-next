@@ -1,11 +1,21 @@
+"use client";
+
 import Form from "next/form";
 import { prepareImageUpload } from "@/images/actions";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { FormEvent, useCallback, useRef } from "react";
 
-export default async function Page()
+export default function Page()
 {
-  const action = async (formData: FormData) => {
-    'use server';
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+
+  const handle = useCallback(async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formRef.current) return;
+
+    const formData = new FormData(formRef.current);
     const file = formData.get("image") as File | null;
     const alt = formData.get("alt")?.toString();
 
@@ -27,11 +37,11 @@ export default async function Page()
       body: bytes,
     });
 
-    redirect(`/images/${image.id}`);
-  }
+    router.push(`/images/${image.id}`);
+  }, [router]);
 
   return (
-    <Form action={action}>
+    <Form ref={formRef} action="" onSubmit={handle}>
       <input name="image" type="file" accept="image/*" />
       <label htmlFor="alt">Alternative text</label>
       <input name="alt" type="text" />

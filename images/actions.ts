@@ -1,3 +1,5 @@
+"use server";
+
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
 
