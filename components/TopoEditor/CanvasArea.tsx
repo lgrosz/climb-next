@@ -5,26 +5,6 @@ import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 import { EditPaths, TransformObjects } from "@/lib/tools";
 
-function fitDimensions(
-  width: number,
-  height: number,
-  thingWidth: number,
-  thingHeight: number
-): [number, number] {
-  if (thingWidth === 0 || thingHeight === 0) {
-    return [0, 0];
-  }
-
-  const widthRatio = width / thingWidth;
-  const heightRatio = height / thingHeight;
-  const scale = Math.min(widthRatio, heightRatio);
-
-  const fitWidth = thingWidth * scale;
-  const fitHeight = thingHeight * scale;
-
-  return [fitWidth, fitHeight];
-}
-
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
     let points;
@@ -272,9 +252,8 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
-    if (background.current && background.current.naturalWidth) {
-      const dims = fitDimensions(world.size.width, world.size.height, background.current.naturalWidth, background.current.naturalHeight);
-      ctx.drawImage(background.current, 0, 0, ...dims);
+    if (background.current && background.current.naturalWidth && world.background) {
+      ctx.drawImage(background.current, 0, 0, world.background.size.width, world.background.size.height);
     }
 
     // draw bounding boxes for the selected items
@@ -302,7 +281,7 @@ export default function CanvasArea() {
     ctx.restore();
 
     renderToolOverlay();
-  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom]);
+  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, world.background]);
 
   // redraw canvas when background image loads
   useEffect(() => {
