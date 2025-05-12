@@ -37,7 +37,8 @@ export default function PropertiesPanel() {
         <div>
           <BackgroundProperties
             value={world.background}
-            availableImages={availableImages.map(({ id, alt }) => ({ id, alt: alt ?? "" }))}
+            availableImages={availableImages.map(({ id, alt, src }) => ({ id, alt: alt ?? "", src: src ?? "" }))}
+            fitTo={world.size}
             onChange={backgroundChanged}
           />
         </div>
