@@ -252,8 +252,9 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
-    if (background.current && background.current.naturalWidth && world.background) {
-      ctx.drawImage(background.current, 0, 0, world.background.size.width, world.background.size.height);
+    const image = background.current;
+    if (image && image.naturalWidth && world.background) {
+      ctx.drawImage(image, world.background.position.x, world.background.position.y, image.naturalWidth, image.naturalHeight, world.background.position.x, world.background.position.y, world.background.size.width, world.background.size.height);
     }
 
     // draw bounding boxes for the selected items

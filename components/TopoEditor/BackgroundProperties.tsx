@@ -63,6 +63,7 @@ export default function BackgroundProperties({
         onChange({
           id: imageId,
           size: { width, height },
+          position: { x: 0, y: 0 },
         });
       }
     }
