@@ -16,6 +16,7 @@ export interface Line {
 
 export interface Image {
   id: string,
+  size: Size,
 }
 
 export interface TopoWorld {
