@@ -6,6 +6,11 @@ interface Size {
   height: number;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 type Geometry =
   | BasisSpline;
 
@@ -17,6 +22,7 @@ export interface Line {
 export interface Image {
   id: string,
   size: Size,
+  position: Position,
 }
 
 export interface TopoWorld {
