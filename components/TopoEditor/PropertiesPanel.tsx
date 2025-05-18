@@ -30,6 +30,7 @@ export default function PropertiesPanel() {
       <div className="space-y-4">
         <PropertyInput
           label="Title"
+          type="text"
           value={world.title}
           onChange={e => setWorld({ ...world, title: e.target.value })}
         />
