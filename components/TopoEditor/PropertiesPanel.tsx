@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react';
 import { useTopoSession } from '../context/TopoSession';
 import { Image } from "@/components/context/TopoWorld";
 import BackgroundProperties from './BackgroundProperties';
+import CanvasProperties from './CanvasProperties';
 
 export default function PropertiesPanel() {
   const { world, setWorld } = useTopoWorld();
@@ -24,6 +25,10 @@ export default function PropertiesPanel() {
     setWorld({ ...world, background: image ?? undefined })
   }, [setWorld, world]);
 
+  const resizeCanvas = useCallback((size: { width: number, height: number }) => {
+    setWorld({...world, size });
+  }, [world, setWorld]);
+
   return (
     <div className="w-80 bg-white border-l p-4 overflow-y-auto">
       <h2 className="text-lg font-semibold mb-4">Properties</h2>
@@ -33,6 +38,10 @@ export default function PropertiesPanel() {
           type="text"
           value={world.title}
           onChange={e => setWorld({ ...world, title: e.target.value })}
+        />
+        <CanvasProperties
+          value={world.size}
+          onChange={resizeCanvas}
         />
         <h3 className="text-lg font-semibold mb-4">Background</h3>
         <div>
