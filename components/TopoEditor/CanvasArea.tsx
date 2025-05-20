@@ -238,7 +238,7 @@ export default function CanvasArea() {
     ctx.shadowOffsetX = 4;
     ctx.shadowOffsetY = 4;
     ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, world.size.width, world.size.height);
+    ctx.fillRect(world.origin.x, world.origin.y, world.size.width, world.size.height);
     ctx.restore();
 
     if (background && world.background) {
@@ -270,7 +270,7 @@ export default function CanvasArea() {
     ctx.restore();
 
     renderToolOverlay();
-  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, world.background, background]);
+  }, [world.lines, world.origin.x, world.origin.y, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, world.background, background]);
 
   // Make canvas focusable
   useEffect(() => {

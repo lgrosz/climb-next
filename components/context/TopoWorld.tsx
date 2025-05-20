@@ -30,6 +30,7 @@ export interface TopoWorld {
   lines: Line[],
   background?: Image,
   size: Size,
+  origin: Position,
 }
 
 interface TopoWorldContextType {

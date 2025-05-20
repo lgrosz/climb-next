@@ -185,6 +185,7 @@ export default function TopoEditor(
     title: "",
     lines: [],
     size: { width: 4000, height: 3000 },
+    origin: { x: 0, y: 0 },
   });
   const worldRef = useRef(world);
 
