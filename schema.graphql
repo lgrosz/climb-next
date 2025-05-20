@@ -167,6 +167,16 @@ type MutationRoot {
     """Formation parent"""
     parent: FormationParentInput
   ): Formation!
+  addTopo(
+    """Topo height"""
+    height: Float!
+
+    """Topo title"""
+    title: String
+
+    """Topo width"""
+    width: Float!
+  ): Topo!
   dateAscent(
     """Area name"""
     dateInterval: DateInterval
@@ -292,9 +302,18 @@ type MutationRoot {
     """Formation name"""
     name: String
   ): Formation!
+  topo(
+    """ID of topo"""
+    id: ID!
+  ): TopoMutationRoot!
 }
 
 type Point2D {
+  x: Float!
+  y: Float!
+}
+
+input Point2DInput {
   x: Float!
   y: Float!
 }
@@ -352,6 +371,11 @@ type Rect {
   min: Point2D!
 }
 
+input RectInput {
+  max: Point2DInput!
+  min: Point2DInput!
+}
+
 type Topo {
   features: [TopoFeature!]!
   height: Float!
@@ -362,10 +386,24 @@ type Topo {
 
 union TopoFeature = TopoImageFeature
 
+input TopoFeatureInput {
+  image: TopoImageFeatureInput
+}
+
 type TopoImageFeature {
   dest: Rect!
   image: Image!
   source: Rect
+}
+
+input TopoImageFeatureInput {
+  dest: RectInput!
+  imageId: Int!
+  source: RectInput
+}
+
+type TopoMutationRoot {
+  addFeature(feature: TopoFeatureInput!): Topo!
 }
 
 type Vermin {
