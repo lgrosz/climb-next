@@ -4,6 +4,7 @@ import { useTopoWorld } from "../context/TopoWorld";
 import { SessionEvent, useTopoSession } from "../context/TopoSession";
 import useTool from "@/hooks/useTool";
 import { EditPaths, TransformObjects } from "@/lib/tools";
+import useImage from "@/hooks/useImage";
 
 const draw = {
   spline: function(ctx: CanvasRenderingContext2D, spline: BasisSpline) {
@@ -103,20 +104,8 @@ export default function CanvasArea() {
   const [zoom, setZoom] = useState(1);
 
   const ref = useRef<HTMLCanvasElement | null>(null);
-  const background = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    // Ensures the image is created at the client-level
-    background.current = new Image();
-  }, [])
-
-  useEffect(() => {
-    const sessionImage = availableImages.find(i => i.id === world.background?.id);
-
-    if (sessionImage?.src && background.current) {
-      background.current.src = sessionImage.src;
-    }
-  }, [world.background, availableImages]);
+  const src = availableImages.find(i => i.id === world.background?.id)?.src;
+  const [background] = useImage(src);
 
   // Renders tool related stuff, this is getting a bit ugly and seems like it'll
   // continue as more tools are introduced
@@ -252,9 +241,8 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
-    const image = background.current;
-    if (image && image.naturalWidth && world.background) {
-      ctx.drawImage(image, world.background.position.x, world.background.position.y, image.naturalWidth, image.naturalHeight, world.background.position.x, world.background.position.y, world.background.size.width, world.background.size.height);
+    if (background && world.background) {
+      ctx.drawImage(background, world.background.position.x, world.background.position.y, background.naturalWidth, background.naturalHeight, world.background.position.x, world.background.position.y, world.background.size.width, world.background.size.height);
     }
 
     // draw bounding boxes for the selected items
@@ -282,17 +270,7 @@ export default function CanvasArea() {
     ctx.restore();
 
     renderToolOverlay();
-  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, world.background]);
-
-  // redraw canvas when background image loads
-  useEffect(() => {
-    const img = background.current;
-    img?.addEventListener("load", redraw);
-
-    return (() => {
-      img?.removeEventListener("load", redraw);
-    });
-  }, [redraw]);
+  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, world.background, background]);
 
   // Make canvas focusable
   useEffect(() => {
