@@ -236,12 +236,15 @@ export default function CanvasArea() {
 
     ctx.save();
 
+    // draw "desk"
     ctx.fillStyle = "#ccc";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // zoom to paper
     ctx.translate(...pan);
     ctx.scale(zoom, zoom);
 
+    // "draw paper"
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
     ctx.shadowBlur = 8;
@@ -295,6 +298,7 @@ export default function CanvasArea() {
       ctx.restore();
     }
 
+    // zoom out from paper
     ctx.restore();
 
     renderToolOverlay();
