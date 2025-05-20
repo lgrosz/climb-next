@@ -61,6 +61,16 @@ export default function BackgroundProperties({
     });
   }, [onChange, value, image, fitTo.height, fitTo.width]);
 
+  const useNaturalSize = useCallback(() => {
+    if (!value || !image) return;
+
+    const [width, height] = [image.naturalWidth, image.naturalHeight];
+    onChange({
+      ...value,
+      size: { width, height }
+    });
+  }, [onChange, value, image]);
+
   return (
     <div className="space-y-4">
       <select onChange={updateBackground}>
@@ -74,7 +84,10 @@ export default function BackgroundProperties({
       {value &&
         <ImageProperties image={value} />
       }
-      <button disabled={!image?.complete} onClick={fitToCanvas}>Fit to canvas</button>
+      <div>
+        <button disabled={!image?.complete} onClick={fitToCanvas}>Fit to canvas</button>
+        <button disabled={!image?.complete} onClick={useNaturalSize}>Use natural size</button>
+      </div>
     </div>
   )
 }
