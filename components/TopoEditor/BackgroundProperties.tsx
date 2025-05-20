@@ -1,6 +1,7 @@
 import { Image as WorldImage } from "@/components/context/TopoWorld";
 import ImageProperties from "./ImageProperties";
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useCallback } from "react";
+import useImage from "@/hooks/useImage";
 
 function fitDimensions(
   width: number,
@@ -33,47 +34,32 @@ export default function BackgroundProperties({
   fitTo: { width: number, height: number },
   onChange: (change: WorldImage | null) => void,
 }) {
-  const [imageId, setImageId] = useState<string | null>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    imageRef.current = new Image;
-  }, [])
+  const src = availableImages.find(img => img.id === value?.id)?.src;
+  const [image] = useImage(src);
 
   const updateBackground = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
-    const data = availableImages.find(i => i.id === id);
 
-    if (id && data?.src && imageRef.current) {
-      setImageId(id);
-      imageRef.current.src = data.src;
+    if (id) {
+      onChange({
+        id,
+        size: { width: 0, height: 0 },
+        position: { x: 0, y: 0 },
+      });
     } else {
-      setImageId(null);
       onChange(null);
     }
-  }, [availableImages, onChange]);
+  }, [onChange]);
 
-  useEffect(() => {
-    const image = imageRef.current;
+  const fitToCanvas = useCallback(() => {
+    if (!value || !image) return;
 
-    const load = () => {
-      if (imageId && image) {
-        const [width, height] = fitDimensions(fitTo.width, fitTo.height, image.naturalWidth, image.naturalHeight);
-
-        onChange({
-          id: imageId,
-          size: { width, height },
-          position: { x: 0, y: 0 },
-        });
-      }
-    }
-
-    image?.addEventListener("load", load);
-
-    return (() => {
-      image?.removeEventListener("load", load);
+    const [width, height] = fitDimensions(fitTo.width, fitTo.height, image.naturalWidth, image.naturalHeight);
+    onChange({
+      ...value,
+      size: { width, height }
     });
-  }, [imageId, onChange, fitTo.width, fitTo.height]);
+  }, [onChange, value, image, fitTo.height, fitTo.width]);
 
   return (
     <div className="space-y-4">
@@ -88,6 +74,7 @@ export default function BackgroundProperties({
       {value &&
         <ImageProperties image={value} />
       }
+      <button disabled={!image?.complete} onClick={fitToCanvas}>Fit to canvas</button>
     </div>
   )
 }
