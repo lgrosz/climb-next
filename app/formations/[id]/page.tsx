@@ -107,6 +107,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </li>
         ))}
       </ul>
+      <div>
+        <Link href={`/images/new?formation=${formation.id}`}>Add image</Link>
+      </div>
     </div>
   )
 }

@@ -95,7 +95,19 @@ input GradeInput {
 type Image {
   alt: String
   downloadUrl: String
+  formations: [Formation!]!
   id: ID!
+}
+
+type ImageMutationRoot {
+  tagFormation(
+    """Formation ID"""
+    id: ID!
+  ): Image!
+  untagFormation(
+    """Formation ID"""
+    id: ID!
+  ): Image!
 }
 
 type MutationRoot {
@@ -182,6 +194,10 @@ type MutationRoot {
     """Formation id"""
     id: ID!
   ): Formation!
+  image(
+    """ID of image"""
+    id: ID!
+  ): ImageMutationRoot!
   moveArea(
     """Area id"""
     id: ID!
@@ -206,6 +222,9 @@ type MutationRoot {
   prepareImageUpload(
     """Alternative text"""
     alt: String
+
+    """IDs of formations in this image"""
+    formationIds: [ID!]
 
     """Name of image file"""
     name: String!
@@ -318,6 +337,7 @@ type QueryRoot {
     parent: FormationParentInput
   ): [Formation!]!
   image(id: ID!): Image!
+  images: [Image!]!
 }
 
 type Vermin {

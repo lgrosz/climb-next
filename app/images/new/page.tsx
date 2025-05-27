@@ -2,13 +2,14 @@
 
 import Form from "next/form";
 import { prepareImageUpload } from "@/images/actions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useCallback, useRef, useState } from "react";
 
 export default function Page()
 {
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+  const params = useSearchParams();
   const [progress, setProgress] = useState(0);
 
   const handle = useCallback(async (e: FormEvent<HTMLFormElement>) => {
@@ -25,7 +26,13 @@ export default function Page()
       return;
     }
 
-    const { image, uploadUrl } = await prepareImageUpload(file.name, alt || undefined);
+    console.log("prepareImageUpload with formations", params.getAll("formation"));
+
+    const { image, uploadUrl } = await prepareImageUpload(
+      file.name,
+      alt || undefined,
+      params.getAll("formation")
+    );
 
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -54,7 +61,7 @@ export default function Page()
     });
 
     router.push(`/images/${image.id}`);
-  }, [router]);
+  }, [router, params]);
 
   return (
     <Form ref={formRef} action="" onSubmit={handle}>

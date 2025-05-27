@@ -3,17 +3,19 @@
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
 
-export async function prepareImageUpload(name: string, alt?: string) {
+export async function prepareImageUpload(name: string, alt?: string, formationIds?: string[]) {
   // TODO Raise error on failure
 
   const mutation = graphql(`
     mutation prepareImageUpload(
       $name: String!
       $alt: String
+      $formationIds: [ID!]
     ) {
       action: prepareImageUpload(
         name: $name
         alt: $alt
+        formationIds: $formationIds
       ) {
         image { id }
         uploadUrl
@@ -23,7 +25,7 @@ export async function prepareImageUpload(name: string, alt?: string) {
 
   const data = await graphqlQuery(
     mutation,
-    { name, alt }
+    { name, alt, formationIds }
   );
 
   return ({
