@@ -1,5 +1,6 @@
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import Link from "next/link";
 
 const query = graphql(`
   query imageDownloadUrl(
@@ -8,6 +9,7 @@ const query = graphql(`
     image(id: $id) {
       downloadUrl
       alt
+      formations { id name }
     }
   }
 `)
@@ -23,6 +25,20 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         alt={image.alt ?? ""}
         className="w-full h-auto block"
       />
+      {image.formations.length > 0 && (
+        <div className="mt-6">
+          <h2>Formations in this image</h2>
+          <ul>
+            {image.formations.map((formation) => (
+              <li key={formation.id}>
+                <Link href={`/formations/${formation.id}`}>
+                  {formation.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
