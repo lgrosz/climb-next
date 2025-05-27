@@ -19,7 +19,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { image } = await graphqlQuery(query, { id: id });
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full max-w-3xl mx-auto p-4">
       <img
         src={image.downloadUrl ?? ""}
         alt={image.alt ?? ""}
