@@ -72,6 +72,7 @@ type Formation {
   description: String
   formations: [Formation!]!
   id: ID!
+  images: [Image!]!
   location: Coordinate
   name: String
   parent: FormationParent

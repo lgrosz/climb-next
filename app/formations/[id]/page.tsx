@@ -11,6 +11,7 @@ const formationData = graphql(`
       id name description
       location { latitude longitude }
       formations { id name }
+      images { id alt }
       climbs { id name }
       parent {
         __typename
@@ -108,8 +109,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         ))}
       </ul>
       <div>
+        <h3>Images</h3>
         <Link href={`/images/new?formation=${formation.id}`}>Add image</Link>
       </div>
+      <ul>
+        {formation.images.map((image) => (
+          <li key={`image-${image.id}`}>
+          <Link href={`/images/${image.id}`}>{image.alt}</Link>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
