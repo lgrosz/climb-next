@@ -7,7 +7,6 @@ const query = graphql(`
     $id: ID!
   ){
     image(id: $id) {
-      downloadUrl
       alt
       formations { id name }
     }
@@ -21,7 +20,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <div className="w-full max-w-3xl mx-auto p-4">
       <img
-        src={image.downloadUrl ?? ""}
+        src={`/images/${id}/download`}
         alt={image.alt ?? ""}
         className="w-full h-auto block"
       />
