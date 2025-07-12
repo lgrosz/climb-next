@@ -339,6 +339,14 @@ type QueryRoot {
   ): [Formation!]!
   image(id: ID!): Image!
   images: [Image!]!
+  topo(id: ID!): Topo!
+}
+
+type Topo {
+  height: Float!
+  id: ID!
+  title: String
+  width: Float!
 }
 
 type Vermin {

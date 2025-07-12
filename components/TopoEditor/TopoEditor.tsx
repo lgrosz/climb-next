@@ -167,15 +167,17 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 
 export default function TopoEditor(
   {
-    availableClimbs
+    availableClimbs,
+    world: initialWorld,
   }: {
     availableClimbs: {
       id: string,
       name: string,
-    }[]
+    }[],
+    world?: TopoWorld,
   }
 ) {
-  const [world, setWorld] = useState<TopoWorld>({
+  const [world, setWorld] = useState<TopoWorld>(initialWorld ?? {
     title: "",
     lines: [],
     size: { width: 4000, height: 3000 },
