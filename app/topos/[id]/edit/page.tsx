@@ -28,6 +28,7 @@ export default async function Page(
   const world: TopoWorld = {
       title: title ?? "",
       lines: [],
+      images: [],
       size: { width, height },
   };
 

@@ -6,6 +6,16 @@ interface Size {
   height: number;
 }
 
+interface Point2D {
+  x: number;
+  y: number;
+}
+
+interface Rect {
+  min: Point2D;
+  max: Point2D;
+}
+
 type Geometry =
   | BasisSpline;
 
@@ -14,8 +24,16 @@ export interface Line {
   geometry: Geometry,
 }
 
+export interface Image {
+  id: string,
+  alt?: string,
+  dest: Rect,
+  source?: Rect,
+};
+
 export interface TopoWorld {
   title: string,
+  images: Image[],
   lines: Line[],
   size: Size,
 }
