@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BasisSpline } from "@/lib/BasisSpline";
 import { useTopoWorld } from "../context/TopoWorld";
 import { SessionEvent, useTopoSession } from "../context/TopoSession";
@@ -91,6 +91,26 @@ export default function CanvasArea() {
     selection,
     transform,
   } = useTool(tool);
+
+  const images = useMemo(() => {
+    if (typeof window === "undefined") return new Map<string, HTMLImageElement>;
+
+    const map = new Map<string, HTMLImageElement>;
+
+    for (const image of world.images) {
+      const id = image.id;
+      const el = new Image;
+      el.src = `/images/${id}/download`;
+
+      if (image.alt) {
+        el.alt = image.alt;
+      }
+
+      map.set(id, el);
+    }
+
+    return map;
+  }, [world.images]); // NOTE world.images must not be mutated
 
   const [pan, setPan] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(1);
@@ -231,6 +251,28 @@ export default function CanvasArea() {
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
 
+    for (const image of world.images) {
+      const el = images.get(image.id);
+
+      if (el) {
+        const dx = image.dest.min.x;
+        const dy = image.dest.min.y;
+        const dWidth = image.dest.max.x - dx;
+        const dHeight = image.dest.max.y - dy;
+
+        if (image.source && el.naturalWidth) {
+          const sx = image.dest.min.x * el.naturalWidth;
+          const sy = image.dest.min.y * el.naturalHeight;
+          const sWidth = image.source.max.x * el.naturalWidth - sx;
+          const sHeight = image.source.max.y * el.naturalHeight - sy;
+
+          ctx.drawImage(el, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+        } else {
+          ctx.drawImage(el, dx, dy, dWidth, dHeight);
+        }
+      }
+    }
+
     // draw bounding boxes for the selected items
     // TODO these should be fixed sizes
     for (const [index] of Object.entries(sessionSelection.lines)) {
@@ -256,8 +298,24 @@ export default function CanvasArea() {
     ctx.restore();
 
     renderToolOverlay();
-  }, [world.lines, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom]);
+  }, [world.lines, world.images, sessionSelection.lines, renderToolOverlay, world.size, pan, zoom, images]);
 
+  // redraw when images load
+  useEffect(() => {
+    const listener = () => { redraw(); };
+    const cleanupFns: (() => void)[] = [];
+
+    for (const image of images.values()) {
+      image.addEventListener("load", listener);
+      cleanupFns.push(() => image.removeEventListener("load", listener));
+    }
+
+    return () => {
+      for (const cleanup of cleanupFns) {
+        cleanup();
+      }
+    };
+  }, [images, redraw]);
 
   // Make canvas focusable
   useEffect(() => {
