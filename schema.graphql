@@ -294,6 +294,11 @@ type MutationRoot {
   ): Formation!
 }
 
+type Point2D {
+  x: Float!
+  y: Float!
+}
+
 type PrepareImageUploadResult {
   image: Image!
   uploadUrl: String!
@@ -342,11 +347,25 @@ type QueryRoot {
   topo(id: ID!): Topo!
 }
 
+type Rect {
+  max: Point2D!
+  min: Point2D!
+}
+
 type Topo {
+  features: [TopoFeature!]!
   height: Float!
   id: ID!
   title: String
   width: Float!
+}
+
+union TopoFeature = TopoImageFeature
+
+type TopoImageFeature {
+  dest: Rect!
+  image: Image!
+  source: Rect
 }
 
 type Vermin {
