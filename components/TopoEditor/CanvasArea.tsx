@@ -74,10 +74,6 @@ const style = {
       fixed: function(ctx: CanvasRenderingContext2D) {
         ctx.strokeStyle = "#3b82f6";
         ctx.lineWidth = 12;
-        ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 4;
-        ctx.shadowOffsetY = 4;
       },
     },
   },
@@ -247,9 +243,6 @@ export default function CanvasArea() {
     // "draw paper"
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 4;
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
