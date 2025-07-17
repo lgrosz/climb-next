@@ -32,7 +32,10 @@ export default function LineProperties(
       </div>
       <h5>References</h5>
       <div>
-        <select onChange={updateClimb}>
+        <select
+          defaultValue={line.climbId ?? ""}
+          onChange={updateClimb}
+        >
           <option value="">
             Select a climb
           </option>

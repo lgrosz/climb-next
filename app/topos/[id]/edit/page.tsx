@@ -1,4 +1,4 @@
-import { TopoWorld, Image } from "@/components/context/TopoWorld";
+import { TopoWorld, Image, Line } from "@/components/context/TopoWorld";
 import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
@@ -15,6 +15,15 @@ const QUERY = graphql(`
             image { id alt }
             dest { min { x y } max { x y } }
             source { min { x y } max { x y } }
+          }
+          ... on TopoPathFeature {
+            geometry {
+              __typename
+              ... on BasisSpline {
+                degree knots
+                controlPoints { x y }
+              }
+            }
           }
         }
       }
@@ -49,9 +58,25 @@ export default async function Page(
       } : undefined,
     }));
 
+  const lines: Line[] = features
+    .filter(f => f.__typename === "TopoPathFeature")
+    .map(f => ({
+      geometry: {
+        points: f.geometry.controlPoints
+          .map(p => ([ p.x, p.y ])),
+        degree: f.geometry.degree,
+        knots: f.geometry.knots,
+      },
+      climbId: f.climb.id,
+    }));
+
+  // TODO get all available climbs
+  // - those already in the lines
+  // - climbs of the formations in the image
+
   const world: TopoWorld = {
       title: title ?? "",
-      lines: [],
+      lines,
       images,
       size: { width, height },
   };
