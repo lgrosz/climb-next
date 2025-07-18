@@ -11,7 +11,7 @@ const draw = {
 
     if (spline.degree === 1) {
       // Use control points directly for linear splines
-      points = spline.control;
+      points = spline.points;
     } else {
       // Sample for higher-degree splines
       points = spline.sample();
@@ -152,9 +152,9 @@ export default function CanvasArea() {
         if (!geom) continue;
 
         style.frame(ctx);
-        draw.line(ctx, geom.control.map(toScreen));
+        draw.line(ctx, geom.points.map(toScreen));
 
-        for (const [i, point] of geom.control.entries()) {
+        for (const [i, point] of geom.points.entries()) {
           const selected = cs.geometry.nodes?.some(n => n.index === i);
           style.diamond(ctx);
           if (selected) ctx.fillStyle = "#0000ff";
@@ -175,22 +175,22 @@ export default function CanvasArea() {
 
           const geom = line.geometry;
 
-          const transformedControl: [number, number][] = geom.control.map((c, i) => {
+          const points: [number, number][] = geom.points.map((p, i) => {
             const selected = sClimb.geometry.nodes?.some(n => n.index === i);
             const world: [number, number] = selected
-              ? [c[0] + transform[0], c[1] + transform[1]]
-              : c;
+              ? [p[0] + transform[0], p[1] + transform[1]]
+              : p;
             return toScreen(world);
           });
 
           const transformedGeom = new BasisSpline(
-            transformedControl,
+            points,
             geom.degree,
             geom.knots
           );
 
           draw.spline(ctx, transformedGeom);
-          draw.line(ctx, transformedControl);
+          draw.line(ctx, points);
         }
       } else if (tool instanceof TransformObjects) {
         for (const [index, line] of world.lines.entries()) {
@@ -199,12 +199,12 @@ export default function CanvasArea() {
 
           const geom = line.geometry;
 
-          const transformedControl: [number, number][] = geom.control.map(c =>
-            toScreen([c[0] + transform[0], c[1] + transform[1]])
+          const points: [number, number][] = geom.points.map(p =>
+            toScreen([p[0] + transform[0], p[1] + transform[1]])
           );
 
           const transformedGeom = new BasisSpline(
-            transformedControl,
+            points,
             geom.degree,
             geom.knots
           );
@@ -275,7 +275,7 @@ export default function CanvasArea() {
       const line = world.lines.at(Number(index));
       if (!line) continue;
 
-      const geom = new BasisSpline(line.geometry.control, line.geometry.degree, line.geometry.knots);
+      const geom = new BasisSpline(line.geometry.points, line.geometry.degree, line.geometry.knots);
       const box = geom.bounds();
 
       ctx.save();
@@ -287,7 +287,7 @@ export default function CanvasArea() {
     for (const line of world.lines) {
       ctx.save();
       style.geometry.spline.fixed(ctx);
-      const spline = new BasisSpline(line.geometry.control, line.geometry.degree, line.geometry.knots);
+      const spline = new BasisSpline(line.geometry.points, line.geometry.degree, line.geometry.knots);
       draw.spline(ctx, spline);
       ctx.restore();
     }

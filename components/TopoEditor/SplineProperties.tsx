@@ -3,28 +3,28 @@ import { BasisSpline } from "@/lib/BasisSpline";
 import { ChangeEvent, useCallback } from "react";
 
 export default function SplineProperties({
-  control,
+  points,
   degree,
   knots,
   onChange,
 }: {
-  control: [number, number][],
+  points: [number, number][],
   degree: number,
   knots: number[],
   onChange: (changes: Partial<{
-    control: [number, number][],
+    points: [number, number][],
     degree: number,
     knots: number[],
   }>) => void;
 }) {
-  const [spline] = useSpline(control, degree, knots);
+  const [spline] = useSpline(points, degree, knots);
 
   const updateDegree = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const degree = parseInt(e.target.value);
-    const knots = BasisSpline.openUniformKnots(control.length, degree);
+    const knots = BasisSpline.openUniformKnots(points.length, degree);
 
     onChange({ degree, knots });
-  }, [control.length, onChange]);
+  }, [points.length, onChange]);
 
   return (
     <div>
@@ -38,7 +38,7 @@ export default function SplineProperties({
           className="w-24 rounded border border-gray-300 px-2 py-1 text-sm"
           defaultValue={degree}
           min={1}
-          max={control.length - 1}
+          max={points.length - 1}
           onChange={updateDegree}
         />
       </div>

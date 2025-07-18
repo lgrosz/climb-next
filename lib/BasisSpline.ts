@@ -1,10 +1,10 @@
 export function deBoor(
   t: number,
   degree: number,
-  controlPoints: [number, number][],
+  points: [number, number][],
   knots: number[]
 ): [number, number] {
-  const n = controlPoints.length - 1;
+  const n = points.length - 1;
 
   // Find the knot span index `k`
   let k = -1;
@@ -22,7 +22,7 @@ export function deBoor(
   // Copy affected control points
   const d: [number, number][] = [];
   for (let j = 0; j <= degree; j++) {
-    d[j] = [...controlPoints[k - degree + j]];
+    d[j] = [...points[k - degree + j]];
   }
 
   // De Boor iterations
@@ -41,24 +41,24 @@ export function deBoor(
 }
 
 export class BasisSpline {
-  readonly control: [number, number][];
+  readonly points: [number, number][];
   readonly knots: number[];
   readonly degree: number;
 
   constructor(
-    control: [number, number][] = [[0, 0], [1, 1]],
+    points: [number, number][] = [[0, 0], [1, 1]],
       degree: number = 1,
       knots?: number[]
   ) {
-    if (degree < 1 || degree > control.length - 1) {
-      throw new Error(`Degree must be between 1 and ${control.length - 1}.`);
+    if (degree < 1 || degree > points.length - 1) {
+      throw new Error(`Degree must be between 1 and ${points.length - 1}.`);
     }
 
-    this.control = control.map(([x, y]) => [x, y]);
+    this.points = points.map(([x, y]) => [x, y]);
     this.degree = degree;
     this.knots = knots
       ? [...knots]
-      : BasisSpline.openUniformKnots(control.length, degree);
+      : BasisSpline.openUniformKnots(points.length, degree);
   }
 
   static openUniformKnots(n: number, k: number): number[] {
@@ -76,7 +76,7 @@ export class BasisSpline {
 
     for (let i = 0; i <= n; i++) {
       const t = tMin + (tMax - tMin) * (i / n);
-      const pt = f(t, this.degree, this.control, this.knots);
+      const pt = f(t, this.degree, this.points, this.knots);
       samples.push(pt);
     }
 

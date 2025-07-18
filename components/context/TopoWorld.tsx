@@ -16,7 +16,7 @@ interface Rect {
 }
 
 interface BasisSpline {
-  control: [number, number][];
+  points: [number, number][];
   knots: number[];
   degree: number;
 }
