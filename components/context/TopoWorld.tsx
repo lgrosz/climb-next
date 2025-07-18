@@ -1,4 +1,3 @@
-import { BasisSpline } from "@/lib/BasisSpline";
 import { createContext, Dispatch, SetStateAction, useContext } from "react";
 
 interface Size {
@@ -14,6 +13,12 @@ interface Point2D {
 interface Rect {
   min: Point2D;
   max: Point2D;
+}
+
+interface BasisSpline {
+  control: [number, number][];
+  knots: number[];
+  degree: number;
 }
 
 type Geometry =
