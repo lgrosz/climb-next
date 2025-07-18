@@ -51,11 +51,12 @@ function selectObjects(world: TopoWorld, selection: Selection) {
   const ret: SessionSelection = { lines: {} };
 
   world.lines.forEach(({ geometry }, index) => {
-    if (selection.type === "point" && isPointOnBasisSpline(geometry, selection.data)) {
+    const spline = new BasisSpline(geometry.control, geometry.degree, geometry.knots);
+    if (selection.type === "point" && isPointOnBasisSpline(spline, selection.data)) {
       ret.lines[index] = { geometry: { index } };
     }
 
-    if (selection.type === "box" && boxContains(selection.data, geometry.bounds())) {
+    if (selection.type === "box" && boxContains(selection.data, spline.bounds())) {
       ret.lines[index] = { geometry: { index } };
     }
   });
@@ -218,7 +219,9 @@ export default function TopoEditor(
 
       if (!geometry) continue;
 
-      if (isPointOnBasisSpline(geometry, point)) {
+      const spline = new BasisSpline(geometry.control, geometry.degree, geometry.knots);
+
+      if (isPointOnBasisSpline(spline, point)) {
         return true;
       }
     }
@@ -240,7 +243,7 @@ export default function TopoEditor(
               return [control[0] + offset[0], control[1] + offset[1]];
             });
 
-            return new BasisSpline(controls, geom.degree, geom.knots);
+            return { control: controls, degree: geom.degree, knots: geom.knots };
           })(line.geometry)
         }
       }),
@@ -315,7 +318,7 @@ export default function TopoEditor(
               }
             });
 
-            return new BasisSpline(controls, geom.degree, geom.knots);
+            return { control: controls, degree: geom.degree, knots: geom.knots };
           })(line.geometry)
         }
       }),
@@ -325,7 +328,7 @@ export default function TopoEditor(
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
     setWorld(prev => ({
       ...prev,
-      lines: [...prev.lines, { geometry: spline }],
+      lines: [...prev.lines, { geometry: { control: spline.control, degree: spline.degree, knots: spline.knots } }],
     }));
   }, [setWorld]);
 
@@ -345,10 +348,11 @@ export default function TopoEditor(
           // Only apply deletion if at least 2 control points would remain
           if (remaining.length > 1) {
             const degree = Math.min(line.geometry.degree, remaining.length - 1);
+            const spline = new BasisSpline(remaining, degree);
 
             return {
               ...line,
-              geometry: new BasisSpline(remaining, degree)
+              geometry: { control: spline.control, degree: spline.degree, knots: spline.knots }
             };
           } else {
             return line;

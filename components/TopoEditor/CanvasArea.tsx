@@ -275,7 +275,7 @@ export default function CanvasArea() {
       const line = world.lines.at(Number(index));
       if (!line) continue;
 
-      const geom = line.geometry;
+      const geom = new BasisSpline(line.geometry.control, line.geometry.degree, line.geometry.knots);
       const box = geom.bounds();
 
       ctx.save();
@@ -287,7 +287,8 @@ export default function CanvasArea() {
     for (const line of world.lines) {
       ctx.save();
       style.geometry.spline.fixed(ctx);
-      draw.spline(ctx, line.geometry);
+      const spline = new BasisSpline(line.geometry.control, line.geometry.degree, line.geometry.knots);
+      draw.spline(ctx, spline);
       ctx.restore();
     }
 

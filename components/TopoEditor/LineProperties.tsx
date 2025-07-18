@@ -1,7 +1,6 @@
 import { ChangeEvent, useCallback } from "react";
 import { Line } from "../context/TopoWorld";
 import SplineProperties from "./SplineProperties";
-import { BasisSpline } from "@/lib/BasisSpline";
 
 export default function LineProperties(
   {
@@ -14,8 +13,12 @@ export default function LineProperties(
     onChange: (line: Line) => void,
   }
 ) {
-  const updateSpline = useCallback((spline: BasisSpline) => {
-    onChange({ ...line, geometry: spline });
+  const updateSpline = useCallback((changes: Partial<{
+    control: [number, number][],
+    degree: number,
+    knots: number[],
+  }>) => {
+    onChange({ ...line, geometry: { ...line.geometry, ...changes } });
   }, [line, onChange]);
 
   const updateClimb = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
@@ -41,7 +44,9 @@ export default function LineProperties(
       <h5>Geometry</h5>
       <div>
         <SplineProperties
-          spline={line.geometry}
+          control={line.geometry.control}
+          degree={line.geometry.degree}
+          knots={line.geometry.knots}
           onChange={updateSpline}
         />
       </div>
