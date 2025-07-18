@@ -14,7 +14,7 @@ export default function LineProperties(
   }
 ) {
   const updateSpline = useCallback((changes: Partial<{
-    control: [number, number][],
+    points: [number, number][],
     degree: number,
     knots: number[],
   }>) => {
@@ -44,7 +44,7 @@ export default function LineProperties(
       <h5>Geometry</h5>
       <div>
         <SplineProperties
-          control={line.geometry.control}
+          points={line.geometry.points}
           degree={line.geometry.degree}
           knots={line.geometry.knots}
           onChange={updateSpline}

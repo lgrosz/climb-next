@@ -51,7 +51,7 @@ function selectObjects(world: TopoWorld, selection: Selection) {
   const ret: SessionSelection = { lines: {} };
 
   world.lines.forEach(({ geometry }, index) => {
-    const spline = new BasisSpline(geometry.control, geometry.degree, geometry.knots);
+    const spline = new BasisSpline(geometry.points, geometry.degree, geometry.knots);
     if (selection.type === "point" && isPointOnBasisSpline(spline, selection.data)) {
       ret.lines[index] = { geometry: { index } };
     }
@@ -131,14 +131,14 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 
             if (!geom) return gs;
 
-            let hitNodes = geom.control
+            let hitNodes = geom.points
               .map((node, nodeIndex) => {
                 return isNodeSelected(node, selection) ? { index: nodeIndex } : null;
               })
               .filter(nodeSelection => nodeSelection !== null);
 
             if (hitNodes.length < 1) {
-              hitNodes = geom.control
+              hitNodes = geom.points
                 .map((node, i, nodes) => {
                   const next = nodes.at(i + 1);
                   if (!next) return null;
@@ -219,7 +219,7 @@ export default function TopoEditor(
 
       if (!geometry) continue;
 
-      const spline = new BasisSpline(geometry.control, geometry.degree, geometry.knots);
+      const spline = new BasisSpline(geometry.points, geometry.degree, geometry.knots);
 
       if (isPointOnBasisSpline(spline, point)) {
         return true;
@@ -239,11 +239,11 @@ export default function TopoEditor(
         return {
           ...line,
           geometry: ((geom) => {
-            const controls: [number, number][] = geom.control.map(control => {
-              return [control[0] + offset[0], control[1] + offset[1]];
+            const points: [number, number][] = geom.points.map(p => {
+              return [p[0] + offset[0], p[1] + offset[1]];
             });
 
-            return { control: controls, degree: geom.degree, knots: geom.knots };
+            return { points, degree: geom.degree, knots: geom.knots };
           })(line.geometry)
         }
       }),
@@ -283,7 +283,7 @@ export default function TopoEditor(
       if (!geometry || !gs.nodes) continue;
 
       for (const { index: ni } of gs.nodes) {
-        const node = geometry.control.at(ni);
+        const node = geometry.points.at(ni);
         if (!node) continue;
 
         if (pointIsOnPoint(node, point)) {
@@ -308,17 +308,17 @@ export default function TopoEditor(
             const sGeom = sLine.geometry;
             if (!sGeom.nodes) return geom;
 
-            const controls: [number, number][] = geom.control.map((control, index) => {
-              const selected = sGeom.nodes?.some(n => n.index === index);
+            const points: [number, number][] = geom.points.map((p, i) => {
+              const selected = sGeom.nodes?.some(n => n.index === i);
 
               if (selected) {
-                return [control[0] + offset[0], control[1] + offset[1]];
+                return [p[0] + offset[0], p[1] + offset[1]];
               } else {
-                return control;
+                return p;
               }
             });
 
-            return { control: controls, degree: geom.degree, knots: geom.knots };
+            return { points, degree: geom.degree, knots: geom.knots };
           })(line.geometry)
         }
       }),
@@ -328,7 +328,7 @@ export default function TopoEditor(
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
     setWorld(prev => ({
       ...prev,
-      lines: [...prev.lines, { geometry: { control: spline.control, degree: spline.degree, knots: spline.knots } }],
+      lines: [...prev.lines, { geometry: { points: spline.points, degree: spline.degree, knots: spline.knots } }],
     }));
   }, [setWorld]);
 
@@ -343,7 +343,7 @@ export default function TopoEditor(
           if (!lineSelection?.geometry?.nodes) return line;
 
           const toDelete = new Set(lineSelection.geometry.nodes.map(n => n.index));
-          const remaining = line.geometry.control.filter((_, ni) => !toDelete.has(ni));
+          const remaining = line.geometry.points.filter((_, ni) => !toDelete.has(ni));
 
           // Only apply deletion if at least 2 control points would remain
           if (remaining.length > 1) {
@@ -352,7 +352,7 @@ export default function TopoEditor(
 
             return {
               ...line,
-              geometry: { control: spline.control, degree: spline.degree, knots: spline.knots }
+              geometry: { points: spline.points, degree: spline.degree, knots: spline.knots }
             };
           } else {
             return line;
