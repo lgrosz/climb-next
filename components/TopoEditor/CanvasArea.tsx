@@ -80,7 +80,7 @@ const style = {
 }
 
 export default function CanvasArea() {
-  const { world } = useTopoWorld();
+  const world = useTopoWorld();
   const { tool, dispatch, selection: sessionSelection } = useTopoSession();
   const {
     data,
