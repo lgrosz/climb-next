@@ -12,11 +12,18 @@ const QUERY = graphql(`
         features {
           __typename
           ... on TopoImageFeature {
-            image { id alt }
+            image {
+              id
+              alt
+              formations {
+                climbs { id name }
+              }
+            }
             dest { min { x y } max { x y } }
             source { min { x y } max { x y } }
           }
           ... on TopoPathFeature {
+            climb { id name }
             geometry {
               __typename
               ... on BasisSpline {
@@ -70,9 +77,28 @@ export default async function Page(
       climbId: f.climb.id,
     }));
 
-  // TODO get all available climbs
-  // - those already in the lines
-  // - climbs of the formations in the image
+  const climbs = features
+    .map(f => {
+      if (f.__typename === "TopoImageFeature") {
+        return f.image.formations
+          .map(f => f.climbs)
+          .flat()
+          .map(c => ({ id: c.id, name: c.name ?? "" }))
+      } else if (f.__typename === "TopoPathFeature") {
+        return { id: f.climb.id, name: f.climb.name ?? "" }
+      } else {
+        return null
+      }
+    })
+    .flat()
+    .filter(f => f !== null)
+    .reduce((acc, curr) => {
+      if (!acc.some(c => c.id === curr.id)) {
+        acc.push(curr);
+      }
+
+      return acc;
+    }, [] as { id: string; name: string }[]);
 
   const world: TopoWorld = {
       title: title ?? "",
@@ -84,7 +110,7 @@ export default async function Page(
   return (
     <div className="w-screen h-screen overflow-hidden">
       <TopoEditor
-        availableClimbs={[]}
+        availableClimbs={climbs}
         world={world}
       />
     </div>
