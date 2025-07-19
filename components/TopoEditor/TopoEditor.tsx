@@ -3,7 +3,7 @@
 import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
-import { TopoWorld, TopoWorldContext } from '../context/TopoWorld';
+import { TopoWorld, TopoWorldProvider, useTopoWorld, useTopoWorldDispatch } from '../context/TopoWorld';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
 import { CreateSplineTool, EditPaths, Tool, TransformObjects } from '@/lib/tools';
@@ -166,24 +166,19 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
   return ret;
 }
 
-export default function TopoEditor(
+// Need this as I refactor the not-so-ideal implementation
+function InnerTopoEditor(
   {
     availableClimbs,
-    world: initialWorld,
   }: {
     availableClimbs: {
       id: string,
       name: string,
     }[],
-    world?: TopoWorld,
   }
 ) {
-  const [world, setWorld] = useState<TopoWorld>(initialWorld ?? {
-    title: "",
-    lines: [],
-    images: [],
-    size: { width: 4000, height: 3000 },
-  });
+  const world = useTopoWorld();
+  const setWorld = useTopoWorldDispatch();
   const worldRef = useRef(world);
 
   const [tool, setTool] = useState<Tool | null>(null);
@@ -248,7 +243,7 @@ export default function TopoEditor(
         }
       }),
     }));
-  }, []);
+  }, [setWorld]);
 
   const onNodeSelect = useCallback((selection: Selection) => {
     const hasSelectedNodes = (s: SessionSelection) =>
@@ -323,7 +318,7 @@ export default function TopoEditor(
         }
       }),
     }));
-  }, []);
+  }, [setWorld]);
 
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
     setWorld(prev => ({
@@ -367,7 +362,7 @@ export default function TopoEditor(
     }
 
     return true;
-  }, [selection.lines, tool, world]);
+  }, [selection.lines, tool, world, setWorld]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -414,29 +409,42 @@ export default function TopoEditor(
   // doing so based on the context they're used.
 
   return (
-    <TopoWorldContext.Provider
+    <TopoSessionContext.Provider
       value={{
-        world,
-        setWorld
+        availableClimbs,
+        tool,
+        setTool,
+        dispatch,
+        selection,
+        setSelection,
       }}>
-      <TopoSessionContext.Provider
-        value={{
-          availableClimbs,
-          tool,
-          setTool,
-          dispatch,
-          selection,
-          setSelection,
-        }}>
-        <div className="w-full h-full flex flex-col bg-white">
-          <Header />
-          <div className="flex-1 flex overflow-hidden p-4">
-            <CanvasArea />
-            <PropertiesPanel />
-          </div>
+      <div className="w-full h-full flex flex-col bg-white">
+        <Header />
+        <div className="flex-1 flex overflow-hidden p-4">
+          <CanvasArea />
+          <PropertiesPanel />
         </div>
-      </TopoSessionContext.Provider>
-    </TopoWorldContext.Provider>
+      </div>
+    </TopoSessionContext.Provider>
+  );
+}
+
+export default function TopoEditor(
+  {
+    availableClimbs,
+    world: initialWorld,
+  }: {
+    availableClimbs: {
+      id: string,
+      name: string,
+    }[],
+    world?: TopoWorld,
+  }
+) {
+  return (
+    <TopoWorldProvider initial={initialWorld}>
+      <InnerTopoEditor availableClimbs={availableClimbs} />
+    </TopoWorldProvider>
   );
 }
 

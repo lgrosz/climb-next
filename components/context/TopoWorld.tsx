@@ -1,4 +1,4 @@
-import { createContext, Dispatch, SetStateAction, useContext } from "react";
+import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 interface Size {
   width: number;
@@ -43,18 +43,48 @@ export interface TopoWorld {
   size: Size,
 }
 
-interface TopoWorldContextType {
-  world: TopoWorld,
-  setWorld: Dispatch<SetStateAction<TopoWorld>>,
+export const TopoWorldContext = createContext<TopoWorld | undefined>(undefined);
+
+export const TopoWorldDispatchContext = createContext<Dispatch<SetStateAction<TopoWorld>> | undefined>(undefined);
+
+export function TopoWorldProvider({
+  initial,
+  children
+}: {
+  initial?: TopoWorld
+  children: React.ReactNode
+}) {
+  const [world, setWorld] = useState<TopoWorld>(initial ?? {
+    title: "",
+    lines: [],
+    images: [],
+    size: { width: 4000, height: 3000 },
+  });
+
+  return (
+    <TopoWorldContext value={world}>
+      <TopoWorldDispatchContext value={setWorld}>
+        { children }
+      </TopoWorldDispatchContext>
+    </TopoWorldContext>
+  )
 }
 
-export const TopoWorldContext = createContext<TopoWorldContextType | undefined>(undefined);
-
 export const useTopoWorld = () => {
-  const context = useContext(TopoWorldContext);
+  const context =  useContext(TopoWorldContext);
 
   if (!context) {
-    throw new Error("useTopoWorld must be used within a TopoWorldContext.Provider");
+    throw new Error("useTopoWorld must be used within a TopoWorldContext provider");
+  }
+
+  return context;
+};
+
+export const useTopoWorldDispatch = () => {
+  const context = useContext(TopoWorldDispatchContext);
+
+  if (!context) {
+    throw new Error("useTopoWorldDispatch must be used within a TopoWorldDispatchContext provider");
   }
 
   return context;
