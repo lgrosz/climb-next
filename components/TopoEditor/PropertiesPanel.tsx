@@ -6,7 +6,7 @@ import { useTopoSession } from '../context/TopoSession';
 
 export default function PropertiesPanel() {
   const world = useTopoWorld();
-  const setWorld = useTopoWorldDispatch();
+  const dispatch = useTopoWorldDispatch();
   const { availableClimbs } = useTopoSession();
 
   const lineAtIndexChanged = useMemo(() => {
@@ -14,10 +14,10 @@ export default function PropertiesPanel() {
       (line: Line) => {
         const lines = [...world.lines];
         lines[index] = line;
-        setWorld({ ...world, lines });
+        dispatch({ type: "set", world: { ...world, lines } });
       }
     );
-  }, [world, setWorld]);
+  }, [world, dispatch]);
 
 
   return (
@@ -27,7 +27,7 @@ export default function PropertiesPanel() {
         <PropertyInput
           label="Title"
           value={world.title}
-          onChange={e => setWorld({ ...world, title: e.target.value })}
+          onChange={e => dispatch({ type: "set", world: { ...world, title: e.target.value }})}
         />
         <h3 className="text-lg font-semibold mb-4">Lines</h3>
         <div>

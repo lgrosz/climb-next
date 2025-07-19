@@ -178,7 +178,7 @@ function InnerTopoEditor(
   }
 ) {
   const world = useTopoWorld();
-  const setWorld = useTopoWorldDispatch();
+  const dispatchWorld = useTopoWorldDispatch();
   const worldRef = useRef(world);
 
   const [tool, setTool] = useState<Tool | null>(null);
@@ -225,7 +225,7 @@ function InnerTopoEditor(
   }, []);
 
   const onTransform = useCallback((offset: [number, number]) => {
-    setWorld(prev => ({
+    dispatchWorld({ type: "set", world: prev => ({
       ...prev,
       lines: prev.lines.map((line, index) => {
         const sLine = selectionRef.current.lines[index];
@@ -242,8 +242,8 @@ function InnerTopoEditor(
           })(line.geometry)
         }
       }),
-    }));
-  }, [setWorld]);
+    })});
+  }, [dispatchWorld]);
 
   const onNodeSelect = useCallback((selection: Selection) => {
     const hasSelectedNodes = (s: SessionSelection) =>
@@ -291,7 +291,7 @@ function InnerTopoEditor(
   }, []);
 
   const onNodeTransform = useCallback((offset: [number, number]) => {
-    setWorld(prev => ({
+    dispatchWorld({ type: "set", world: prev => ({
       ...prev,
       lines: prev.lines.map((line, index) => {
         const sLine = selectionRef.current.lines[index];
@@ -317,21 +317,21 @@ function InnerTopoEditor(
           })(line.geometry)
         }
       }),
-    }));
-  }, [setWorld]);
+    })});
+  }, [dispatchWorld]);
 
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
-    setWorld(prev => ({
+    dispatchWorld({ type: "set", world: prev => ({
       ...prev,
       lines: [...prev.lines, { geometry: { points: spline.points, degree: spline.degree, knots: spline.knots } }],
-    }));
-  }, [setWorld]);
+    })});
+  }, [dispatchWorld]);
 
   const deleteSelection = useCallback(() => {
     if (Object.keys(selection.lines).length < 1) return false;
 
     if (tool instanceof EditPaths) {
-      setWorld({
+      dispatchWorld({ type: "set", world: {
         ...world,
         lines: world.lines.map((line, li) => {
           const lineSelection = selection.lines[li];
@@ -353,16 +353,16 @@ function InnerTopoEditor(
             return line;
           }
         })
-      });
+      }});
     } else if (tool instanceof TransformObjects) {
-      setWorld({
+      dispatchWorld({ type: "set", world: {
         ...world,
         lines: world.lines.filter((_, li) => !Object.keys(selection.lines).includes(String(li)))
-      });
+      }});
     }
 
     return true;
-  }, [selection.lines, tool, world, setWorld]);
+  }, [selection.lines, tool, world, dispatchWorld]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

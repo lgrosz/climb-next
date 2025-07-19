@@ -1,4 +1,4 @@
-import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { ActionDispatch, createContext, useContext, useReducer } from "react";
 
 interface Size {
   width: number;
@@ -43,9 +43,22 @@ export interface TopoWorld {
   size: Size,
 }
 
+type BaseTopoWorldAction<T extends string> = {
+  type: T,
+}
+
+// TODO remove this when nothing else uses it as it is sort of a catch-all and
+// could be quite error prone with the deeply nested nature of `TopoWorld`
+type SetTopoWorldAction = BaseTopoWorldAction<"set"> & {
+  world: TopoWorld | ((prev: TopoWorld) => TopoWorld),
+};
+
+type TopoWorldAction =
+  | SetTopoWorldAction;
+
 export const TopoWorldContext = createContext<TopoWorld | undefined>(undefined);
 
-export const TopoWorldDispatchContext = createContext<Dispatch<SetStateAction<TopoWorld>> | undefined>(undefined);
+export const TopoWorldDispatchContext = createContext<ActionDispatch<[TopoWorldAction]> | undefined>(undefined);
 
 export function TopoWorldProvider({
   initial,
@@ -54,7 +67,7 @@ export function TopoWorldProvider({
   initial?: TopoWorld
   children: React.ReactNode
 }) {
-  const [world, setWorld] = useState<TopoWorld>(initial ?? {
+  const [state, dispatch] = useReducer(reducer, initial ?? {
     title: "",
     lines: [],
     images: [],
@@ -62,8 +75,8 @@ export function TopoWorldProvider({
   });
 
   return (
-    <TopoWorldContext value={world}>
-      <TopoWorldDispatchContext value={setWorld}>
+    <TopoWorldContext value={state}>
+      <TopoWorldDispatchContext value={dispatch}>
         { children }
       </TopoWorldDispatchContext>
     </TopoWorldContext>
@@ -89,3 +102,11 @@ export const useTopoWorldDispatch = () => {
 
   return context;
 };
+
+function reducer(state: TopoWorld, action: TopoWorldAction) {
+  switch (action.type) {
+    case "set":
+      return typeof action.world === "function" ?
+        action.world(state) : { ...action.world };
+  }
+}
