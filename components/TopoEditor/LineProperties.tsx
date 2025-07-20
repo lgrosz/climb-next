@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback } from "react";
+import { useCallback } from "react";
 import { Line } from "../context/TopoWorld";
 import SplineProperties from "./SplineProperties";
 
@@ -6,10 +6,12 @@ export default function LineProperties(
   {
     line,
     availableClimbs,
+    onClimbChanged,
     onChange,
   } : {
     line: Line,
     availableClimbs: { id: string, name: string }[],
+    onClimbChanged: (id: string) => void,
     onChange: (line: Line) => void,
   }
 ) {
@@ -21,10 +23,6 @@ export default function LineProperties(
     onChange({ ...line, geometry: { ...line.geometry, ...changes } });
   }, [line, onChange]);
 
-  const updateClimb = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    onChange({ ...line, climbId: e.target.value || undefined });
-  }, [line, onChange]);
-
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -34,7 +32,7 @@ export default function LineProperties(
       <div>
         <select
           defaultValue={line.climbId ?? ""}
-          onChange={updateClimb}
+          onChange={e => onClimbChanged(e.target.value)}
         >
           <option value="">
             Select a climb

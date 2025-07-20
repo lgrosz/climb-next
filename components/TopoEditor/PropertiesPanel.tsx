@@ -19,6 +19,21 @@ export default function PropertiesPanel() {
     );
   }, [world, dispatch]);
 
+  const climbAtIndexChanged = useMemo(() => {
+    return world.lines.map((_, index) =>
+      (id: string) => {
+        dispatch({
+          type: "line",
+          index: index,
+          action: {
+            type: "assign-climb",
+            id,
+          }
+        });
+      }
+    );
+  }, [world, dispatch]);
+
 
   return (
     <div className="w-80 bg-white border-l p-4 overflow-y-auto">
@@ -36,6 +51,7 @@ export default function PropertiesPanel() {
               key={`line-${index}`}
               availableClimbs={availableClimbs}
               line={line}
+              onClimbChanged={climbAtIndexChanged[index]}
               onChange={lineAtIndexChanged[index]}
             />
           ))}
