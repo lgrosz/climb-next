@@ -3,9 +3,9 @@
 import Form from "next/form";
 import { prepareImageUpload } from "@/images/actions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useCallback, useRef, useState } from "react";
+import { FormEvent, Suspense, useCallback, useRef, useState } from "react";
 
-export default function Page()
+function UploadForm()
 {
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
@@ -76,5 +76,14 @@ export default function Page()
         </>
       }
     </Form>
+  );
+}
+
+export default function Page()
+{
+  return (
+    <Suspense>
+      <UploadForm />
+    </Suspense>
   );
 }
