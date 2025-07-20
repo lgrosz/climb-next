@@ -27,7 +27,7 @@ export default function PropertiesPanel() {
         <PropertyInput
           label="Title"
           value={world.title}
-          onChange={e => dispatch({ type: "set", world: { ...world, title: e.target.value }})}
+          onChange={e => dispatch({ type: "title", title: e.target.value })}
         />
         <h3 className="text-lg font-semibold mb-4">Lines</h3>
         <div>

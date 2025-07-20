@@ -53,8 +53,13 @@ type SetTopoWorldAction = BaseTopoWorldAction<"set"> & {
   world: TopoWorld | ((prev: TopoWorld) => TopoWorld),
 };
 
+type TitleTopoWorldAction = BaseTopoWorldAction<"title"> & {
+  title: string,
+}
+
 type TopoWorldAction =
-  | SetTopoWorldAction;
+  | SetTopoWorldAction
+  | TitleTopoWorldAction;
 
 export const TopoWorldContext = createContext<TopoWorld | undefined>(undefined);
 
@@ -108,5 +113,7 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
     case "set":
       return typeof action.world === "function" ?
         action.world(state) : { ...action.world };
+    case "title":
+      return { ...state, title: action.title };
   }
 }
