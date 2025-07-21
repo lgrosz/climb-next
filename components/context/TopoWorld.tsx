@@ -65,10 +65,15 @@ type AssignClimbTopoWorldLineAction = BaseTopoWorldLineAction<"assign-climb"> & 
   id: string,
 }
 
+type UpdateGeometryTopoWorldLineAction = BaseTopoWorldLineAction<"update-geometry"> & {
+  geometry: Partial<Geometry>,
+}
+
 type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
   index: number,
   action:
-    | AssignClimbTopoWorldLineAction,
+    | AssignClimbTopoWorldLineAction
+    | UpdateGeometryTopoWorldLineAction,
 };
 
 type TopoWorldAction =
@@ -143,6 +148,19 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
               i === lineIndex ? {
                 ...l,
                 climbId: lineAction.id
+              } : l
+            )
+          };
+        case "update-geometry":
+          return {
+            ...state,
+            lines: state.lines.map((l, i) =>
+              i === lineIndex ? {
+                ...l,
+                geometry: {
+                  ...l.geometry,
+                  ...lineAction.geometry
+                }
               } : l
             )
           };

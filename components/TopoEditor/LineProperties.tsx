@@ -7,12 +7,12 @@ export default function LineProperties(
     line,
     availableClimbs,
     onClimbChanged,
-    onChange,
+    onGeometryChanged,
   } : {
     line: Line,
     availableClimbs: { id: string, name: string }[],
     onClimbChanged: (id: string) => void,
-    onChange: (line: Line) => void,
+    onGeometryChanged: (geometry: Line["geometry"]) => void,
   }
 ) {
   const updateSpline = useCallback((changes: Partial<{
@@ -20,8 +20,8 @@ export default function LineProperties(
     degree: number,
     knots: number[],
   }>) => {
-    onChange({ ...line, geometry: { ...line.geometry, ...changes } });
-  }, [line, onChange]);
+    onGeometryChanged({ ...line.geometry, ...changes });
+  }, [line, onGeometryChanged]);
 
   return (
     <div>

@@ -9,16 +9,6 @@ export default function PropertiesPanel() {
   const dispatch = useTopoWorldDispatch();
   const { availableClimbs } = useTopoSession();
 
-  const lineAtIndexChanged = useMemo(() => {
-    return world.lines.map((_, index) =>
-      (line: Line) => {
-        const lines = [...world.lines];
-        lines[index] = line;
-        dispatch({ type: "set", world: { ...world, lines } });
-      }
-    );
-  }, [world, dispatch]);
-
   const climbAtIndexChanged = useMemo(() => {
     return world.lines.map((_, index) =>
       (id: string) => {
@@ -34,6 +24,20 @@ export default function PropertiesPanel() {
     );
   }, [world, dispatch]);
 
+  const geometryAtIndexChanged = useMemo(() => {
+    return world.lines.map((_, index) =>
+      (geometry: Line["geometry"]) => {
+        dispatch({
+          type: "line",
+          index: index,
+          action: {
+            type: "update-geometry",
+            geometry,
+          }
+        });
+      }
+    );
+  }, [world, dispatch]);
 
   return (
     <div className="w-80 bg-white border-l p-4 overflow-y-auto">
@@ -52,7 +56,7 @@ export default function PropertiesPanel() {
               availableClimbs={availableClimbs}
               line={line}
               onClimbChanged={climbAtIndexChanged[index]}
-              onChange={lineAtIndexChanged[index]}
+              onGeometryChanged={geometryAtIndexChanged[index]}
             />
           ))}
         </div>
