@@ -70,7 +70,7 @@ type AssignClimbTopoWorldLineAction = BaseTopoWorldLineAction<"assign-climb"> & 
 }
 
 type UpdateGeometryTopoWorldLineAction = BaseTopoWorldLineAction<"update-geometry"> & {
-  geometry: Partial<Geometry>,
+  geometry: Partial<Geometry> | ((prev: Geometry) => Partial<Geometry>),
 }
 
 type RemoveTopoWorldLineAction = BaseTopoWorldLineAction<"remove"> & { };
@@ -169,7 +169,8 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
                 ...l,
                 geometry: {
                   ...l.geometry,
-                  ...lineAction.geometry
+                  ...(typeof lineAction.geometry === "function" ?
+                      lineAction.geometry(l.geometry) : lineAction.geometry),
                 }
               } : l
             )

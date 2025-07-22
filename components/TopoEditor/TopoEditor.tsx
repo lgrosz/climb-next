@@ -225,24 +225,21 @@ function InnerTopoEditor(
   }, []);
 
   const onTransform = useCallback((offset: [number, number]) => {
-    dispatchWorld({ type: "set", world: prev => ({
-      ...prev,
-      lines: prev.lines.map((line, index) => {
-        const sLine = selectionRef.current.lines[index];
-        if (!sLine) return line;
+    const lineIndeces = Object.keys(selectionRef.current.lines)
+      .map(i => Number(i));
 
-        return {
-          ...line,
-          geometry: ((geom) => {
-            const points: [number, number][] = geom.points.map(p => {
-              return [p[0] + offset[0], p[1] + offset[1]];
-            });
-
-            return { points, degree: geom.degree, knots: geom.knots };
-          })(line.geometry)
+    for (const lineIndex of lineIndeces) {
+      dispatchWorld({
+        type: "line",
+        index: lineIndex,
+        action: {
+          type: "update-geometry",
+          geometry: (prev) => ({
+            points: prev.points.map(p => [p[0] + offset[0], p[1] + offset[1]])
+          })
         }
-      }),
-    })});
+      });
+    }
   }, [dispatchWorld]);
 
   const onNodeSelect = useCallback((selection: Selection) => {
@@ -291,33 +288,23 @@ function InnerTopoEditor(
   }, []);
 
   const onNodeTransform = useCallback((offset: [number, number]) => {
-    dispatchWorld({ type: "set", world: prev => ({
-      ...prev,
-      lines: prev.lines.map((line, index) => {
-        const sLine = selectionRef.current.lines[index];
-        if (!sLine) return line;
+    for (const [key, selection] of Object.entries(selectionRef.current.lines)) {
+      const index = parseInt(key);
 
-        return {
-          ...line,
-          geometry: (geom => {
-            const sGeom = sLine.geometry;
-            if (!sGeom.nodes) return geom;
-
-            const points: [number, number][] = geom.points.map((p, i) => {
-              const selected = sGeom.nodes?.some(n => n.index === i);
-
-              if (selected) {
-                return [p[0] + offset[0], p[1] + offset[1]];
-              } else {
-                return p;
-              }
-            });
-
-            return { points, degree: geom.degree, knots: geom.knots };
-          })(line.geometry)
+      dispatchWorld({
+        type: "line",
+        index,
+        action: {
+          type: "update-geometry",
+          geometry: (prev) => ({
+            points: prev.points.map((p, i) =>
+              selection.geometry.nodes?.some(s => s.index === i) ?
+                [p[0] + offset[0], p[1] + offset[1]] : p
+            )
+          }),
         }
-      }),
-    })});
+      })
+    }
   }, [dispatchWorld]);
 
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
@@ -333,29 +320,41 @@ function InnerTopoEditor(
     if (Object.keys(selection.lines).length < 1) return false;
 
     if (tool instanceof EditPaths) {
-      dispatchWorld({ type: "set", world: {
-        ...world,
-        lines: world.lines.map((line, li) => {
-          const lineSelection = selection.lines[li];
-          if (!lineSelection?.geometry?.nodes) return line;
+      for (const [key, selection] of Object.entries(selectionRef.current.lines)) {
+        const index = parseInt(key);
+        const line = world.lines.at(index);
+        const nodes = selection.geometry.nodes;
 
-          const toDelete = new Set(lineSelection.geometry.nodes.map(n => n.index));
-          const remaining = line.geometry.points.filter((_, ni) => !toDelete.has(ni));
+        if (!line || !nodes) return;
 
-          // Only apply deletion if at least 2 control points would remain
-          if (remaining.length > 1) {
-            const degree = Math.min(line.geometry.degree, remaining.length - 1);
-            const spline = new BasisSpline(remaining, degree);
+        // remove the line when fewer than two points would remain
+        if (line.geometry.points.length - nodes.length < 2) {
+          dispatchWorld({
+            type: "line",
+            index,
+            action: { type: "remove" }
+          });
 
-            return {
-              ...line,
-              geometry: { points: spline.points, degree: spline.degree, knots: spline.knots }
-            };
-          } else {
-            return line;
+          return;
+        }
+
+        dispatchWorld({
+          type: "line",
+          index,
+          action: {
+            type: "update-geometry",
+            geometry: (prev) => {
+              const points = prev.points
+                .filter((_, i) => !nodes.some(n => n.index === i));
+
+              const degree = Math.min(prev.degree, points.length - 1);
+              const knots = BasisSpline.openUniformKnots(points.length, degree);
+
+              return { points, degree, knots };
+            },
           }
-        })
-      }});
+        });
+      }
     } else if (tool instanceof TransformObjects) {
       // TODO ideally, this is a single dispatch as it's one action
       const sortedIndeces = Object.keys(selectionRef.current.lines)
