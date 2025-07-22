@@ -355,10 +355,19 @@ function InnerTopoEditor(
         })
       }});
     } else if (tool instanceof TransformObjects) {
-      dispatchWorld({ type: "set", world: {
-        ...world,
-        lines: world.lines.filter((_, li) => !Object.keys(selection.lines).includes(String(li)))
-      }});
+      // TODO ideally, this is a single dispatch as it's one action
+      const sortedIndeces = Object.keys(selectionRef.current.lines)
+        .map(i => Number(i))
+        .toSorted()
+        .toReversed();
+
+      for (const index of sortedIndeces) {
+        dispatchWorld({
+          type: "line",
+          index: Number(index),
+          action: { type: "remove" }
+        });
+      }
     }
 
     return true;

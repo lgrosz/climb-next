@@ -69,11 +69,14 @@ type UpdateGeometryTopoWorldLineAction = BaseTopoWorldLineAction<"update-geometr
   geometry: Partial<Geometry>,
 }
 
+type RemoveTopoWorldLineAction = BaseTopoWorldLineAction<"remove"> & { };
+
 type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
   index: number,
   action:
     | AssignClimbTopoWorldLineAction
-    | UpdateGeometryTopoWorldLineAction,
+    | UpdateGeometryTopoWorldLineAction
+    | RemoveTopoWorldLineAction,
 };
 
 type TopoWorldAction =
@@ -164,6 +167,11 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
               } : l
             )
           };
+        case "remove":
+          return {
+            ...state,
+            lines: state.lines.filter((_, i) => i !== lineIndex)
+          }
       }
   }
 }
