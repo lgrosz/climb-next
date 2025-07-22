@@ -57,6 +57,10 @@ type TitleTopoWorldAction = BaseTopoWorldAction<"title"> & {
   title: string,
 }
 
+type AddLineTopoWorldAction = BaseTopoWorldAction<"add-line"> & {
+  line: Line,
+}
+
 type BaseTopoWorldLineAction<T extends string> = {
   type: T,
 };
@@ -82,7 +86,8 @@ type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
 type TopoWorldAction =
   | SetTopoWorldAction
   | TitleTopoWorldAction
-  | TopoWorldLineAction;
+  | TopoWorldLineAction
+  | AddLineTopoWorldAction;
 
 export const TopoWorldContext = createContext<TopoWorld | undefined>(undefined);
 
@@ -138,6 +143,8 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
         action.world(state) : { ...action.world };
     case "title":
       return { ...state, title: action.title };
+    case "add-line":
+      return { ...state, lines: [ ...state.lines, action.line ] };
     case "line":
       // TODO This basically a `Line`-reducer, can probably extract it as such
       const lineIndex = action.index;

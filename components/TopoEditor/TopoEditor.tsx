@@ -321,10 +321,12 @@ function InnerTopoEditor(
   }, [dispatchWorld]);
 
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
-    dispatchWorld({ type: "set", world: prev => ({
-      ...prev,
-      lines: [...prev.lines, { geometry: { points: spline.points, degree: spline.degree, knots: spline.knots } }],
-    })});
+    const { points, degree, knots } = spline;
+
+    dispatchWorld({
+      type: "add-line",
+      line: { geometry: { points, degree, knots } }
+    });
   }, [dispatchWorld]);
 
   const deleteSelection = useCallback(() => {
