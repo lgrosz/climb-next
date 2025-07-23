@@ -1,5 +1,5 @@
 import { Tool } from "@/lib/tools";
-import { createContext, Dispatch, SetStateAction, useContext } from "react";
+import { createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
 
 interface Climb {
   id: string,
@@ -74,6 +74,40 @@ interface TopoSessionContextType {
 }
 
 export const TopoSessionContext = createContext<TopoSessionContextType | undefined>(undefined);
+
+// TODO feels bloated, need to really decide what belongs to the session..
+export function TopoSessionProvider({
+  availableClimbs,
+  children,
+}: {
+  availableClimbs: Climb[],
+  children: React.ReactNode,
+}) {
+  const [tool, setTool] = useState<Tool | null>(null);
+
+  const dispatch = useCallback((e: SessionEvent) => {
+    if (tool?.handle(e)) {
+      return true;
+    }
+
+    return false;
+  }, [tool]);
+
+  const [selection, setSelection] = useState<Selection>({ lines: { } });
+
+  return (
+    <TopoSessionContext value={{
+      availableClimbs,
+      tool,
+      setTool,
+      dispatch,
+      selection,
+      setSelection,
+    }}>
+      { children }
+    </TopoSessionContext>
+  );
+}
 
 export const useTopoSession = () => {
   const context = useContext(TopoSessionContext);

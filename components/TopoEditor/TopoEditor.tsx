@@ -4,9 +4,9 @@ import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
 import { TopoWorld, TopoWorldProvider, useTopoWorld, useTopoWorldDispatch } from '../context/TopoWorld';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { SessionEvent, TopoSessionContext } from '../context/TopoSession';
-import { CreateSplineTool, EditPaths, Tool, TransformObjects } from '@/lib/tools';
+import { useCallback, useEffect, useRef } from 'react';
+import { TopoSessionProvider, useTopoSession } from '../context/TopoSession';
+import { CreateSplineTool, EditPaths, TransformObjects } from '@/lib/tools';
 import { Selection } from '@/lib/tools/Select';
 import { Selection as SessionSelection } from '../context/TopoSession';
 import { BasisSpline } from '@/lib/BasisSpline';
@@ -167,23 +167,16 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 }
 
 // Need this as I refactor the not-so-ideal implementation
-function InnerTopoEditor(
-  {
-    availableClimbs,
-  }: {
-    availableClimbs: {
-      id: string,
-      name: string,
-    }[],
-  }
-) {
+function InnerTopoEditor() {
   const world = useTopoWorld();
   const dispatchWorld = useTopoWorldDispatch();
   const worldRef = useRef(world);
 
-  const [tool, setTool] = useState<Tool | null>(null);
+  const {
+    tool, setTool,
+    selection, setSelection,
+  } = useTopoSession();
 
-  const [selection, setSelection] = useState<SessionSelection>({ lines: { } });
   const selectionRef = useRef(selection);
 
   // keep refs up-to-date, this is necessary for methods being passed
@@ -196,17 +189,9 @@ function InnerTopoEditor(
     selectionRef.current = selection;
   }, [selection]);
 
-  const dispatch = useCallback((e: SessionEvent) => {
-    if (tool?.handle(e)) {
-      return true;
-    }
-
-    return false;
-  }, [tool]);
-
   const onSelect = useCallback((selection: Selection) => {
     setSelection(selectObjects(worldRef.current, selection));
-  }, []);
+  }, [setSelection]);
 
   const selectionHitTest = useCallback((point: [number, number]) => {
     for (const index of Object.keys(selectionRef.current.lines)) {
@@ -265,7 +250,7 @@ function InnerTopoEditor(
     }
 
     setSelection(sessionSelection);
-  }, []);
+  }, [setSelection]);
 
   const selectedNodeHitTest = useCallback((point: [number, number]) => {
     for (const [index, { geometry: gs }] of Object.entries(selectionRef.current.lines)) {
@@ -410,7 +395,7 @@ function InnerTopoEditor(
     return () => {
       removeEventListener("keydown", handle);
     }
-  }, [onSelect, tool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry, selection.lines, deleteSelection]);
+  }, [onSelect, tool, setTool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry, selection.lines, setSelection, deleteSelection]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
@@ -419,23 +404,13 @@ function InnerTopoEditor(
   // doing so based on the context they're used.
 
   return (
-    <TopoSessionContext.Provider
-      value={{
-        availableClimbs,
-        tool,
-        setTool,
-        dispatch,
-        selection,
-        setSelection,
-      }}>
-      <div className="w-full h-full flex flex-col bg-white">
-        <Header />
-        <div className="flex-1 flex overflow-hidden p-4">
-          <CanvasArea />
-          <PropertiesPanel />
-        </div>
+    <div className="w-full h-full flex flex-col bg-white">
+      <Header />
+      <div className="flex-1 flex overflow-hidden p-4">
+        <CanvasArea />
+        <PropertiesPanel />
       </div>
-    </TopoSessionContext.Provider>
+    </div>
   );
 }
 
@@ -453,7 +428,9 @@ export default function TopoEditor(
 ) {
   return (
     <TopoWorldProvider initial={initialWorld}>
-      <InnerTopoEditor availableClimbs={availableClimbs} />
+      <TopoSessionProvider availableClimbs={availableClimbs} >
+        <InnerTopoEditor />
+      </TopoSessionProvider>
     </TopoWorldProvider>
   );
 }
