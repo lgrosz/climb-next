@@ -3,7 +3,7 @@
 import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
-import { TopoWorld, TopoWorldProvider, useTopoWorld, useTopoWorldDispatch } from '../context/TopoWorld';
+import { TopoWorld, TopoWorldProvider, useTopoWorld } from '../context/TopoWorld';
 import { useCallback, useEffect, useRef } from 'react';
 import { TopoSessionProvider, useTopoSession } from '../context/TopoSession';
 import { CreateSplineTool, EditPaths, TransformObjects } from '@/lib/tools';
@@ -169,7 +169,7 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 // Need this as I refactor the not-so-ideal implementation
 function InnerTopoEditor() {
   const world = useTopoWorld();
-  const dispatchWorld = useTopoWorldDispatch();
+  const { dispatchWorld } = useTopoSession();
   const worldRef = useRef(world);
 
   const {

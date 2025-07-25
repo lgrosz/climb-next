@@ -1,18 +1,17 @@
 import PropertyInput from './PropertyInput';
-import { Line, useTopoWorld, useTopoWorldDispatch } from '../context/TopoWorld';
+import { Line, useTopoWorld } from '../context/TopoWorld';
 import LineProperties from './LineProperties';
 import { useMemo } from 'react';
 import { useTopoSession } from '../context/TopoSession';
 
 export default function PropertiesPanel() {
   const world = useTopoWorld();
-  const dispatch = useTopoWorldDispatch();
-  const { availableClimbs } = useTopoSession();
+  const { availableClimbs, dispatchWorld } = useTopoSession();
 
   const climbAtIndexChanged = useMemo(() => {
     return world.lines.map((_, index) =>
       (id: string) => {
-        dispatch({
+        dispatchWorld({
           type: "line",
           index: index,
           action: {
@@ -22,12 +21,12 @@ export default function PropertiesPanel() {
         });
       }
     );
-  }, [world, dispatch]);
+  }, [world, dispatchWorld]);
 
   const geometryAtIndexChanged = useMemo(() => {
     return world.lines.map((_, index) =>
       (geometry: Line["geometry"]) => {
-        dispatch({
+        dispatchWorld({
           type: "line",
           index: index,
           action: {
@@ -37,7 +36,7 @@ export default function PropertiesPanel() {
         });
       }
     );
-  }, [world, dispatch]);
+  }, [world, dispatchWorld]);
 
   return (
     <div className="w-80 bg-white border-l p-4 overflow-y-auto">
@@ -46,7 +45,7 @@ export default function PropertiesPanel() {
         <PropertyInput
           label="Title"
           value={world.title}
-          onChange={e => dispatch({ type: "title", title: e.target.value })}
+          onChange={e => dispatchWorld({ type: "title", title: e.target.value })}
         />
         <h3 className="text-lg font-semibold mb-4">Lines</h3>
         <div>

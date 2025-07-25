@@ -83,7 +83,7 @@ type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
     | RemoveTopoWorldLineAction,
 };
 
-type TopoWorldAction =
+export type TopoWorldAction =
   | SetTopoWorldAction
   | TitleTopoWorldAction
   | TopoWorldLineAction

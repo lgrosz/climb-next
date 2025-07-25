@@ -1,5 +1,6 @@
 import { Tool } from "@/lib/tools";
-import { createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
+import { ActionDispatch, createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
+import { TopoWorldAction, useTopoWorldDispatch } from "./TopoWorld";
 
 interface Climb {
   id: string,
@@ -71,6 +72,11 @@ interface TopoSessionContextType {
     * Set the current selection
     */
    setSelection: Dispatch<SetStateAction<Selection>>;
+
+   /**
+    * Dispatches a world action
+    */
+    dispatchWorld: ActionDispatch<[TopoWorldAction]>;
 }
 
 export const TopoSessionContext = createContext<TopoSessionContextType | undefined>(undefined);
@@ -84,6 +90,7 @@ export function TopoSessionProvider({
   children: React.ReactNode,
 }) {
   const [tool, setTool] = useState<Tool | null>(null);
+  const dispatchWorld = useTopoWorldDispatch();
 
   const dispatch = useCallback((e: SessionEvent) => {
     if (tool?.handle(e)) {
@@ -103,6 +110,7 @@ export function TopoSessionProvider({
       dispatch,
       selection,
       setSelection,
+      dispatchWorld,
     }}>
       { children }
     </TopoSessionContext>
