@@ -3,9 +3,9 @@
 import Header from './Header';
 import CanvasArea from './CanvasArea';
 import PropertiesPanel from './PropertiesPanel';
-import { TopoWorld, TopoWorldProvider, useTopoWorld } from '../context/TopoWorld';
+import { TopoWorld, useTopoWorld } from '../context/TopoWorld';
 import { useCallback, useEffect, useRef } from 'react';
-import { TopoSessionProvider, useTopoSession } from '../context/TopoSession';
+import { useTopoSession } from '../context/TopoSession';
 import { CreateSplineTool, EditPaths, TransformObjects } from '@/lib/tools';
 import { Selection } from '@/lib/tools/Select';
 import { Selection as SessionSelection } from '../context/TopoSession';
@@ -167,7 +167,7 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 }
 
 // Need this as I refactor the not-so-ideal implementation
-function InnerTopoEditor() {
+export default function TopoEditor() {
   const world = useTopoWorld();
   const { dispatchWorld } = useTopoSession();
   const worldRef = useRef(world);
@@ -411,27 +411,6 @@ function InnerTopoEditor() {
         <PropertiesPanel />
       </div>
     </div>
-  );
-}
-
-export default function TopoEditor(
-  {
-    availableClimbs,
-    world: initialWorld,
-  }: {
-    availableClimbs: {
-      id: string,
-      name: string,
-    }[],
-    world?: TopoWorld,
-  }
-) {
-  return (
-    <TopoWorldProvider initial={initialWorld}>
-      <TopoSessionProvider availableClimbs={availableClimbs} >
-        <InnerTopoEditor />
-      </TopoSessionProvider>
-    </TopoWorldProvider>
   );
 }
 

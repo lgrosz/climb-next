@@ -1,6 +1,7 @@
 "use client";
 
-import { TopoWorld } from "@/components/context/TopoWorld";
+import { TopoSessionProvider } from "@/components/context/TopoSession";
+import { TopoWorld, TopoWorldProvider } from "@/components/context/TopoWorld";
 import TopoEditor from "@/components/TopoEditor/TopoEditor";
 
 export default function EditTopoClient({
@@ -15,10 +16,11 @@ export default function EditTopoClient({
 }) {
   return (
     <div className="w-screen h-screen overflow-hidden">
-      <TopoEditor
-        availableClimbs={availableClimbs}
-        world={world}
-      />
+      <TopoWorldProvider initial={world}>
+        <TopoSessionProvider availableClimbs={availableClimbs} >
+          <TopoEditor />
+        </TopoSessionProvider>
+      </TopoWorldProvider>
     </div>
   );
 }
