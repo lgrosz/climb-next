@@ -1,7 +1,7 @@
 import { TopoWorld, Image, Line } from "@/components/context/TopoWorld";
-import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import EditTopoClient from "./EditTopoClient";
 
 const QUERY = graphql(`
     query topoById($id: ID!) {
@@ -108,12 +108,10 @@ export default async function Page(
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
-      <TopoEditor
-        availableClimbs={climbs}
-        world={world}
-      />
-    </div>
+    <EditTopoClient
+      availableClimbs={climbs}
+      world={world}
+    />
   );
 }
 

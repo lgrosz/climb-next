@@ -1,6 +1,6 @@
-import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import NewTopoClient from "./NewTopoClient";
 
 const query = graphql(`
   query newTopoClimbs {
@@ -16,10 +16,8 @@ export default async function Page() {
   }))
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
-      <TopoEditor
-        availableClimbs={availableClimbs}
-      />
-    </div>
+    <NewTopoClient
+      availableClimbs={availableClimbs}
+    />
   );
 }
