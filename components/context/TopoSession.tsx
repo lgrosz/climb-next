@@ -1,6 +1,7 @@
 import { Tool } from "@/lib/tools";
 import { ActionDispatch, createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
 import { TopoWorldAction, useTopoWorldDispatch } from "./TopoWorld";
+import { useTopoHistory } from "@/hooks/useTopoHistory";
 
 interface Climb {
   id: string,
@@ -90,7 +91,8 @@ export function TopoSessionProvider({
   children: React.ReactNode,
 }) {
   const [tool, setTool] = useState<Tool | null>(null);
-  const dispatchWorld = useTopoWorldDispatch();
+  const originalDispatchWorld = useTopoWorldDispatch();
+  const [dispatchWorld] = useTopoHistory({ dispatch: originalDispatchWorld });
 
   const dispatch = useCallback((e: SessionEvent) => {
     if (tool?.handle(e)) {
