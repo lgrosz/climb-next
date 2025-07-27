@@ -29,6 +29,26 @@ export async function create(title: string | null, width: number, height: number
   return data.action.id;
 }
 
+export async function title(id: Scalars["ID"]["input"], title: string | null) {
+  const mutation = graphql(`
+    mutation titleTopo(
+      $id: ID!,
+      $title: String
+    ) {
+      action: topo(id: $id) {
+        title(title: $title) {
+          id
+        }
+      }
+    }
+  `);
+
+  await graphqlQuery(
+    mutation,
+    { id, title, }
+  );
+}
+
 interface Point {
   x: number,
   y: number,

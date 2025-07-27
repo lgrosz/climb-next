@@ -410,6 +410,7 @@ input TopoImageFeatureInput {
 
 type TopoMutationRoot {
   addFeature(feature: TopoFeatureInput!): Topo!
+  title(title: String): Topo!
 }
 
 type TopoPathFeature {
