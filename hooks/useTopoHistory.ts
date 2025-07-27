@@ -1,7 +1,7 @@
 import { ActionDispatch, useCallback, useState } from "react";
 import { TopoWorldAction } from "@/components/context/TopoWorld";
 
-interface TopoChange {
+export interface TopoChange {
   action: TopoWorldAction;
 }
 
