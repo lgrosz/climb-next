@@ -1,4 +1,4 @@
-'use client';
+import "client-only";
 
 import Header from './Header';
 import CanvasArea from './CanvasArea';
@@ -10,6 +10,7 @@ import { CreateSplineTool, EditPaths, TransformObjects } from '@/lib/tools';
 import { Selection } from '@/lib/tools/Select';
 import { Selection as SessionSelection } from '../context/TopoSession';
 import { BasisSpline } from '@/lib/BasisSpline';
+import { FinishTopoEditorProvider } from './Contexts';
 
 function isPointOnBasisSpline(
   spline: BasisSpline,
@@ -167,7 +168,11 @@ function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selec
 }
 
 // Need this as I refactor the not-so-ideal implementation
-export default function TopoEditor() {
+export default function TopoEditor({
+  onFinish,
+}: {
+  onFinish?: () => void,
+}) {
   const world = useTopoWorld();
   const { dispatchWorld } = useTopoSession();
   const worldRef = useRef(world);
@@ -404,13 +409,15 @@ export default function TopoEditor() {
   // doing so based on the context they're used.
 
   return (
-    <div className="w-full h-full flex flex-col bg-white">
-      <Header />
-      <div className="flex-1 flex overflow-hidden p-4">
-        <CanvasArea />
-        <PropertiesPanel />
+    <FinishTopoEditorProvider onFinish={onFinish}>
+      <div className="w-full h-full flex flex-col bg-white">
+        <Header />
+        <div className="flex-1 flex overflow-hidden p-4">
+          <CanvasArea />
+          <PropertiesPanel />
+        </div>
       </div>
-    </div>
+    </FinishTopoEditorProvider>
   );
 }
 

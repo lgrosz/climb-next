@@ -3,10 +3,12 @@ import { Line, useTopoWorld } from '../context/TopoWorld';
 import LineProperties from './LineProperties';
 import { useMemo } from 'react';
 import { useTopoSession } from '../context/TopoSession';
+import { useFinishTopoEditor } from './Contexts';
 
 export default function PropertiesPanel() {
   const world = useTopoWorld();
   const { availableClimbs, dispatchWorld } = useTopoSession();
+  const finish = useFinishTopoEditor()
 
   const climbAtIndexChanged = useMemo(() => {
     return world.lines.map((_, index) =>
@@ -58,6 +60,14 @@ export default function PropertiesPanel() {
               onGeometryChanged={geometryAtIndexChanged[index]}
             />
           ))}
+        </div>
+        <div className="flex justify-end pt-2">
+          <button
+            disabled={!finish}
+            onClick={finish}
+          >
+            Done
+          </button>
         </div>
       </div>
     </div>
