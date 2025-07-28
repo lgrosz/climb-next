@@ -30,6 +30,7 @@ function EditTopoClientInner({
 
   const finish = useCallback(async () => {
     const actions = changes
+      .reduce(changeReducer, [])
       .map(changeToAction);
 
     for (const action of actions) {
@@ -65,3 +66,17 @@ export default function EditTopoClient({
   );
 }
 
+const changeReducer = (
+  prev: TopoChange[],
+  curr: TopoChange,
+  ..._: [number, TopoChange[]]
+) => {
+  // Only keep the latest title action
+  if (curr.action.type === "title") {
+    return [...prev.filter(c => c.action.type !== "title"), curr];
+  }
+
+  return [...prev, curr];
+}
+
+export const __internal = { changeReducer };
