@@ -80,7 +80,7 @@ type UpdateGeometryTopoWorldLineAction = BaseTopoWorldLineAction<"update-geometr
 type RemoveTopoWorldLineAction = BaseTopoWorldLineAction<"remove"> & { };
 
 type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
-  index: number,
+  id: string,
   action:
     | AssignClimbTopoWorldLineAction
     | UpdateGeometryTopoWorldLineAction
@@ -151,15 +151,15 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
       return { ...state, lines: [ ...state.lines, action.line ] };
     case "line":
       // TODO This basically a `Line`-reducer, can probably extract it as such
-      const lineIndex = action.index;
+      const lineId = action.id;
       const lineAction = action.action;
 
       switch (lineAction.type) {
         case "assign-climb":
           return {
             ...state,
-            lines: state.lines.map((l, i) =>
-              i === lineIndex ? {
+            lines: state.lines.map(l =>
+              l.featureId === lineId ? {
                 ...l,
                 climbId: lineAction.id
               } : l
@@ -168,8 +168,8 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
         case "update-geometry":
           return {
             ...state,
-            lines: state.lines.map((l, i) =>
-              i === lineIndex ? {
+            lines: state.lines.map(l =>
+              l.featureId === lineId ? {
                 ...l,
                 geometry: {
                   ...l.geometry,
@@ -182,7 +182,7 @@ function reducer(state: TopoWorld, action: TopoWorldAction) {
         case "remove":
           return {
             ...state,
-            lines: state.lines.filter((_, i) => i !== lineIndex)
+            lines: state.lines.filter(l => l.featureId !== lineId)
           }
       }
   }

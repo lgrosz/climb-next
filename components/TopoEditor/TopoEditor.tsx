@@ -49,18 +49,19 @@ function boxContains(
 }
 
 function selectObjects(world: TopoWorld, selection: Selection) {
-  const ret: SessionSelection = { lines: {} };
+  const ret: SessionSelection = { lines: [] };
 
-  world.lines.forEach(({ geometry }, index) => {
+  for (const { featureId: id, geometry } of world.lines) {
     const spline = new BasisSpline(geometry.points, geometry.degree, geometry.knots);
+
     if (selection.type === "point" && isPointOnBasisSpline(spline, selection.data)) {
-      ret.lines[index] = { geometry: { index } };
+      ret.lines.push({ id, geometry: { } });
     }
 
     if (selection.type === "box" && boxContains(selection.data, spline.bounds())) {
-      ret.lines[index] = { geometry: { index } };
+      ret.lines.push({ id, geometry: { } });
     }
-  });
+  }
 
   return ret;
 }
@@ -124,44 +125,43 @@ function isSegmentSelected(segment: [[number, number], [number, number]], select
 
 function selectNodes(world: TopoWorld, sessionSelection: SessionSelection, selection: Selection) {
   const ret: SessionSelection = {
-    lines: Object.fromEntries(
-      Object.entries(sessionSelection.lines).map(([id, cs]) => {
-        return [id, {
-          geometry: (gs => {
-            const geom = world.lines.at(gs.index)?.geometry;
+    lines: sessionSelection.lines.map(cs => {
+      return {
+        id: cs.id,
+        geometry: (gs => {
+          const geom = world.lines.find(l => l.featureId === cs.id)?.geometry;
 
-            if (!geom) return gs;
+          if (!geom) return gs;
 
-            let hitNodes = geom.points
-              .map((node, nodeIndex) => {
-                return isNodeSelected(node, selection) ? { index: nodeIndex } : null;
-              })
-              .filter(nodeSelection => nodeSelection !== null);
+          let hitNodes = geom.points
+          .map((node, nodeIndex) => {
+            return isNodeSelected(node, selection) ? { index: nodeIndex } : null;
+          })
+          .filter(nodeSelection => nodeSelection !== null);
 
-            if (hitNodes.length < 1) {
-              hitNodes = geom.points
-                .map((node, i, nodes) => {
-                  const next = nodes.at(i + 1);
-                  if (!next) return null;
+          if (hitNodes.length < 1) {
+            hitNodes = geom.points
+            .map((node, i, nodes) => {
+              const next = nodes.at(i + 1);
+              if (!next) return null;
 
-                  if (isSegmentSelected([node, next], selection)) {
-                    return [{ index: i }, { index: i + 1}];
-                  }
+              if (isSegmentSelected([node, next], selection)) {
+                return [{ index: i }, { index: i + 1}];
+              }
 
-                  return null;
-                })
-                .filter(n => n !== null)
-                .flat();
-            }
+              return null;
+            })
+            .filter(n => n !== null)
+            .flat();
+          }
 
-            return {
-              ...gs,
-              nodes: hitNodes,
-            };
-          })(cs.geometry)
-        }]
-      })
-    )
+          return {
+            ...gs,
+            nodes: hitNodes,
+          };
+        })(cs.geometry)
+      };
+    })
   };
 
   return ret;
@@ -199,8 +199,8 @@ export default function TopoEditor({
   }, [setSelection]);
 
   const selectionHitTest = useCallback((point: [number, number]) => {
-    for (const index of Object.keys(selectionRef.current.lines)) {
-      const geometry = worldRef.current.lines.at(Number(index))?.geometry;
+    for (const { id } of selectionRef.current.lines) {
+      const geometry = worldRef.current.lines.find(l => l.featureId === id)?.geometry;
 
       if (!geometry) continue;
 
@@ -215,13 +215,10 @@ export default function TopoEditor({
   }, []);
 
   const onTransform = useCallback((offset: [number, number]) => {
-    const lineIndeces = Object.keys(selectionRef.current.lines)
-      .map(i => Number(i));
-
-    for (const lineIndex of lineIndeces) {
+    for (const { id } of selectionRef.current.lines) {
       dispatchWorld({
         type: "line",
-        index: lineIndex,
+        id,
         action: {
           type: "update-geometry",
           geometry: (prev) => ({
@@ -240,7 +237,7 @@ export default function TopoEditor({
 
     let sessionSelection: SessionSelection;
 
-    if (Object.keys(selectionRef.current.lines).length < 1) {
+    if (selectionRef.current.lines.length < 1) {
       sessionSelection = selectObjects(worldRef.current, selection);
     } else {
       sessionSelection = selectNodes(worldRef.current, selectionRef.current, selection);
@@ -250,7 +247,7 @@ export default function TopoEditor({
         !hasSelectedNodes(selectionRef.current) &&
         !hasSelectedNodes(sessionSelection)
       ) {
-        sessionSelection = { lines: {} };
+        sessionSelection = { lines: [] };
       }
     }
 
@@ -258,8 +255,8 @@ export default function TopoEditor({
   }, [setSelection]);
 
   const selectedNodeHitTest = useCallback((point: [number, number]) => {
-    for (const [index, { geometry: gs }] of Object.entries(selectionRef.current.lines)) {
-      const geometry = worldRef.current.lines.at(Number(index))?.geometry;
+    for (const { id, geometry: gs } of selectionRef.current.lines) {
+      const geometry = worldRef.current.lines.find(l => l.featureId === id)?.geometry;
       if (!geometry) continue;
 
       if (!geometry || !gs.nodes) continue;
@@ -278,17 +275,15 @@ export default function TopoEditor({
   }, []);
 
   const onNodeTransform = useCallback((offset: [number, number]) => {
-    for (const [key, selection] of Object.entries(selectionRef.current.lines)) {
-      const index = parseInt(key);
-
+    for (const { id, geometry } of selectionRef.current.lines) {
       dispatchWorld({
         type: "line",
-        index,
+        id,
         action: {
           type: "update-geometry",
           geometry: (prev) => ({
             points: prev.points.map((p, i) =>
-              selection.geometry.nodes?.some(s => s.index === i) ?
+              geometry.nodes?.some(s => s.index === i) ?
                 [p[0] + offset[0], p[1] + offset[1]] : p
             )
           }),
@@ -309,13 +304,12 @@ export default function TopoEditor({
   }, [dispatchWorld]);
 
   const deleteSelection = useCallback(() => {
-    if (Object.keys(selection.lines).length < 1) return false;
+    if (selection.lines.length < 1) return false;
 
     if (tool instanceof EditPaths) {
-      for (const [key, selection] of Object.entries(selectionRef.current.lines)) {
-        const index = parseInt(key);
-        const line = world.lines.at(index);
-        const nodes = selection.geometry.nodes;
+      for (const { id, geometry } of selectionRef.current.lines) {
+        const line = world.lines.find(l => l.featureId === id);
+        const nodes = geometry.nodes;
 
         if (!line || !nodes) return;
 
@@ -323,7 +317,7 @@ export default function TopoEditor({
         if (line.geometry.points.length - nodes.length < 2) {
           dispatchWorld({
             type: "line",
-            index,
+            id,
             action: { type: "remove" }
           });
 
@@ -332,7 +326,7 @@ export default function TopoEditor({
 
         dispatchWorld({
           type: "line",
-          index,
+          id,
           action: {
             type: "update-geometry",
             geometry: (prev) => {
@@ -349,15 +343,10 @@ export default function TopoEditor({
       }
     } else if (tool instanceof TransformObjects) {
       // TODO ideally, this is a single dispatch as it's one action
-      const sortedIndeces = Object.keys(selectionRef.current.lines)
-        .map(i => Number(i))
-        .toSorted()
-        .toReversed();
-
-      for (const index of sortedIndeces) {
+      for (const { id } of selectionRef.current.lines) {
         dispatchWorld({
           type: "line",
-          index: Number(index),
+          id,
           action: { type: "remove" }
         });
       }
@@ -382,7 +371,7 @@ export default function TopoEditor({
         e.preventDefault();
       } else if (e.key === "Backspace") {
         if (deleteSelection()) {
-          setSelection({ lines: { } })
+          setSelection({ lines: [ ] })
           e.stopPropagation();
           e.preventDefault();
         }
