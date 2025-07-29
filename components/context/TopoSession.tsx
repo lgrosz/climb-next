@@ -30,17 +30,16 @@ interface NodeSelection {
 }
 
 interface GeometrySelection {
-  index: number;
   nodes?: NodeSelection[];
 }
 
 interface LineSelection {
+  id: string;
   geometry: GeometrySelection;
 }
 
 export interface Selection {
-  // TODO TypeScript thinks that _every_ string is valid with this typing
-  lines: Record<number, LineSelection>;
+  lines: LineSelection[];
 }
 
 interface TopoSessionContextType {
@@ -107,7 +106,7 @@ export function TopoSessionProvider({
     return false;
   }, [tool]);
 
-  const [selection, setSelection] = useState<Selection>({ lines: { } });
+  const [selection, setSelection] = useState<Selection>({ lines: [ ] });
 
   return (
     <TopoSessionContext value={{

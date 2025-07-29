@@ -147,15 +147,15 @@ export default function CanvasArea() {
     }
 
     if (tool instanceof EditPaths) {
-      for (const [index, cs] of Object.entries(sessionSelection.lines)) {
-        const geom = world.lines.at(Number(index))?.geometry;
+      for (const line of sessionSelection.lines) {
+        const geom = world.lines.find(l => l.featureId === line.id)?.geometry;
         if (!geom) continue;
 
         style.frame(ctx);
         draw.line(ctx, geom.points.map(toScreen));
 
         for (const [i, point] of geom.points.entries()) {
-          const selected = cs.geometry.nodes?.some(n => n.index === i);
+          const selected = line.geometry.nodes?.some(n => n.index === i);
           style.diamond(ctx);
           if (selected) ctx.fillStyle = "#0000ff";
           draw.node(ctx, toScreen(point));
@@ -169,8 +169,8 @@ export default function CanvasArea() {
 
       // TODO if `TransformObjects` selected all nodes, the logic here could be identical
       if (tool instanceof EditPaths) {
-        for (const [index, line] of world.lines.entries()) {
-          const sClimb = sessionSelection.lines[index];
+        for (const line of world.lines) {
+          const sClimb = sessionSelection.lines.find(l => l.id === line.featureId);
           if (!sClimb) continue;
 
           const geom = line.geometry;
@@ -193,8 +193,8 @@ export default function CanvasArea() {
           draw.line(ctx, points);
         }
       } else if (tool instanceof TransformObjects) {
-        for (const [index, line] of world.lines.entries()) {
-          const sClimb = sessionSelection.lines[index];
+        for (const line of world.lines) {
+          const sClimb = sessionSelection.lines.find(l => l.id === line.featureId);
           if (!sClimb) continue;
 
           const geom = line.geometry;
@@ -271,8 +271,8 @@ export default function CanvasArea() {
 
     // draw bounding boxes for the selected items
     // TODO these should be fixed sizes
-    for (const [index] of Object.entries(sessionSelection.lines)) {
-      const line = world.lines.at(Number(index));
+    for (const cs of sessionSelection.lines) {
+      const line = world.lines.find(l => l.featureId === cs.id);
       if (!line) continue;
 
       const geom = new BasisSpline(line.geometry.points, line.geometry.degree, line.geometry.knots);

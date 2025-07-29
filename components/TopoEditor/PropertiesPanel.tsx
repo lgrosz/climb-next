@@ -11,11 +11,11 @@ export default function PropertiesPanel() {
   const finish = useFinishTopoEditor()
 
   const climbAtIndexChanged = useMemo(() => {
-    return world.lines.map((_, index) =>
+    return world.lines.map(({ featureId }) =>
       (id: string) => {
         dispatchWorld({
           type: "line",
-          index: index,
+          id: featureId,
           action: {
             type: "assign-climb",
             id,
@@ -26,11 +26,11 @@ export default function PropertiesPanel() {
   }, [world, dispatchWorld]);
 
   const geometryAtIndexChanged = useMemo(() => {
-    return world.lines.map((_, index) =>
+    return world.lines.map(({ featureId: id }) =>
       (geometry: Line["geometry"]) => {
         dispatchWorld({
           type: "line",
-          index: index,
+          id,
           action: {
             type: "update-geometry",
             geometry,
