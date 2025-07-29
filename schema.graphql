@@ -390,14 +390,17 @@ type Topo {
   width: Float!
 }
 
-union TopoFeature = TopoImageFeature | TopoPathFeature
+interface TopoFeature {
+  id: ID!
+}
 
 input TopoFeatureInput {
   image: TopoImageFeatureInput
 }
 
-type TopoImageFeature {
+type TopoImageFeature implements TopoFeature {
   dest: Rect!
+  id: ID!
   image: Image!
   source: Rect
 }
@@ -413,9 +416,10 @@ type TopoMutationRoot {
   title(title: String): Topo!
 }
 
-type TopoPathFeature {
+type TopoPathFeature implements TopoFeature {
   climb: Climb!
   geometry: TopoPathGeometry!
+  id: ID!
 }
 
 union TopoPathGeometry = BasisSpline

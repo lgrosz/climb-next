@@ -302,7 +302,9 @@ export default function TopoEditor({
 
     dispatchWorld({
       type: "add-line",
-      line: { geometry: { points, degree, knots } }
+      // NOTE for now, create random IDs for new features to avoid potentially
+      // complex replay behavior in other modules
+      line: { featureId: crypto.randomUUID(), geometry: { points, degree, knots } }
     });
   }, [dispatchWorld]);
 

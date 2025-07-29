@@ -10,7 +10,7 @@ const QUERY = graphql(`
         height
         width
         features {
-          __typename
+          __typename id
           ... on TopoImageFeature {
             image {
               id
@@ -53,6 +53,7 @@ export default async function Page(
   const images: Image[] = features
     .filter(f => f.__typename === "TopoImageFeature")
     .map(f => ({
+      featureId: f.id,
       id: f.image.id,
       alt: f.image.alt ?? undefined,
       dest: {
@@ -68,6 +69,7 @@ export default async function Page(
   const lines: Line[] = features
     .filter(f => f.__typename === "TopoPathFeature")
     .map(f => ({
+      featureId: f.id,
       geometry: {
         points: f.geometry.controlPoints
           .map(p => ([ p.x, p.y ])),
