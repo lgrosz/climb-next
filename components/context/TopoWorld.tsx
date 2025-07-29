@@ -24,12 +24,16 @@ interface BasisSpline {
 type Geometry =
   | BasisSpline;
 
-export interface Line {
+interface Feature {
+  featureId: string,
+}
+
+export interface Line extends Feature {
   climbId?: string,
   geometry: Geometry,
 }
 
-export interface Image {
+export interface Image extends Feature {
   id: string,
   alt?: string,
   dest: Rect,
