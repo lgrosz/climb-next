@@ -33,6 +33,12 @@ type BasisSpline {
   knots: [Float!]!
 }
 
+input BasisSplineInput {
+  controlPoints: [Point2DInput!]!
+  degree: Int!
+  knots: [Float!]!
+}
+
 type Climb {
   ascents: [Ascent!]!
   description: String
@@ -396,6 +402,7 @@ interface TopoFeature {
 
 input TopoFeatureInput {
   image: TopoImageFeatureInput
+  path: TopoPathFeatureInput
 }
 
 type TopoImageFeature implements TopoFeature {
@@ -422,7 +429,16 @@ type TopoPathFeature implements TopoFeature {
   id: ID!
 }
 
+input TopoPathFeatureInput {
+  climbId: ID!
+  geometry: TopoPathGeometryInput!
+}
+
 union TopoPathGeometry = BasisSpline
+
+input TopoPathGeometryInput {
+  basisSpline: BasisSplineInput
+}
 
 type Vermin {
   value: VerminGrade!

@@ -71,7 +71,19 @@ interface TopoImageFeature extends AbstractTopoFeature {
   destCrop: Rect,
 }
 
-type TopoFeature = TopoImageFeature;
+interface TopoPathFeature extends AbstractTopoFeature {
+  type: "path"
+  climbId: Scalars["ID"]["input"],
+  geometry: {
+    points: [number, number][],
+    degree: number,
+    knots: number[],
+  }
+}
+
+type TopoFeature = 
+  | TopoImageFeature
+  | TopoPathFeature;
 
 // Converts internal TopoFeature type to GraphQL TopoFeatureInput
 function toTopoFeatureInput(feature: TopoFeature) {
@@ -82,6 +94,17 @@ function toTopoFeatureInput(feature: TopoFeature) {
       imageId: parseInt(feature.imageId),
       dest: feature.destCrop,
       source: feature.sourceCrop
+    }
+  } else if (feature.type === "path") {
+    gqlFeature.path = {
+      climbId: feature.climbId,
+      geometry: {
+        basisSpline: {
+          controlPoints: feature.geometry.points.map(p => ({ x: p[0], y: p[1] })),
+          degree: feature.geometry.degree,
+          knots: [...feature.geometry.knots],
+        }
+      }
     }
   }
 
