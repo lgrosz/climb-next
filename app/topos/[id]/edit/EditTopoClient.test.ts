@@ -20,7 +20,7 @@ describe("Change reducer", () => {
     ]
 
     expect(
-      input.reduce(__internal.changeReducer, [])
+      __internal.keepLatestTitle.apply(input)
     ).toStrictEqual(
       [input.at(-1)]
     );
@@ -68,7 +68,7 @@ describe("Change reducer", () => {
     };
 
     expect(
-      input.reduce(__internal.changeReducer, [])
+      __internal.squashClimbAssign.apply(input)
     ).toStrictEqual([expected]);
   });
 });
