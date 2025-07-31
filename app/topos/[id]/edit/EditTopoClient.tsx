@@ -38,9 +38,14 @@ function EditTopoClientInner({
   }, [id]);
 
   const finish = useCallback(async () => {
-    const actions = changes
-      .reduce(changeReducer, [])
-      .map(changeToAction);
+    // NOTE the ordering of the reducer rules may matter and it is important
+    // that their operations are well-tested and though about thoroughly..
+    const reducedChanges = [
+      squashClimbAssign,
+      keepLatestTitle,
+    ].reduce((acc, rule) => rule.apply(acc), changes)
+
+    const actions = reducedChanges.map(changeToAction);
 
     for (const action of actions) {
       await action();
@@ -75,47 +80,65 @@ export default function EditTopoClient({
   );
 }
 
-const changeReducer = (
-  prev: TopoChange[],
-  curr: TopoChange,
-  ..._: [number, TopoChange[]]
-) => {
-  // Only keep the latest title action
-  if (curr.action.type === "title") {
-    return [...prev.filter(c => c.action.type !== "title"), curr];
-  }
+type ChangeReducerRule = {
+  apply: ((_: TopoChange[]) => TopoChange[]),
+};
 
-  if (curr.action.type === "line") {
-    const { id, action: subAction } = curr.action;
-
-    // Squash assign-climb into last add-line
-    if (subAction.type === "assign-climb") {
-      const shouldSquash = ((c: TopoChange) => c.action.type === "add-line" && c.action.line.featureId === id)
-      const canSquash = prev.some(shouldSquash);
-
-      if (canSquash) {
-        return prev.map(c => {
-          // TODO I wish I could use `shouldSquash` here
-          if (c.action.type === "add-line" && c.action.line.featureId === id) {
-            return {
-              ...c,
-              action: {
-                ...c.action,
-                line: {
-                  ...c.action.line,
-                  climbId: subAction.id
-                }
-              }
-            }
-          } else {
-            return c;
-          }
-        });
+const keepLatestTitle: ChangeReducerRule = {
+  apply: (changes) => changes
+    .reduce<TopoChange[]>((acc, change) => {
+      if (change.action.type === "title") {
+        return [...acc.filter(c => c.action.type !== "title"), change];
       }
-    }
-  }
 
-  return [...prev, curr];
+      return [...acc, change];
+    }, []),
 }
 
-export const __internal = { changeReducer };
+const squashClimbAssign: ChangeReducerRule = {
+  apply: (changes: TopoChange[]) => {
+    const result: TopoChange[] = [];
+
+    for (const change of changes) {
+      if (
+        change.action.type === "line" &&
+        change.action.action.type === "assign-climb"
+      ) {
+        const { id: featureId, action: { id: climbId } } = change.action;
+
+        const index = result.findIndex(c =>
+          c.action.type === "add-line" &&
+          c.action.line.featureId === featureId
+        );
+
+        if (index !== -1) {
+          const existing = result[index];
+
+          if (existing.action.type !== "add-line") {
+            continue;
+          }
+
+          result[index] = {
+            ...existing,
+            action: {
+              ...existing.action,
+              line: {
+                ...existing.action.line,
+                climbId,
+              }
+            }
+          };
+
+          continue;
+        }
+      }
+
+      // Otherwise, just add the change
+      result.push(change);
+    }
+
+    return result;
+  }
+};
+
+export const __internal = { keepLatestTitle, squashClimbAssign };
