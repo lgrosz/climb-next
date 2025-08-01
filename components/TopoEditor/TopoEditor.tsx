@@ -296,10 +296,14 @@ export default function TopoEditor({
     const { points, degree, knots } = spline;
 
     dispatchWorld({
-      type: "add-line",
+      type: "line",
       // NOTE for now, create random IDs for new features to avoid potentially
       // complex replay behavior in other modules
-      line: { featureId: crypto.randomUUID(), geometry: { points, degree, knots } }
+      id: crypto.randomUUID(),
+      action: {
+        type: "add",
+        geometry: { points, degree, knots }
+      }
     });
   }, [dispatchWorld]);
 
