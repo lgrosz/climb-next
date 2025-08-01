@@ -420,6 +420,7 @@ input TopoImageFeatureInput {
 
 type TopoMutationRoot {
   addFeature(feature: TopoFeatureInput!): Topo!
+  removeFeature(id: ID!): Topo!
   title(title: String): Topo!
 }
 
