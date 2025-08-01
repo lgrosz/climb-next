@@ -61,13 +61,14 @@ type TitleTopoWorldAction = BaseTopoWorldAction<"title"> & {
   title: string,
 }
 
-type AddLineTopoWorldAction = BaseTopoWorldAction<"add-line"> & {
-  line: Line,
-}
-
 type BaseTopoWorldLineAction<T extends string> = {
   type: T,
 };
+
+type AddTopoWorldLineAction = BaseTopoWorldLineAction<"add"> & {
+  climbId?: string,
+  geometry: Geometry,
+}
 
 type AssignClimbTopoWorldLineAction = BaseTopoWorldLineAction<"assign-climb"> & {
   id: string,
@@ -82,6 +83,7 @@ type RemoveTopoWorldLineAction = BaseTopoWorldLineAction<"remove"> & { };
 type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
   id: string,
   action:
+    | AddTopoWorldLineAction
     | AssignClimbTopoWorldLineAction
     | UpdateGeometryTopoWorldLineAction
     | RemoveTopoWorldLineAction,
@@ -90,8 +92,7 @@ type TopoWorldLineAction = BaseTopoWorldAction<"line"> & {
 export type TopoWorldAction =
   | SetTopoWorldAction
   | TitleTopoWorldAction
-  | TopoWorldLineAction
-  | AddLineTopoWorldAction;
+  | TopoWorldLineAction;
 
 export const TopoWorldContext = createContext<TopoWorld | undefined>(undefined);
 
@@ -140,21 +141,28 @@ export const useTopoWorldDispatch = () => {
   return context;
 };
 
-function reducer(state: TopoWorld, action: TopoWorldAction) {
+function reducer(state: TopoWorld, action: TopoWorldAction): TopoWorld {
   switch (action.type) {
     case "set":
       return typeof action.world === "function" ?
         action.world(state) : { ...action.world };
     case "title":
       return { ...state, title: action.title };
-    case "add-line":
-      return { ...state, lines: [ ...state.lines, action.line ] };
     case "line":
       // TODO This basically a `Line`-reducer, can probably extract it as such
       const lineId = action.id;
       const lineAction = action.action;
 
       switch (lineAction.type) {
+        case "add":
+          return {
+            ...state,
+            lines: [
+              ...state.lines, {
+                featureId: action.id,
+                climbId: lineAction.climbId,
+                geometry: lineAction.geometry,
+              }]}
         case "assign-climb":
           return {
             ...state,

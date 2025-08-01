@@ -23,15 +23,20 @@ function EditTopoClientInner({
     switch (action.type) {
       case "title":
         return () => title(id, action.title)
-      case "add-line":
-        const climbId = action.line.climbId;
-        if (!climbId) return noApply;
+      case "line":
+        const subAction = action.action;
 
-        return () => addFeature(id, {
-          type: "path",
-          climbId,
-          geometry: action.line.geometry
-        })
+        switch (subAction.type) {
+          case "add":
+            const climbId = subAction.climbId;
+            if (!climbId) return noApply;
+
+            return () => addFeature(id, {
+              type: "path",
+              climbId,
+              geometry: subAction.geometry
+            })
+        }
     }
 
     return noApply;
@@ -107,14 +112,15 @@ const squashClimbAssign: ChangeReducerRule = {
         const { id: featureId, action: { id: climbId } } = change.action;
 
         const index = result.findIndex(c =>
-          c.action.type === "add-line" &&
-          c.action.line.featureId === featureId
+          c.action.type === "line" &&
+          c.action.id === featureId &&
+          c.action.action.type === "add"
         );
 
         if (index !== -1) {
           const existing = result[index];
 
-          if (existing.action.type !== "add-line") {
+          if (existing.action.type !== "line" || existing.action.action.type !== "add") {
             continue;
           }
 
@@ -122,8 +128,8 @@ const squashClimbAssign: ChangeReducerRule = {
             ...existing,
             action: {
               ...existing.action,
-              line: {
-                ...existing.action.line,
+              action: {
+                ...existing.action.action,
                 climbId,
               }
             }

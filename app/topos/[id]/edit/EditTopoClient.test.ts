@@ -29,9 +29,10 @@ describe("Change reducer", () => {
     const input: TopoChange[] = [
       {
         action: {
-          type: "add-line",
-          line: {
-            featureId: "xxx",
+          type: "line",
+          id: "xxx",
+          action: {
+            type: "add",
             geometry: {
               points: [],
               degree: 0,
@@ -54,9 +55,10 @@ describe("Change reducer", () => {
 
     const expected: TopoChange = {
       action: {
-        type: "add-line",
-        line: {
-          featureId: "xxx",
+        type: "line",
+        id: "xxx",
+        action: {
+          type: "add",
           climbId: "1",
           geometry: {
             points: [],
