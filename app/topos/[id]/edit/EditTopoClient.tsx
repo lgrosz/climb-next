@@ -4,7 +4,7 @@ import { TopoSessionProvider, useTopoSession } from "@/components/context/TopoSe
 import { TopoWorld, TopoWorldProvider } from "@/components/context/TopoWorld";
 import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { TopoChange } from "@/hooks/useTopoHistory";
-import { addFeature, title } from "@/topos/actions";
+import { addFeature, removeFeature, title } from "@/topos/actions";
 import { useParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -36,6 +36,8 @@ function EditTopoClientInner({
               climbId,
               geometry: subAction.geometry
             })
+          case "remove":
+            return () => removeFeature(id, action.id);
         }
     }
 

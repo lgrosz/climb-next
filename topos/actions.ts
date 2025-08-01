@@ -135,3 +135,27 @@ export async function addFeature(topoId: Scalars['ID']['input'], feature: TopoFe
     }
   );
 }
+
+export async function removeFeature(topoId: Scalars['ID']['input'], featureId: Scalars['ID']['input'])
+{
+  const mutation = graphql(`
+    mutation removeTopoFeature(
+      $topoId: ID!
+      $featureId: ID!
+    ) {
+      action: topo(id: $topoId) {
+        removeFeature(id: $featureId) {
+          id
+        }
+      }
+    }
+  `);
+
+  await graphqlQuery(
+    mutation,
+    {
+      topoId,
+      featureId
+    }
+  );
+}
