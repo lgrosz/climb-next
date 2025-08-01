@@ -50,6 +50,7 @@ function EditTopoClientInner({
     const reducedChanges = [
       squashClimbAssign,
       keepLatestTitle,
+      removeAllLineChangesForRemovedLine,
     ].reduce((acc, rule) => rule.apply(acc), changes)
 
     const actions = reducedChanges.map(changeToAction);
@@ -149,4 +150,46 @@ const squashClimbAssign: ChangeReducerRule = {
   }
 };
 
-export const __internal = { keepLatestTitle, squashClimbAssign };
+const removeAllLineChangesForRemovedLine: ChangeReducerRule = {
+    apply: function(changes: TopoChange[]): TopoChange[] {
+        const newChanges: TopoChange[] = [];
+
+        // TODO can do memoization to avoid needing to `.some` so often
+
+        for (const change of changes) {
+          const action = change.action;
+
+          if (action.type === "line") {
+            const subAction = action.action;
+
+            if (subAction.type === "remove") {
+              const isObselete = changes.some(c =>
+                c.action.type === "line" &&
+                c.action.id === action.id &&
+                c.action.action.type === "add"
+              );
+
+              if (isObselete) continue;
+            } else {
+              const isObselete = changes.some(c =>
+                c.action.type === "line" &&
+                c.action.id === action.id &&
+                c.action.action.type === "remove"
+              );
+
+              if (isObselete) continue;
+            }
+          }
+
+          newChanges.push(change);
+        }
+
+        return newChanges;
+    }
+}
+
+export const __internal = {
+  keepLatestTitle,
+  squashClimbAssign,
+  removeAllLineChangesForRemovedLine,
+};
