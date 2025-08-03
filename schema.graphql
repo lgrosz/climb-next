@@ -322,6 +322,7 @@ type MutationRoot {
 
 type PathFeatureMutationRoot {
   assignClimb(id: ID!): TopoPathFeature!
+  updateGeometry(geometry: TopoPathGeometryInput!): TopoPathFeature!
 }
 
 type Point2D {

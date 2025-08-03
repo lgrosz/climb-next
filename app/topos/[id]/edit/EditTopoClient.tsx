@@ -4,7 +4,7 @@ import { TopoSessionProvider, useTopoSession } from "@/components/context/TopoSe
 import { TopoWorld, TopoWorldProvider } from "@/components/context/TopoWorld";
 import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { TopoChange } from "@/hooks/useTopoHistory";
-import { addFeature, assignClimb, removeFeature, title } from "@/topos/actions";
+import { addFeature, assignClimb, removeFeature, title, updateGeometry } from "@/topos/actions";
 import { useParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -38,6 +38,18 @@ function EditTopoClientInner({
             })
           case "assign-climb":
             return () => assignClimb(id, action.id, subAction.id)
+          case "update-geometry":
+            // Cannot deal with this right now
+            const geom = subAction.geometry;
+            if (typeof geom === "function") {
+              return noApply;
+            }
+
+            return () => updateGeometry(id, action.id, {
+              points: geom.points ?? [],
+              knots: geom.knots ?? [],
+              degree: geom.degree ?? 1,
+            })
           case "remove":
             return () => removeFeature(id, action.id);
         }

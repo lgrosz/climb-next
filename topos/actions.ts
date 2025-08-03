@@ -169,6 +169,45 @@ export async function assignClimb(
   );
 }
 
+export async function updateGeometry(
+  topoId: Scalars['ID']['input'],
+  featureId: Scalars['ID']['input'],
+  geometry: TopoPathFeature['geometry']
+) {
+  const mutation = graphql(`
+    mutation updateGeometryOfTopoPathFeature(
+      $topoId: ID!
+      $featureId: ID!
+      $geometry: TopoPathGeometryInput!
+    ) {
+      action: topo(id: $topoId) {
+        feature(id: $featureId) {
+          ... on PathFeatureMutationRoot {
+            updateGeometry(geometry: $geometry) {
+              id
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  await graphqlQuery(
+    mutation,
+    {
+      topoId,
+      featureId,
+      geometry: {
+        basisSpline: {
+          controlPoints: geometry.points.map(p => ({ x: p[0], y: p[1] })),
+          degree: geometry.degree,
+          knots: [...geometry.knots],
+        }
+      }
+    }
+  );
+}
+
 export async function removeFeature(topoId: Scalars['ID']['input'], featureId: Scalars['ID']['input'])
 {
   const mutation = graphql(`
