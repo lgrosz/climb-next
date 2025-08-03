@@ -320,6 +320,10 @@ type MutationRoot {
   ): TopoMutationRoot!
 }
 
+type PathFeatureMutationRoot {
+  assignClimb(id: ID!): TopoPathFeature!
+}
+
 type Point2D {
   x: Float!
   y: Float!
@@ -405,6 +409,8 @@ input TopoFeatureInput {
   path: TopoPathFeatureInput
 }
 
+union TopoFeatureMutationRoot = PathFeatureMutationRoot
+
 type TopoImageFeature implements TopoFeature {
   dest: Rect!
   id: ID!
@@ -420,6 +426,7 @@ input TopoImageFeatureInput {
 
 type TopoMutationRoot {
   addFeature(feature: TopoFeatureInput!): Topo!
+  feature(id: ID!): TopoFeatureMutationRoot!
   removeFeature(id: ID!): Topo!
   title(title: String): Topo!
 }

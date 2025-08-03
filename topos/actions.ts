@@ -136,6 +136,39 @@ export async function addFeature(topoId: Scalars['ID']['input'], feature: TopoFe
   );
 }
 
+export async function assignClimb(
+  topoId: Scalars['ID']['input'],
+  featureId: Scalars['ID']['input'],
+  climbId: Scalars['ID']['input']
+) {
+  const mutation = graphql(`
+    mutation assignClimbToTopoFeature(
+      $topoId: ID!
+      $featureId: ID!
+      $climbId: ID!
+    ) {
+      action: topo(id: $topoId) {
+        feature(id: $featureId) {
+          ... on PathFeatureMutationRoot {
+            assignClimb(id: $climbId) {
+              id
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  await graphqlQuery(
+    mutation,
+    {
+      topoId,
+      featureId,
+      climbId
+    }
+  );
+}
+
 export async function removeFeature(topoId: Scalars['ID']['input'], featureId: Scalars['ID']['input'])
 {
   const mutation = graphql(`
