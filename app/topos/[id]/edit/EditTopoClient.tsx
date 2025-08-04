@@ -6,14 +6,19 @@ import TopoEditor from "@/components/TopoEditor/TopoEditor";
 import { TopoChange } from "@/hooks/useTopoHistory";
 import { addFeature, assignClimb, removeFeature, title, updateGeometry } from "@/topos/actions";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 function EditTopoClientInner({
   id,
+  availableClimbs,
 }: {
-  id: string,
+  id: string;
+  availableClimbs: { id: string; name: string }[];
 }) {
   const { changes } = useTopoSession();
+
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [reducedChanges, setReducedChanges] = useState<TopoChange[]>([]);
 
   const changeToAction = useCallback((change: TopoChange) => {
     const action = change.action;
@@ -61,22 +66,39 @@ function EditTopoClientInner({
   const finish = useCallback(async () => {
     // NOTE the ordering of the reducer rules may matter and it is important
     // that their operations are well-tested and though about thoroughly..
-    const reducedChanges = [
+    const reduced = [
       squashClimbAssign,
       keepLatestTitle,
       removeAllLineChangesForRemovedLine,
-    ].reduce((acc, rule) => rule.apply(acc), changes)
+    ].reduce((acc, rule) => rule.apply(acc), changes);
 
+    setReducedChanges(reduced);
+    setShowConfirm(true);
+  }, [changes]);
+
+  const applyChanges = useCallback(async () => {
     const actions = reducedChanges.map(changeToAction);
-
     for (const action of actions) {
       await action();
     }
-  }, [changes, changeToAction]);
+    setShowConfirm(false);
+  }, [reducedChanges, changeToAction]);
+
+  const cancelChanges = () => {
+    setShowConfirm(false);
+  };
 
   return (
     <div className="w-screen h-screen overflow-hidden">
       <TopoEditor onFinish={finish} />
+      {showConfirm && (
+        <ConfirmChangesModal
+        changes={reducedChanges}
+        availableClimbs={availableClimbs}
+        onConfirm={applyChanges}
+        onCancel={cancelChanges}
+        />
+      )}
     </div>
   );
 }
@@ -96,9 +118,70 @@ export default function EditTopoClient({
   return (
     <TopoWorldProvider initial={world}>
       <TopoSessionProvider availableClimbs={availableClimbs} >
-        <EditTopoClientInner id={id} />
+        <EditTopoClientInner
+          id={id}
+          availableClimbs={availableClimbs}
+        />
       </TopoSessionProvider>
     </TopoWorldProvider>
+  );
+}
+
+function ConfirmChangesModal({
+  changes,
+  availableClimbs,
+  onConfirm,
+  onCancel,
+}: {
+  changes: TopoChange[];
+  availableClimbs: { id: string; name: string }[];
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const renderChangeDescription = (change: TopoChange) => {
+    const action = change.action;
+    switch (action.type) {
+      case "title":
+        return `Change topo title to "${action.title}"`;
+      case "line": {
+        const sub = action.action;
+        switch (sub.type) {
+          case "add": {
+            const climbName = availableClimbs.find(c => c.id === sub.climbId)?.name ?? "unknown climb";
+            return `Add path linked to climb "${climbName}"`;
+          }
+          case "assign-climb": {
+            const climbName = availableClimbs.find(c => c.id === sub.id)?.name ?? "unknown climb";
+            return `Assign climb "${climbName}" to path ${action.id}`;
+          }
+          case "update-geometry":
+            return `Update geometry of path ${action.id}`;
+          case "remove":
+            return `Remove path ${action.id}`;
+          default:
+            return `Unknown line action`;
+        }
+      }
+      default:
+        return `Unknown action type`;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+      <div className="bg-white rounded p-4 max-w-lg w-full max-h-[80vh] overflow-auto">
+        <h2 className="text-lg font-bold mb-4">Confirm Changes</h2>
+          <ul className="mb-4 list-disc list-inside space-y-1">
+          {changes.map((change, i) => (
+            <li key={i}>{renderChangeDescription(change)}</li>
+          ))}
+          </ul>
+        <div className="flex justify-end gap-2">
+          <button onClick={onCancel}>Cancel</button>
+          <button onClick={onConfirm}>Confirm</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
