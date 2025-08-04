@@ -1,7 +1,8 @@
 import { Tool } from "@/lib/tools";
 import { ActionDispatch, createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
-import { TopoWorldAction, useTopoWorldDispatch } from "./TopoWorld";
+import { TopoWorldAction, useTopoWorld, useTopoWorldDispatch } from "./TopoWorld";
 import { TopoChange, useTopoHistory } from "@/hooks/useTopoHistory";
+import { useCollapsedWorldDispatch } from "@/hooks/useCollapsedWorldDispatch";
 
 interface Climb {
   id: string,
@@ -95,8 +96,12 @@ export function TopoSessionProvider({
   children: React.ReactNode,
 }) {
   const [tool, setTool] = useState<Tool | null>(null);
+
+  // TODO some sort of "middleware" pattern would probably be a better fit here
   const originalDispatchWorld = useTopoWorldDispatch();
-  const [dispatchWorld, changes] = useTopoHistory({ dispatch: originalDispatchWorld });
+  const [historicWorldDispatch, changes] = useTopoHistory({ dispatch: originalDispatchWorld });
+  const world = useTopoWorld();
+  const [collapsedWorldDispatch] = useCollapsedWorldDispatch(historicWorldDispatch, world);
 
   const dispatch = useCallback((e: SessionEvent) => {
     if (tool?.handle(e)) {
@@ -116,7 +121,7 @@ export function TopoSessionProvider({
       dispatch,
       selection,
       setSelection,
-      dispatchWorld,
+      dispatchWorld: collapsedWorldDispatch,
       changes,
     }}>
       { children }
