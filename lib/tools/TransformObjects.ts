@@ -5,7 +5,7 @@ import { Tool } from "./Tool";
 type Point = [number, number]
 
 type HitTest = (point: Point) => boolean;
-type TransformCallback = (point: Point) => void;
+export type TransformCallback = (point: Point) => void;
 
 /**
  * A transformation intent tool

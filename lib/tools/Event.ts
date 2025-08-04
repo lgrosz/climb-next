@@ -21,9 +21,17 @@ export interface TransformEvent {
   transform: [number, number] | null;
 }
 
+type EditPathEvent = AddNodeEditPathEvent;
+
+type AddNodeEditPathEvent = {
+  type: "add-node",
+  point: [number, number]
+}
+
 export interface EventMap {
   "newgeometry": NewGeometryEvent
   "data": DataEvent
   "selection": SelectionEvent
   "transform": TransformEvent
+  "edit-path": EditPathEvent
 }

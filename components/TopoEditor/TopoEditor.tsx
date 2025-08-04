@@ -292,6 +292,64 @@ export default function TopoEditor({
     }
   }, [dispatchWorld]);
 
+  const onAddNode = useCallback((node: [number, number]) => {
+    for (const { id } of selectionRef.current.lines) {
+      function distanceToSegment(p: [number, number], a: [number, number], b: [number, number]) {
+        const [px, py] = p;
+        const [ax, ay] = a;
+        const [bx, by] = b;
+
+        const dx = bx - ax;
+        const dy = by - ay;
+
+        if (dx === 0 && dy === 0) return Math.hypot(px - ax, py - ay);
+
+        const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+        const closestX = ax + t * dx;
+        const closestY = ay + t * dy;
+        return Math.hypot(px - closestX, py - closestY);
+      }
+
+      dispatchWorld({
+        type: "line",
+        id,
+        action: {
+          type: "update-geometry",
+          geometry: (prev) => {
+            const { points, degree } = prev;
+
+            let insertIndex = points.length;
+            let minDist = Infinity;
+
+            for (let i = 0; i < points.length - 1; i++) {
+              const a = points[i];
+              const b = points[i + 1];
+
+              const dist = distanceToSegment(node, a, b);
+              if (dist < minDist) {
+                minDist = dist;
+                insertIndex = i + 1;
+              }
+            }
+
+            const newPoints = [
+              ...points.slice(0, insertIndex),
+              node,
+              ...points.slice(insertIndex),
+            ];
+
+            return {
+              points: newPoints,
+              knots: BasisSpline.openUniformKnots(newPoints.length, degree),
+            };
+          },
+        },
+      });
+    }
+
+    return selectionRef.current.lines.length > 0;
+  }, [dispatchWorld]);
+
   const addSplineGeometry = useCallback((spline: BasisSpline) => {
     const { points, degree, knots } = spline;
 
@@ -366,7 +424,7 @@ export default function TopoEditor({
         e.stopPropagation();
         e.preventDefault();
       } else if (e.key === "n") {
-        setTool(new EditPaths(selectedNodeHitTest, onNodeSelect, onNodeTransform));
+        setTool(new EditPaths(selectedNodeHitTest, onNodeSelect, onNodeTransform, onAddNode));
         e.stopPropagation();
         e.preventDefault();
       } else if (e.key === "b") {
