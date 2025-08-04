@@ -68,8 +68,10 @@ function EditTopoClientInner({
     // that their operations are well-tested and though about thoroughly..
     const reduced = [
       squashClimbAssign,
+      squashClimbGeometryUpdate,
       keepLatestTitle,
       keepLatestClimbAssignment,
+      keepLatestPathGeometryUpdate,
       removeAllLineChangesForRemovedLine,
     ].reduce((acc, rule) => rule.apply(acc), changes);
 
@@ -221,6 +223,26 @@ const keepLatestClimbAssignment: ChangeReducerRule = {
     }, []),
 }
 
+const keepLatestPathGeometryUpdate: ChangeReducerRule = {
+  apply: (changes) => changes
+    .reduce<TopoChange[]>((acc, change) => {
+      const action = change.action;
+
+      if (
+        action.type === "line" &&
+        action.action.type === "update-geometry"
+      ) {
+        return [...acc.filter(c =>
+          c.action.type !== "line" ||
+          c.action.id !== action.id ||
+          c.action.action.type !== "update-geometry"
+        ), change];
+      }
+
+      return [...acc, change];
+    }, []),
+}
+
 const squashClimbAssign: ChangeReducerRule = {
   apply: (changes: TopoChange[]) => {
     const result: TopoChange[] = [];
@@ -252,6 +274,56 @@ const squashClimbAssign: ChangeReducerRule = {
               action: {
                 ...existing.action.action,
                 climbId,
+              }
+            }
+          };
+
+          continue;
+        }
+      }
+
+      // Otherwise, just add the change
+      result.push(change);
+    }
+
+    return result;
+  }
+};
+
+const squashClimbGeometryUpdate: ChangeReducerRule = {
+  apply: (changes: TopoChange[]) => {
+    const result: TopoChange[] = [];
+
+    for (const change of changes) {
+      if (
+        change.action.type === "line" &&
+        change.action.action.type === "update-geometry"
+      ) {
+        const { id: featureId, action: { geometry } } = change.action;
+
+        const index = result.findIndex(c =>
+          c.action.type === "line" &&
+          c.action.id === featureId &&
+          c.action.action.type === "add"
+        );
+
+        if (index !== -1) {
+          const existing = result[index];
+
+          if (existing.action.type !== "line" || existing.action.action.type !== "add") {
+            continue;
+          }
+
+          result[index] = {
+            ...existing,
+            action: {
+              ...existing.action,
+              action: {
+                ...existing.action.action,
+                geometry: {
+                  ...existing.action.action.geometry,
+                  ...geometry
+                },
               }
             }
           };
