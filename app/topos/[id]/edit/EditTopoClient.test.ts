@@ -25,6 +25,50 @@ describe("Change reducer", () => {
       [input.at(-1)]
     );
   });
+  test("Drop extraneous climb assignments", () => {
+    const expected: TopoChange[] = [
+      {
+        action: {
+          type: "line",
+          id: "yyy",
+          action: {
+            type: "assign-climb",
+            id: "c2"
+          }
+        }
+      },
+      {
+        action: {
+          type: "line",
+          id: "xxx",
+          action: {
+            type: "assign-climb",
+            id: "c3"
+          }
+        }
+      },
+    ];
+
+    const input: TopoChange[] = [
+      {
+        action: {
+          type: "line",
+          id: "xxx",
+          action: {
+            type: "assign-climb",
+            id: "c1"
+          }
+        }
+      },
+      ...expected,
+    ]
+
+    expect(
+      __internal.keepLatestClimbAssignment.apply(input)
+    ).toStrictEqual(
+      expected
+    );
+  });
   test("assign-climb squahes into add", () => {
     const input: TopoChange[] = [
       {

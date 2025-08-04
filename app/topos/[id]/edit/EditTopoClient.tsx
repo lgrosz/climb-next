@@ -69,6 +69,7 @@ function EditTopoClientInner({
     const reduced = [
       squashClimbAssign,
       keepLatestTitle,
+      keepLatestClimbAssignment,
       removeAllLineChangesForRemovedLine,
     ].reduce((acc, rule) => rule.apply(acc), changes);
 
@@ -200,6 +201,26 @@ const keepLatestTitle: ChangeReducerRule = {
     }, []),
 }
 
+const keepLatestClimbAssignment: ChangeReducerRule = {
+  apply: (changes) => changes
+    .reduce<TopoChange[]>((acc, change) => {
+      const action = change.action;
+
+      if (
+        action.type === "line" &&
+        action.action.type === "assign-climb"
+      ) {
+        return [...acc.filter(c =>
+          c.action.type !== "line" ||
+          c.action.id !== action.id ||
+          c.action.action.type !== "assign-climb"
+        ), change];
+      }
+
+      return [...acc, change];
+    }, []),
+}
+
 const squashClimbAssign: ChangeReducerRule = {
   apply: (changes: TopoChange[]) => {
     const result: TopoChange[] = [];
@@ -287,6 +308,7 @@ const removeAllLineChangesForRemovedLine: ChangeReducerRule = {
 
 export const __internal = {
   keepLatestTitle,
+  keepLatestClimbAssignment,
   squashClimbAssign,
   removeAllLineChangesForRemovedLine,
 };
