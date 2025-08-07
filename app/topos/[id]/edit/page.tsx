@@ -1,85 +1,37 @@
-import { TopoWorld, Image, Line } from "@/components/context/TopoWorld";
-import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
 import EditTopoClient from "./EditTopoClient";
+import { graphql } from "@/gql";
+import { fromGql } from "@/lib/TopoWorld";
 
-const QUERY = graphql(`
-    query topoById($id: ID!) {
-      topo(id: $id) {
-        title
-        height
-        width
-        features {
-          __typename id
-          ... on TopoImageFeature {
-            image {
-              id
-              alt
-              formations {
-                climbs { id name }
-              }
-            }
-            dest { min { x y } max { x y } }
-            source { min { x y } max { x y } }
-          }
-          ... on TopoPathFeature {
-            climb { id name }
-            geometry {
-              __typename
-              ... on BasisSpline {
-                degree knots
-                controlPoints { x y }
-              }
+const query = graphql(`
+  query Topo_ById($id: ID!) {
+    topo(id: $id) {
+      features {
+        __typename
+        ... on TopoImageFeature {
+          image {
+            formations {
+              climbs { id name }
             }
           }
         }
+        ... on TopoPathFeature {
+          climb { id name }
+        }
       }
+      ...Topo_CompleteFragment
     }
+  }
 `);
 
 export default async function Page(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const data = await graphqlQuery(QUERY, { id })
+  const result = await graphqlQuery(query, { id });
+  const world = fromGql(result.topo);
 
-  const {
-    title,
-    width,
-    height,
-    features,
-  } = data.topo;
-
-  const images: Image[] = features
-    .filter(f => f.__typename === "TopoImageFeature")
-    .map(f => ({
-      featureId: f.id,
-      id: f.image.id,
-      alt: f.image.alt ?? undefined,
-      dest: {
-        min: { x: f.dest.min.x, y: f.dest.min.y },
-        max: { x: f.dest.max.x, y: f.dest.max.y }
-      },
-      source: f.source ? {
-        min: { x: f.source.min.x, y: f.source.min.y },
-        max: { x: f.source.max.x, y: f.source.max.y }
-      } : undefined,
-    }));
-
-  const lines: Line[] = features
-    .filter(f => f.__typename === "TopoPathFeature")
-    .map(f => ({
-      featureId: f.id,
-      geometry: {
-        points: f.geometry.controlPoints
-          .map(p => ([ p.x, p.y ])),
-        degree: f.geometry.degree,
-        knots: f.geometry.knots,
-      },
-      climbId: f.climb.id,
-    }));
-
-  const climbs = features
+  const climbs = result.topo.features
     .map(f => {
       if (f.__typename === "TopoImageFeature") {
         return f.image.formations
@@ -101,13 +53,6 @@ export default async function Page(
 
       return acc;
     }, [] as { id: string; name: string }[]);
-
-  const world: TopoWorld = {
-      title: title ?? "",
-      lines,
-      images,
-      size: { width, height },
-  };
 
   return (
     <EditTopoClient
