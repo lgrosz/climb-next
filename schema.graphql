@@ -381,6 +381,7 @@ type QueryRoot {
   image(id: ID!): Image!
   images: [Image!]!
   topo(id: ID!): Topo!
+  toposByFormation(id: ID!): [Topo!]!
 }
 
 type Rect {

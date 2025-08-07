@@ -19,6 +19,11 @@ const formationData = graphql(`
         ... on Formation { id name }
       }
     }
+    topos: toposByFormation(
+      id: $id
+    ) {
+      id title
+    }
   }
 `);
 
@@ -30,7 +35,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     { id: params.id }
   );
 
-  const { formation } = data;
+  const {
+    formation,
+    topos,
+  } = data;
 
   let parentHref: string | null = null;
   if (formation.parent?.__typename == "Area") {
@@ -105,6 +113,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <h3>Topos</h3>
+        <Link href={`/formations/${formation.id}/new-topo`}>New topo</Link>
+      </div>
+      <ul>
+        {topos.map(topo => (
+          <li key={`topo-${topo.id}`}>
+            <Link href={`/topos/${topo.id}/edit`}>{topo.title ?? "Untitled"}</Link>
           </li>
         ))}
       </ul>
