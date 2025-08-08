@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Coordinate from '@/lib/Coordinate'
 import { graphql } from '@/gql';
 import { graphqlQuery } from '@/graphql';
+import { TopoViewer } from '@/components/TopoViewer';
+import { fromGql } from '@/lib/TopoWorld';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -23,6 +25,7 @@ const formationData = graphql(`
       id: $id
     ) {
       id title
+      ...Topo_CompleteFragment
     }
   }
 `);
@@ -123,7 +126,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <ul>
         {topos.map(topo => (
           <li key={`topo-${topo.id}`}>
-            <Link href={`/topos/${topo.id}/edit`}>{topo.title ?? "Untitled"}</Link>
+            <h4>{topo.title ?? "Untitled"}</h4>
+            <div className="container mx-auto px-4 py-8">
+              <TopoViewer className="max-w-4xl mx-auto" world={fromGql(topo)} />
+            </div>
+            <Link href={`/topos/${topo.id}/edit`}>Edit</Link>
           </li>
         ))}
       </ul>
