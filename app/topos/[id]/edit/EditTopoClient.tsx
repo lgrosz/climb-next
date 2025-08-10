@@ -20,6 +20,12 @@ function EditTopoClientInner({
   const [showConfirm, setShowConfirm] = useState(false);
   const [reducedChanges, setReducedChanges] = useState<TopoChange[]>([]);
 
+  // TODO
+  // - lift out of component
+  //   - new function needs topo-id
+  //   - new function would be great if it said it couldn't take any
+  //     "functional" changes
+  //   - callback can invoke this new function with the id
   const changeToAction = useCallback((change: TopoChange) => {
     const action = change.action;
 
