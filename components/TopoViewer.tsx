@@ -40,14 +40,7 @@ const TopoLine = ({ line }: { line: Line }) => {
   );
 
   return (
-    <path
-      d={path}
-      stroke="#ff6b6b"
-      strokeWidth="3"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d={path} />
   );
 };
 
@@ -58,30 +51,19 @@ export const TopoViewer = ({
   world: TopoWorld;
   className?: string;
 }) => {
-  const aspectRatio = world.size.width / world.size.height;
-
   return (
-    <div className={`topo-viewer ${className}`}>
-      <div
-        className="w-full border border-gray-300 rounded-lg overflow-hidden bg-gray-50"
-        style={{ aspectRatio: aspectRatio }}
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${world.size.width} ${world.size.height}`}
-          className="block"
-        >
-          {world.images.map((image) => (
-            <TopoImage key={image.featureId} image={image} />
-          ))}
+    <svg
+      className={className}
+      viewBox={`0 0 ${world.size.width} ${world.size.height}`}
+    >
+      {world.images.map((image) => (
+        <TopoImage key={image.featureId} image={image} />
+      ))}
 
-          {world.lines.map((line) => (
-            <TopoLine key={line.featureId} line={line} />
-          ))}
-        </svg>
-      </div>
-    </div>
+      {world.lines.map((line) => (
+        <TopoLine key={line.featureId} line={line} />
+      ))}
+    </svg>
   );
 };
 

@@ -4,6 +4,7 @@ import { graphql } from '@/gql';
 import { graphqlQuery } from '@/graphql';
 import { TopoViewer } from '@/components/TopoViewer';
 import { fromGql } from '@/lib/TopoWorld';
+import styles from "./formation.module.css"
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -127,8 +128,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {topos.map(topo => (
           <li key={`topo-${topo.id}`}>
             <h4>{topo.title ?? "Untitled"}</h4>
-            <div className="container mx-auto px-4 py-8">
-              <TopoViewer className="max-w-4xl mx-auto" world={fromGql(topo)} />
+            <div className="flex justify-center items-center p-2 max-w-4xl mx-auto border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
+              <TopoViewer world={fromGql(topo)} className={`block w-full h-full ${styles["topo-viewer"]}`} />
             </div>
             <Link href={`/topos/${topo.id}/edit`}>Edit</Link>
           </li>
