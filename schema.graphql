@@ -284,28 +284,16 @@ type QueryRoot {
     id: ID!
   ): Area!
   areas: [Area!]!
-  areasByParent(
-    """Area parent"""
-    parent: AreaParentInput
-  ): [Area!]!
   climb(
     """Climb id"""
     id: ID!
   ): Climb!
   climbs: [Climb!]!
-  climbsByParent(
-    """Climb parent"""
-    parent: ClimbParentInput
-  ): [Climb!]!
   formation(
     """Formation id"""
     id: ID!
   ): Formation!
   formations: [Formation!]!
-  formationsByParent(
-    """Formation parent"""
-    parent: FormationParentInput
-  ): [Formation!]!
   image(id: ID!): Image!
   images: [Image!]!
   topo(id: ID!): Topo!
