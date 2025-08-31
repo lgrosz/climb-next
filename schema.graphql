@@ -46,12 +46,6 @@ input ClimbParentInput {
   formation: Int
 }
 
-type Climber {
-  firstName: String!
-  id: ID!
-  lastName: String!
-}
-
 type Coordinate {
   latitude: Float!
   longitude: Float!
@@ -135,13 +129,6 @@ type MutationRoot {
     """Climb id"""
     id: ID!
   ): Climb!
-  addClimber(
-    """First name"""
-    firstName: String!
-
-    """Last name"""
-    lastName: String!
-  ): Climber!
   addFormation(
     """Formation location"""
     location: CoordinateInput
@@ -240,10 +227,6 @@ type MutationRoot {
     """Climb id"""
     id: ID!
   ): Climb!
-  removeClimber(
-    """Climber id"""
-    id: ID!
-  ): Climber!
   removeFormation(
     """Formation id"""
     id: ID!
@@ -309,11 +292,6 @@ type QueryRoot {
     """Climb id"""
     id: ID!
   ): Climb!
-  climber(
-    """Climber id"""
-    id: ID!
-  ): Climber!
-  climbers: [Climber!]!
   climbs: [Climb!]!
   climbsByParent(
     """Climb parent"""
