@@ -57,7 +57,12 @@ async function config() {
 
   // generate new local schema
   if (config.schema == GRAPHQL_ENDPOINT) {
-    config.generates["schema.graphql"] = { plugins: ["schema-ast"] };
+    config.generates["schema.graphql"] = {
+      plugins: ["schema-ast"],
+      config: {
+        skipDocumentsValidation: true,
+      }
+    };
   }
 
   return config;
