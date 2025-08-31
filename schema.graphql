@@ -19,14 +19,6 @@ input AreaParentInput {
   area: Int
 }
 
-type Ascent {
-  climb: Climb!
-  climber: Climber!
-  dateWindow: DateInterval
-  grades: [Grade!]!
-  id: ID!
-}
-
 type BasisSpline {
   controlPoints: [Point2D!]!
   degree: Int!
@@ -40,7 +32,6 @@ input BasisSplineInput {
 }
 
 type Climb {
-  ascents: [Ascent!]!
   description: String
   grades: [Grade!]!
   id: ID!
@@ -71,7 +62,6 @@ input CoordinateInput {
   longitude: Float!
 }
 
-scalar DateInterval
 
 type Fontainebleau {
   value: FontainebleauGrade!
@@ -131,23 +121,6 @@ type MutationRoot {
     """Area parent"""
     parent: AreaParentInput
   ): Area!
-  addAscent(
-    """Climb ID"""
-    climbId: ID!
-
-    """Climber ID"""
-    climberId: ID!
-
-    """Date window"""
-    dateWindow: DateInterval
-  ): Ascent!
-  addAscentGrade(
-    """Grade"""
-    grade: GradeInput!
-
-    """Ascent ID"""
-    id: ID!
-  ): Ascent!
   addClimb(
     """Climb name"""
     name: String
@@ -189,13 +162,6 @@ type MutationRoot {
     """Topo width"""
     width: Float!
   ): Topo!
-  dateAscent(
-    """Area name"""
-    dateInterval: DateInterval
-
-    """Ascent ID"""
-    id: ID!
-  ): Ascent!
   describeArea(
     """Area description"""
     description: String
@@ -263,17 +229,6 @@ type MutationRoot {
     """Area id"""
     id: ID!
   ): Area!
-  removeAscent(
-    """Ascent id"""
-    id: ID!
-  ): Ascent!
-  removeAscentGrade(
-    """Grade"""
-    grade: GradeInput!
-
-    """Ascent ID"""
-    id: ID!
-  ): Ascent!
   removeClimb(
     """Climb id"""
     id: ID!
@@ -350,11 +305,6 @@ type QueryRoot {
     """Area parent"""
     parent: AreaParentInput
   ): [Area!]!
-  ascent(
-    """Ascent id"""
-    id: ID!
-  ): Ascent!
-  ascents: [Ascent!]!
   climb(
     """Climb id"""
     id: ID!
