@@ -2,21 +2,6 @@ import Form from 'next/form';
 import { move } from '@/climbs/actions';
 import { redirect } from 'next/navigation';
 import RadioTree, { RadioTreeNode } from '@/components/RadioTree';
-import { graphqlQuery } from '@/graphql';
-import { graphql } from '@/gql';
-
-const potentialClimbParents = graphql(`
-  query potentialClimbParents {
-    potentialParentFormations: formations {
-      __typename
-      id name
-      parent {
-        __typename
-        ... on Formation { id }
-      }
-    }
-  }
-`);
 
 // TODO graphql-codegen fragment
 type Area = {
@@ -93,10 +78,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
 
-  const data = await graphqlQuery(potentialClimbParents);
-
-  const { potentialParentFormations } = data;
-
   const action = async (data: FormData) => {
     'use server';
 
@@ -122,7 +103,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const roots = [
-    ...buildTree([...potentialParentFormations]),
+    ...buildTree([]),
     {
       input: {
         id: "node",
