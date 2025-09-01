@@ -15,10 +15,6 @@ const formationData = graphql(`
       location { latitude longitude }
       images { id alt }
       climbs { id name }
-      parent {
-        __typename
-        ... on Formation { id name }
-      }
     }
     topos: toposByFormation(
       id: $id
@@ -41,13 +37,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     formation,
     topos,
   } = data;
-
-  let parentHref: string | null = null;
-  if (formation.parent?.__typename == "Area") {
-    parentHref = `/areas/${formation.parent.id}`
-  } else if (formation.parent?.__typename == "Formation") {
-    parentHref = `/formations/${formation.parent.id}`
-  }
 
   let location: Coordinate | null = null;
 
@@ -79,11 +68,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
       </div>
       <div>
-        {
-          formation.parent ?
-          <h2><Link href={`${parentHref}`}>{formation.parent.name}</Link></h2> :
-          null
-        }
         <Link href={`/formations/${formation.id}/move`}>Move</Link>
       </div>
       <div>
