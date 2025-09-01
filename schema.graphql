@@ -3,22 +3,6 @@ schema {
   mutation: MutationRoot
 }
 
-type Area {
-  areas: [Area!]!
-  climbs: [Climb!]!
-  description: String
-  formations: [Formation!]!
-  id: ID!
-  name: String
-  parent: AreaParent
-}
-
-union AreaParent = Area
-
-input AreaParentInput {
-  area: Int
-}
-
 type BasisSpline {
   controlPoints: [Point2D!]!
   degree: Int!
@@ -39,7 +23,7 @@ type Climb {
   parent: ClimbParent
 }
 
-union ClimbParent = Area | Formation
+union ClimbParent = Formation
 
 input ClimbParentInput {
   area: Int
@@ -74,7 +58,7 @@ type Formation {
   parent: FormationParent
 }
 
-union FormationParent = Area | Formation
+union FormationParent = Formation
 
 input FormationParentInput {
   area: Int
@@ -108,13 +92,6 @@ type ImageMutationRoot {
 }
 
 type MutationRoot {
-  addArea(
-    """Area name"""
-    name: String
-
-    """Area parent"""
-    parent: AreaParentInput
-  ): Area!
   addClimb(
     """Climb name"""
     name: String
@@ -149,13 +126,6 @@ type MutationRoot {
     """Topo width"""
     width: Float!
   ): Topo!
-  describeArea(
-    """Area description"""
-    description: String
-
-    """Area id"""
-    id: ID!
-  ): Area!
   describeClimb(
     """Climb description"""
     description: String
@@ -174,13 +144,6 @@ type MutationRoot {
     """ID of image"""
     id: ID!
   ): ImageMutationRoot!
-  moveArea(
-    """Area id"""
-    id: ID!
-
-    """Area parent"""
-    parent: AreaParentInput
-  ): Area!
   moveClimb(
     """Climb id"""
     id: ID!
@@ -212,10 +175,6 @@ type MutationRoot {
     """Formation location"""
     location: CoordinateInput
   ): Formation!
-  removeArea(
-    """Area id"""
-    id: ID!
-  ): Area!
   removeClimb(
     """Climb id"""
     id: ID!
@@ -231,13 +190,6 @@ type MutationRoot {
     """Formation id"""
     id: ID!
   ): Formation!
-  renameArea(
-    """Area id"""
-    id: ID!
-
-    """Area name"""
-    name: String
-  ): Area!
   renameClimb(
     """Climb id"""
     id: ID!
@@ -279,11 +231,6 @@ type PrepareImageUploadResult {
 }
 
 type QueryRoot {
-  area(
-    """Area id"""
-    id: ID!
-  ): Area!
-  areas: [Area!]!
   climb(
     """Climb id"""
     id: ID!

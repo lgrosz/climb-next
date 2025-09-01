@@ -18,7 +18,6 @@ const formationData = graphql(`
       climbs { id name }
       parent {
         __typename
-        ... on Area { id name }
         ... on Formation { id name }
       }
     }
