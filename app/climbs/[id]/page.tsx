@@ -27,7 +27,6 @@ const climbData = graphql(`
       }
       parent {
         __typename
-        ... on Area { id name }
         ... on Formation { id name }
       }
     }

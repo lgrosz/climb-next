@@ -21,7 +21,6 @@ export async function create(
         id
         parent {
           __typename
-          ... on Area { id }
           ... on Formation { id }
         }
       }
@@ -104,7 +103,6 @@ export async function rename(climbId: Scalars["ID"]["input"], name: string) {
         name
         parent {
           __typename
-          ... on Area { id }
           ... on Formation { id }
         }
       }

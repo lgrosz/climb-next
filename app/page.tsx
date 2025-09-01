@@ -172,20 +172,11 @@ async function Node({ node }: { node : TreeNode }) {
 
 const allEntities = graphql(`
   query allEntities {
-    areas {
-      id
-      name
-      parent {
-        __typename
-        ... on Area { id }
-      }
-    }
     formations {
       id
       name
       parent {
         __typename
-        ... on Area { id }
         ... on Formation { id }
       }
     }
@@ -194,7 +185,6 @@ const allEntities = graphql(`
       name
       parent {
         __typename
-        ... on Area { id }
         ... on Formation { id }
       }
     }
@@ -204,8 +194,8 @@ const allEntities = graphql(`
 export default async function Page() {
   const data = await graphqlQuery(allEntities)
 
-  const { areas, formations, climbs } = data;
-  const roots = buildTree(areas, formations, climbs)
+  const { formations, climbs } = data;
+  const roots = buildTree([], formations, climbs)
 
   return (
     <div>

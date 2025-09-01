@@ -7,20 +7,11 @@ import { graphql } from '@/gql';
 
 const potentialFormationParents = graphql(`
   query potentialFormationParents {
-    potentialParentAreas: areas {
-      __typename
-      id name
-      parent {
-        __typename
-        ... on Area { id }
-      }
-    }
     potentialParentFormations: formations {
       __typename
       id name
       parent {
         __typename
-        ... on Area { id }
         ... on Formation { id }
       }
     }
@@ -114,7 +105,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const id = params.id;
 
   const data = await graphqlQuery(potentialFormationParents);
-  const { potentialParentAreas, potentialParentFormations } = data;
+  const { potentialParentFormations } = data;
 
   const action = async (data: FormData) => {
     'use server';
@@ -142,7 +133,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const roots = [
-    ...buildTree([...potentialParentAreas, ...potentialParentFormations], id),
+    ...buildTree([...potentialParentFormations], id),
     {
       input: {
         id: "node",
