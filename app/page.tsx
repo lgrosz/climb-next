@@ -175,10 +175,6 @@ const allEntities = graphql(`
     formations {
       id
       name
-      parent {
-        __typename
-        ... on Formation { id }
-      }
     }
     climbs {
       id

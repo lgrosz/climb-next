@@ -17,10 +17,6 @@ export async function create(
         parent: $parent
       ) {
         id
-        parent {
-          __typename
-          ... on Formation { id }
-        }
       }
     }
   `);
@@ -35,21 +31,9 @@ export async function create(
   );
 
   let id = data.action.id;
-  let parentId = data.action.parent?.id;
-  let parentType = data.action.parent?.__typename;
 
   if (id) {
     revalidatePath(`/areas/${id}`);
-  }
-
-  if (parentType === "Area") {
-    if (parentId) {
-      revalidatePath(`/areas/${parentId}`);
-    }
-  } else if (parentType === "Formation"){
-    if (parentId) {
-      revalidatePath(`/formations/${parentId}`);
-    }
   }
 
   revalidatePath('/');
@@ -100,12 +84,6 @@ export async function rename(formationId: Scalars["ID"]["input"], name: string) 
         name: $name
       ) {
         name
-        parent {
-          __typename
-          ... on Formation {
-            id
-          }
-        }
         climbs { id }
       }
     }
