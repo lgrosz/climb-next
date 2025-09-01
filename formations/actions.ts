@@ -106,7 +106,6 @@ export async function rename(formationId: Scalars["ID"]["input"], name: string) 
             id
           }
         }
-        formations { id }
         climbs { id }
       }
     }
@@ -132,14 +131,6 @@ export async function rename(formationId: Scalars["ID"]["input"], name: string) 
     const parentFormationId = data.action.parent.id;
     if (parentFormationId) {
       revalidatePath(`/formations/${parentFormationId}`)
-    }
-  }
-
-  const childFormations = data.action.formations
-  for (const child of childFormations) {
-    const childFormationId = child.id
-    if (childFormationId) {
-      revalidatePath(`/formations/${childFormationId}`)
     }
   }
 

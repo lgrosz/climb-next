@@ -50,7 +50,6 @@ scalar FontainebleauGrade
 type Formation {
   climbs: [Climb!]!
   description: String
-  formations: [Formation!]!
   id: ID!
   images: [Image!]!
   location: Coordinate
