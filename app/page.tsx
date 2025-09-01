@@ -1,6 +1,7 @@
 import React from 'react'
 import { FragmentType, graphql, useFragment } from '@/gql'
 import { graphqlQuery } from '@/graphql'
+import Link from 'next/link';
 
 const ClimbFieldsFragment = graphql(`
   fragment ClimbFields on Climb {
@@ -46,24 +47,28 @@ const allEntities = graphql(`
 `);
 
 function ClimbItem(frag: FragmentType<typeof ClimbFieldsFragment>) {
-  const { name } = useFragment(ClimbFieldsFragment, frag);
+  const {
+    id,
+    name,
+  } = useFragment(ClimbFieldsFragment, frag);
 
   return (
     <li>
-      { name }
+      <Link href={`/climbs/${id}`}>{ name }</Link>
     </li>
   )
 }
 
 function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
   const {
+    id,
     name,
     climbs,
   } = useFragment(FormationFieldsFragment, frag);
 
   return (
     <li>
-      { name }
+      <Link href={`/formations/${id}`}>{ name }</Link>
       <ul>
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
       </ul>
@@ -73,6 +78,7 @@ function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
 
 function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
   const {
+    id,
     name,
     formations,
     climbs,
@@ -80,7 +86,7 @@ function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
 
   return (
     <li>
-      { name }
+      <Link href={`/sectors/${id}`}>{ name }</Link>
       <ul>
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
@@ -91,6 +97,7 @@ function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
 
 function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
   const {
+    id,
     name,
     sectors,
     formations,
@@ -99,7 +106,7 @@ function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
 
   return (
     <li>
-      { name }
+      <Link href={`crags/${id}`}>{ name }</Link>
       <ul>
         { sectors.map(s => <SectorItem key={`sector/${s.id}`} { ...s } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
@@ -111,6 +118,7 @@ function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
 
 function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
   const {
+    id,
     name,
     crags,
     formations,
@@ -119,7 +127,7 @@ function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
 
   return (
     <li>
-      { name }
+      <Link href={`/regions/${id}`}>{ name }</Link>
       <ul>
         { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
