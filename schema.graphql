@@ -23,11 +23,13 @@ type Climb {
   parent: ClimbParent
 }
 
-union ClimbParent = Formation
+union ClimbParent = Crag | Formation | Region | Sector
 
 input ClimbParentInput {
-  area: Int
-  formation: Int
+  crag: ID
+  formation: ID
+  region: ID
+  sector: ID
 }
 
 type Coordinate {
@@ -40,6 +42,14 @@ input CoordinateInput {
   longitude: Float!
 }
 
+type Crag {
+  climbs: [Climb!]!
+  formations: [Formation!]!
+  id: ID!
+  name: String
+  region: Region
+  sectors: [Sector!]!
+}
 
 type Fontainebleau {
   value: FontainebleauGrade!
@@ -57,11 +67,12 @@ type Formation {
   parent: FormationParent
 }
 
-union FormationParent = Formation
+union FormationParent = Crag | Region | Sector
 
 input FormationParentInput {
-  area: Int
-  formation: Int
+  crag: ID
+  region: ID
+  sector: ID
 }
 
 union Grade = Fontainebleau | Vermin | YosemiteDecimal
@@ -235,6 +246,11 @@ type QueryRoot {
     id: ID!
   ): Climb!
   climbs: [Climb!]!
+  crag(
+    """Crag id"""
+    id: ID!
+  ): Crag!
+  crags: [Crag!]!
   formation(
     """Formation id"""
     id: ID!
@@ -242,6 +258,15 @@ type QueryRoot {
   formations: [Formation!]!
   image(id: ID!): Image!
   images: [Image!]!
+  region(
+    """Region id"""
+    id: ID!
+  ): Region!
+  regions: [Region!]!
+  sector(
+    """Sector id"""
+    id: ID!
+  ): Sector!
   topo(id: ID!): Topo!
   toposByFormation(id: ID!): [Topo!]!
 }
@@ -254,6 +279,22 @@ type Rect {
 input RectInput {
   max: Point2DInput!
   min: Point2DInput!
+}
+
+type Region {
+  climbs: [Climb!]!
+  crags: [Crag!]!
+  formations: [Formation!]!
+  id: ID!
+  name: String
+}
+
+type Sector {
+  climbs: [Climb!]!
+  crag: Crag
+  formations: [Formation!]!
+  id: ID!
+  name: String
 }
 
 type Topo {

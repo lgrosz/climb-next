@@ -1,205 +1,152 @@
 import React from 'react'
-import Link from 'next/link'
+import { FragmentType, graphql, useFragment } from '@/gql'
 import { graphqlQuery } from '@/graphql'
-import { graphql } from '@/gql'
 
-interface TreeNode {
-  id: string,
-  name: string | null,
-  type:
-    "area" |
-    "formation" |
-    "climb"
-  children: TreeNode[]
-}
+const ClimbFieldsFragment = graphql(`
+  fragment ClimbFields on Climb {
+    id name
+  }`);
 
-// TODO This can probably come from a graphql-codegen fragment
-type Areas = {
-    __typename?: "Area";
-    id: string;
-    name?: string | null;
-    parent?: {
-        __typename: "Area";
-        id: string;
-    } | null;
-}[];
+const FormationFieldsFragment = graphql(`
+  fragment FormationFields on Formation {
+    id name
+    climbs { id ...ClimbFields }
+  }`);
 
-// TODO This can probably come from a graphql-codegen fragment
-type Formations = {
-    __typename?: "Formation";
-    id: string;
-    name?: string | null;
-    parent?: {
-        __typename: "Area";
-        id: string;
-    } | {
-        __typename: "Formation";
-        id: string;
-    } | null;
-}[];
+const SectorFieldsFragment = graphql(`
+  fragment SectorFields on Sector {
+    id name
+    formations { id ...FormationFields }
+    climbs { id ...ClimbFields }
+  }`);
 
-// TODO This can probably come from a graphql-codegen fragment
-type Climbs = {
-    __typename?: "Climb";
-    id: string;
-    name?: string | null;
-    parent?: {
-        __typename: "Area";
-        id: string;
-    } | {
-        __typename: "Formation";
-        id: string;
-    } | null;
-}[];
+const CragFieldsFragment = graphql(`
+  fragment CragFields on Crag {
+    id name
+    sectors { id ...SectorFields }
+    formations { id ...FormationFields }
+    climbs { id ...ClimbFields }
+  }`);
 
-function buildTree(areas: Areas, formations: Formations, climbs: Climbs): TreeNode[] {
-  const areaMap: Map<string, TreeNode> = new Map();
-  const formationMap: Map<string, TreeNode> = new Map();
-  const climbMap: Map<string, TreeNode> = new Map();
-
-  areas.forEach(area => {
-    if (area.id !== undefined && area.name !== undefined) {
-      areaMap.set(area.id, {
-        id: area.id,
-        name: area.name,
-        type: 'area',
-        children: []
-      });
-    }
-  });
-
-  formations.forEach(formation => {
-    if (formation.id !== undefined && formation.name !== undefined) {
-      formationMap.set(formation.id, {
-        id: formation.id,
-        name: formation.name,
-        type: 'formation',
-        children: []
-      });
-    }
-  });
-
-  climbs.forEach(climb => {
-    if (climb.id !== undefined && climb.name !== undefined) {
-      climbMap.set(climb.id, {
-        id: climb.id,
-        name: climb.name,
-        type: 'climb',
-        children: []
-      });
-    }
-  });
-
-  const roots: TreeNode[] = [];
-
-  climbs.forEach(climb => {
-    if (climb.id === undefined) return;
-    const node = climbMap.get(climb.id);
-    if (!node) return;
-
-    const parentId = climb.parent?.id;
-    if (parentId !== undefined) {
-      if (climb.parent?.__typename === "Formation") {
-        formationMap.get(parentId)?.children.push(node);
-      } else if (climb.parent?.__typename === "Area") {
-        areaMap.get(parentId)?.children.push(node);
-      }
-    } else {
-      roots.push(node);
-    }
-  });
-
-  formations.forEach(formation => {
-    if (formation.id === undefined) return;
-    const node = formationMap.get(formation.id);
-    if (!node) return;
-
-    if (formation.parent?.id !== undefined) {
-      if (formation.parent.__typename === "Formation") {
-        formationMap.get(formation.parent.id)?.children.push(node);
-      } else {
-        areaMap.get(formation.parent.id)?.children.push(node);
-      }
-    } else {
-      roots.push(node);
-    }
-  });
-
-  areas.forEach(area => {
-    if (area.id === undefined) return;
-    const node = areaMap.get(area.id);
-    if (!node) return;
-
-    if (area.parent?.id !== undefined && area.parent.__typename === "Area") {
-      areaMap.get(area.parent.id)?.children.push(node);
-    } else {
-      roots.push(node);
-    }
-  });
-
-  return roots;
-}
-
-async function Node({ node }: { node : TreeNode }) {
-  let text = "";
-  let href = "/";
-
-  if (node.type == "area") {
-    text = "[a]"
-    href = "/areas/"
-  } else if (node.type == "formation") {
-    text = "[f]"
-    href = "/formations/"
-  } else if (node.type == "climb") {
-    text = "[c]"
-    href = "/climbs/"
-  }
-
-  text = `${text} ${node.name}`
-  href = `${href}${node.id}`
-
-  return (
-    <li>
-      <Link href={href}>{text}</Link>
-      <ul>
-      {node.children.map((child, index) => (
-        <Node key={index} node={child} />
-      ))}
-      </ul>
-    </li>
-  );
-}
+const RegionFieldsFragment = graphql(`
+  fragment RegionFields on Region {
+    id name
+    crags { id ...CragFields }
+    formations { id ...FormationFields }
+    climbs { id ...ClimbFields }
+  }`);
 
 const allEntities = graphql(`
   query allEntities {
-    formations {
-      id
-      name
-    }
-    climbs {
-      id
-      name
-      parent {
-        __typename
-        ... on Formation { id }
-      }
-    }
+    regions { id ...RegionFields }
+    crags { id ...CragFields }
+    formations { id ...FormationFields }
+    climbs { id ...ClimbFields }
   }
 `);
+
+function ClimbItem(frag: FragmentType<typeof ClimbFieldsFragment>) {
+  const { name } = useFragment(ClimbFieldsFragment, frag);
+
+  return (
+    <li>
+      { name }
+    </li>
+  )
+}
+
+function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
+  const {
+    name,
+    climbs,
+  } = useFragment(FormationFieldsFragment, frag);
+
+  return (
+    <li>
+      { name }
+      <ul>
+        { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
+      </ul>
+    </li>
+  )
+}
+
+function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
+  const {
+    name,
+    formations,
+    climbs,
+  } = useFragment(SectorFieldsFragment, frag);
+
+  return (
+    <li>
+      { name }
+      <ul>
+        { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
+        { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
+      </ul>
+    </li>
+  )
+}
+
+function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
+  const {
+    name,
+    sectors,
+    formations,
+    climbs,
+  } = useFragment(CragFieldsFragment, frag);
+
+  return (
+    <li>
+      { name }
+      <ul>
+        { sectors.map(s => <SectorItem key={`sector/${s.id}`} { ...s } />) }
+        { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
+        { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
+      </ul>
+    </li>
+  )
+}
+
+function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
+  const {
+    name,
+    crags,
+    formations,
+    climbs,
+  } = useFragment(RegionFieldsFragment, frag);
+
+  return (
+    <li>
+      { name }
+      <ul>
+        { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
+        { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
+        { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
+      </ul>
+    </li>
+  )
+}
 
 export default async function Page() {
   const data = await graphqlQuery(allEntities)
 
-  const { formations, climbs } = data;
-  const roots = buildTree([], formations, climbs)
+  const {
+    regions,
+    crags,
+    formations,
+    climbs,
+  } = data;
 
   return (
     <div>
       <h1>Content</h1>
       <ul>
-        {roots.map((node, index) => (
-          <Node key={index} node={node} />
-        ))}
+        { regions.map(r => <RegionItem key={`region/${r.id}`} { ...r } />) }
+        { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
+        { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
+        { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
       </ul>
     </div>
   );
