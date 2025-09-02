@@ -1,3 +1,4 @@
+import reactHooks from "eslint-plugin-react-hooks";
 import { FlatCompat } from "@eslint/eslintrc";
 
 const compat = new FlatCompat({
@@ -8,7 +9,9 @@ const eslintConfig = [
   ...compat.config({
     extends: [
       "next/typescript",
-      "next",
+      /*"next",*/ // TODO rushstack#4965
+      "plugin:react/recommended",
+      "plugin:react/jsx-runtime",
     ],
     rules: {
       "@typescript-eslint/no-unused-vars": [
@@ -20,6 +23,7 @@ const eslintConfig = [
       ],
     },
   }),
+  reactHooks.configs["recommended-latest"],
 ];
 
 export default eslintConfig;
