@@ -453,7 +453,7 @@ export default function TopoEditor({
     return () => {
       removeEventListener("keydown", handle);
     }
-  }, [onSelect, tool, setTool, onTransform, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry, selection.lines, setSelection, deleteSelection]);
+  }, [onSelect, tool, setTool, onTransform, onAddNode, selectionHitTest, selectedNodeHitTest, onNodeSelect, onNodeTransform, addSplineGeometry, selection.lines, setSelection, deleteSelection]);
 
   // TODO I can either define the interaction between the session and the world
   // here, or I can do so within the session by defining a custom "provider"
