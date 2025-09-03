@@ -1,5 +1,5 @@
 import { Image, Line, TopoWorld } from "@/components/context/TopoWorld";
-import { FragmentType, graphql, useFragment } from "@/gql";
+import { FragmentType, graphql, getFragmentData } from "@/gql";
 
 /** A query for a complete TopoWorld */
 const Topo_CompleteFragment = graphql(`
@@ -34,7 +34,7 @@ export function fromGql(frag: FragmentType<typeof Topo_CompleteFragment>): TopoW
     width,
     height,
     features,
-  } = useFragment(Topo_CompleteFragment, frag);
+  } = getFragmentData(Topo_CompleteFragment, frag);
 
   const images: Image[] = features
     .filter(f => f.__typename === "TopoImageFeature")

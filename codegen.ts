@@ -35,6 +35,9 @@ async function config() {
   if (GQL_GENERATE) {
     config.generates["gql/"] = {
       preset: "client",
+      presetConfig: {
+        fragmentMasking: { unmaskFunctionName: "getFragmentData" }
+      },
       plugins: [],
       config: {
         scalars: {
