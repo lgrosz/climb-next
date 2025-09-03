@@ -1,4 +1,3 @@
-import React from 'react'
 import { FragmentType, graphql, useFragment } from '@/gql'
 import { graphqlQuery } from '@/graphql'
 import Link from 'next/link';
