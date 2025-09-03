@@ -1,4 +1,4 @@
-import { FragmentType, graphql, useFragment } from '@/gql'
+import { FragmentType, graphql, getFragmentData } from '@/gql'
 import { graphqlQuery } from '@/graphql'
 import Link from 'next/link';
 
@@ -49,7 +49,7 @@ function ClimbItem(frag: FragmentType<typeof ClimbFieldsFragment>) {
   const {
     id,
     name,
-  } = useFragment(ClimbFieldsFragment, frag);
+  } = getFragmentData(ClimbFieldsFragment, frag);
 
   return (
     <li>
@@ -63,7 +63,7 @@ function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
     id,
     name,
     climbs,
-  } = useFragment(FormationFieldsFragment, frag);
+  } = getFragmentData(FormationFieldsFragment, frag);
 
   return (
     <li>
@@ -81,7 +81,7 @@ function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
     name,
     formations,
     climbs,
-  } = useFragment(SectorFieldsFragment, frag);
+  } = getFragmentData(SectorFieldsFragment, frag);
 
   return (
     <li>
@@ -101,7 +101,7 @@ function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
     sectors,
     formations,
     climbs,
-  } = useFragment(CragFieldsFragment, frag);
+  } = getFragmentData(CragFieldsFragment, frag);
 
   return (
     <li>
@@ -122,7 +122,7 @@ function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
     crags,
     formations,
     climbs,
-  } = useFragment(RegionFieldsFragment, frag);
+  } = getFragmentData(RegionFieldsFragment, frag);
 
   return (
     <li>
