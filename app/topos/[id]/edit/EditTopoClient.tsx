@@ -7,6 +7,7 @@ import { TopoChange } from "@/hooks/useTopoHistory";
 import { addFeature, assignClimb, removeFeature, title, updateGeometry } from "@/topos/actions";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 
 function EditTopoClientInner({
   id,
@@ -94,13 +95,14 @@ function EditTopoClientInner({
   return (
     <div className="w-full h-full flex flex-col">
       <TopoEditor onFinish={finish} />
-      {showConfirm && (
+      {showConfirm && createPortal(
         <ConfirmChangesModal
-        changes={reducedChanges}
-        availableClimbs={availableClimbs}
-        onConfirm={applyChanges}
-        onCancel={cancelChanges}
-        />
+          changes={reducedChanges}
+          availableClimbs={availableClimbs}
+          onConfirm={applyChanges}
+          onCancel={cancelChanges}
+        />,
+        document.body
       )}
     </div>
   );
