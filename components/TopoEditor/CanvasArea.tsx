@@ -62,12 +62,10 @@ const style = {
   sketch: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#60a5fa";
     ctx.lineWidth = 3;
-    ctx.setLineDash([15, 15]);
   },
   ghost: function(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
     ctx.lineWidth = 6;
-    ctx.shadowColor = "rgba(0, 0, 0, 0)";
   },
   geometry: {
     spline: {
@@ -242,7 +240,6 @@ export default function CanvasArea() {
 
     // "draw paper"
     ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, world.size.width, world.size.height);
     ctx.restore();
