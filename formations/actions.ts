@@ -1,3 +1,5 @@
+"use server";
+
 import { graphql } from "@/gql";
 import { CoordinateInput, FormationParentInput, InputMaybe, Scalars } from "@/gql/graphql";
 import { graphqlQuery } from "@/graphql";
@@ -74,6 +76,8 @@ export async function move(formationId: Scalars["ID"]["input"], parent: InputMay
 }
 
 export async function rename(formationId: Scalars["ID"]["input"], name: string) {
+  "use server";
+
   const mutation = graphql(`
     mutation renameFormation(
       $id: ID!
