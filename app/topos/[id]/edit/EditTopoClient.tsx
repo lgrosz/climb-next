@@ -92,7 +92,7 @@ function EditTopoClientInner({
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
+    <div className="w-full h-full flex flex-col">
       <TopoEditor onFinish={finish} />
       {showConfirm && (
         <ConfirmChangesModal
