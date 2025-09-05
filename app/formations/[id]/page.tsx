@@ -49,9 +49,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div>
       <Header id={formation.id} name={formation.name ?? undefined} />
       <div>
-        <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
-      </div>
-      <div>
         <h3>
           {
             location ?
