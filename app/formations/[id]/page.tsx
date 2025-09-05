@@ -5,6 +5,7 @@ import { graphqlQuery } from '@/graphql';
 import { TopoViewer } from '@/components/TopoViewer';
 import { fromGql } from '@/lib/TopoWorld';
 import styles from "./formation.module.css"
+import Header from './Header';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -46,13 +47,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
+      <Header id={formation.id} name={formation.name ?? undefined} />
       <div>
-        <h1>
-          {
-            formation.name ??
-            <i>Unnamed formation</i>
-          }
-        </h1>
         <Link href={`/formations/${formation.id}/rename`}>Rename</Link>
       </div>
       <div>
