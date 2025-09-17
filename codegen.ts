@@ -49,6 +49,10 @@ async function config() {
             input: 'string',
             output: 'string',
           },
+          Upload: {
+            input: 'File',
+            output: 'File',
+          },
           VerminGrade: {
             input: 'string',
             output: 'string',
