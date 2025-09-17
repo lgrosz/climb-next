@@ -14,9 +14,11 @@ interface UploadImageResponse {
 async function uploadImageViaGraphQL({
   file,
   alt,
+  formationIds,
 }: {
   file: File,
   alt: string | null,
+  formationIds?: string[],
 }) {
   "use server";
 
@@ -26,8 +28,16 @@ async function uploadImageViaGraphQL({
 
   const operations = JSON.stringify({
     query: `
-      mutation ($image: Upload!, $alt: String) {
-        uploadImage(image: $image, alt: $alt) {
+      mutation (
+        $image: Upload!
+        $alt: String
+        $formationIds: [ID!]
+      ) {
+        uploadImage(
+          image: $image
+          alt: $alt
+          formationIds: $formationIds
+        ) {
           id
         }
       }
@@ -35,6 +45,7 @@ async function uploadImageViaGraphQL({
     variables: {
       image: null,
       alt: alt || null,
+      formationIds: formationIds || null,
     },
   });
 
@@ -76,9 +87,10 @@ export async function POST(r: NextRequest) {
   const formData = await r.formData();
   const file = formData.get("file") as File;
   const alt = formData.get("alt")?.toString() || null;
+  const formationIds = formData.getAll("formation").map(f => f.toString());
 
   try {
-    const { id } = await uploadImageViaGraphQL({ file, alt });
+    const { id } = await uploadImageViaGraphQL({ file, alt, formationIds });
     return Response.json({ id }, { status: 200 });
   } catch (e) {
     console.error("Failed to upload image via GraphQL", e);

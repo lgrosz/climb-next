@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 
 type SuccessState = { success: true; imageId: string };
@@ -25,6 +26,8 @@ async function uploadImage(_: FormState,  formData: FormData): Promise<FormState
 
 export default function Page() {
   const [state, dispatch, pending] = useActionState(uploadImage, null);
+  const searchParams = useSearchParams();
+  const formation = searchParams.get("formation");
 
   return (
     <>
@@ -34,6 +37,9 @@ export default function Page() {
         </h2>
         { pending && <progress className="block" /> }
         <form action={dispatch} className="space-y-2">
+          {formation && (
+            <input type="hidden" name="formation" value={formation} />
+          )}
           <input
             type="file"
             name="file"
