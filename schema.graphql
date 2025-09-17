@@ -218,6 +218,16 @@ type MutationRoot {
     """ID of topo"""
     id: ID!
   ): TopoMutationRoot!
+  uploadImage(
+    """Alternative text"""
+    alt: String
+
+    """IDs of formations in this image"""
+    formationIds: [ID!]
+
+    """Image upload"""
+    image: Upload!
+  ): Image!
 }
 
 type PathFeatureMutationRoot {
@@ -352,6 +362,8 @@ union TopoPathGeometry = BasisSpline
 input TopoPathGeometryInput {
   basisSpline: BasisSplineInput
 }
+
+scalar Upload
 
 type Vermin {
   value: VerminGrade!
