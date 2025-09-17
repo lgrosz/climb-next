@@ -1,89 +1,98 @@
 "use client";
 
-import Form from "next/form";
-import { prepareImageUpload } from "@/images/actions";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, Suspense, useCallback, useRef, useState } from "react";
+import { useActionState } from "react";
 
-function UploadForm()
-{
-  const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
-  const params = useSearchParams();
-  const [progress, setProgress] = useState(0);
+type SuccessState = { success: true; imageId: string };
+type ErrorState = { success: false; error: string };
+type InitialState = null;
+type FormState = SuccessState | ErrorState | InitialState;
 
-  const handle = useCallback(async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+async function uploadImage(_: FormState,  formData: FormData): Promise<FormState> {
+  const res = await fetch("/images/new/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    if (!formRef.current) return;
+  let data;
 
-    const formData = new FormData(formRef.current);
-    const file = formData.get("image") as File | null;
-    const alt = formData.get("alt")?.toString();
-
-    if (!file?.size) {
-      // TODO redirect to error page?
-      return;
-    }
-
-    console.log("prepareImageUpload with formations", params.getAll("formation"));
-
-    const { image, uploadUrl } = await prepareImageUpload(
-      file.name,
-      alt || undefined,
-      params.getAll("formation")
-    );
-
-    await new Promise<void>((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", uploadUrl);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          setProgress(percent);
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setProgress(100);
-          resolve();
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Network error during upload"));
-
-      xhr.setRequestHeader("Content-Type", file.type);
-      xhr.send(file);
-    });
-
-    router.push(`/images/${image.id}`);
-  }, [router, params]);
-
-  return (
-    <Form ref={formRef} action="" onSubmit={handle}>
-      <input name="image" type="file" accept="image/*" />
-      <label htmlFor="alt">Alternative text</label>
-      <input name="alt" type="text" />
-      <button type="submit">Upload image</button>
-      { progress > 0 &&
-        <>
-          <label htmlFor="progress">Progress</label>
-          <progress max="100" value={progress}>{progress}%</progress>
-        </>
-      }
-    </Form>
-  );
+  try {
+    data = await res.json();
+    return { success: true, imageId: data.id as string };
+  } catch {
+    return { success: false, error: "Failed to upload image." };
+  }
 }
 
-export default function Page()
-{
+export default function Page() {
+  const [state, dispatch, pending] = useActionState(uploadImage, null);
+
   return (
-    <Suspense>
-      <UploadForm />
-    </Suspense>
+    <>
+      <section aria-labelledby="upload-heading" className="mt-4">
+        <h2 id="upload-heading">
+          {state === null ? "Upload an image" : "Upload another image"}
+        </h2>
+        { pending && <progress className="block" /> }
+        <form action={dispatch} className="space-y-2">
+          <input
+            type="file"
+            name="file"
+            accept="image/*"
+            placeholder="Choose file"
+            disabled={pending}
+            className="block"
+          />
+          <input
+            type="text"
+            name="alt"
+            placeholder="Alternative text"
+            disabled={pending}
+            className="block"
+          />
+          <input
+            type="submit"
+            disabled={pending}
+            className="block"
+          />
+        </form>
+      </section>
+
+      {state?.success === true && (
+        <section aria-labelledby="success-heading" className="mt-4">
+          <h2 id="success-heading">Upload successful</h2>
+          <figure>
+            <img
+              src={`/images/${state.imageId}/download`}
+              alt="Uploaded image"
+              className="max-w-[300px] rounded-md"
+            />
+            <figcaption className="mt-1 text-sm text-gray-600">
+              <a
+                href={`/images/${state.imageId}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View image
+              </a>
+              {" | "}
+              <a
+                href={`/images/${state.imageId}/download`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Download
+              </a>
+            </figcaption>
+          </figure>
+        </section>
+      )}
+
+      {state?.success === false && (
+        <section aria-labelledby="error-heading" className="mt-4">
+          <h2 id="error-heading">Upload failed</h2>
+          <p className="text-red-600">Error: {state.error}</p>
+        </section>
+      )}
+    </>
   );
 }
