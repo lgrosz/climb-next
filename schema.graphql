@@ -168,16 +168,6 @@ type MutationRoot {
     """Formation parent"""
     parent: FormationParentInput
   ): Formation!
-  prepareImageUpload(
-    """Alternative text"""
-    alt: String
-
-    """IDs of formations in this image"""
-    formationIds: [ID!]
-
-    """Name of image file"""
-    name: String!
-  ): PrepareImageUploadResult!
   relocateFormation(
     """Formation id"""
     id: ID!
@@ -243,11 +233,6 @@ type Point2D {
 input Point2DInput {
   x: Float!
   y: Float!
-}
-
-type PrepareImageUploadResult {
-  image: Image!
-  uploadUrl: String!
 }
 
 type QueryRoot {
