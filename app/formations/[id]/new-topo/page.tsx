@@ -1,10 +1,29 @@
 "use client";
 
 import Form from "next/form";
-import { prepareImageUpload } from "@/images/actions";
 import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useCallback, useRef, useState } from "react";
+import { FormEvent, useCallback, useRef } from "react";
 import { addFeature as addTopoFeature, create as createTopo } from "@/topos/actions";
+
+type UploadImageResultFailure = { success: false };
+type UploadImageResultSuccess = { success: true; imageId: string };
+type UploadImageResult = UploadImageResultFailure | UploadImageResultSuccess;
+
+async function uploadImage(formData: FormData): Promise<UploadImageResult> {
+  const res = await fetch("/images/new/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  let data;
+
+  try {
+    data = await res.json();
+    return { success: true, imageId: data.id as string };
+  } catch {
+    return { success: false };
+  }
+}
 
 function getImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -32,33 +51,6 @@ export default function Page()
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const { id: formationId } = useParams<{ id: string }>()
-  const [progress, setProgress] = useState(0);
-
-  function uploadFile(uploadUrl: string, file: File): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", uploadUrl);
-      xhr.setRequestHeader("Content-Type", file.type);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          setProgress(percent);
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve()
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Network error during upload"));
-      xhr.send(file);
-    });
-  }
 
   const handle = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,32 +62,35 @@ export default function Page()
     const alt = formData.get("alt")?.toString().trim() || null;
     const title = formData.get("title")?.toString().trim() || null;
 
+    const uploadImageFormData = new FormData();
+    uploadImageFormData.append("file", file ?? "");
+    if (alt) uploadImageFormData.append("alt", alt);
+    if (formationId) uploadImageFormData.append("formation", formationId);
+
     if (!file?.size) {
       // TODO this doesn't protect against malicious uploads
       return;
     }
 
     try {
-      const [localImage, { image, uploadUrl }] = await Promise.all([
-        getImage(file),
-        prepareImageUpload(file.name, alt ?? undefined, [formationId]),
-      ]);
-
-      const uploadPromise = uploadFile(uploadUrl, file);
+      // TODO We can leave some things dangling here.. so some report of what failed would be good
+      // and some links for the user to clean up if they want to
+      const uploadPromise = uploadImage(uploadImageFormData);
+      const localImage = await getImage(file);
       const topoId = await createTopo(title, localImage.naturalWidth, localImage.naturalHeight);
+      const upload = await uploadPromise;
 
-      await Promise.all([
-        uploadPromise,
-        addTopoFeature(topoId, {
+      if (upload.success) {
+        await addTopoFeature(topoId, {
           type: "image",
           topoId,
-          imageId: image.id,
+          imageId: upload.imageId,
           destCrop: {
             min: { x: 0, y: 0 },
             max: { x: localImage.naturalWidth, y: localImage.naturalHeight },
           },
-        }),
-      ]);
+        });
+      }
 
       router.push(`/topos/${topoId}/edit`);
     } catch (err) {
@@ -117,12 +112,6 @@ export default function Page()
         <input id="title" name="title" type="text" />
       </div>
       <button type="submit">Create topo</button>
-      { progress > 0 &&
-        <>
-          <label htmlFor="progress">Progress</label>
-          <progress id="progress" max="100" value={progress}>{progress}%</progress>
-        </>
-      }
     </Form>
   );
 }
