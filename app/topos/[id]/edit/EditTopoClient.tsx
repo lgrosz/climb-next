@@ -85,6 +85,7 @@ function EditTopoClientInner({
       await action();
     }
     setShowConfirm(false);
+    // TODO navigate back
   }, [reducedChanges, changeToAction]);
 
   const cancelChanges = () => {
