@@ -44,6 +44,7 @@ input CoordinateInput {
 
 type Crag {
   climbs: [Climb!]!
+  description: String
   formations: [Formation!]!
   id: ID!
   name: String
@@ -279,6 +280,7 @@ input RectInput {
 type Region {
   climbs: [Climb!]!
   crags: [Crag!]!
+  description: String
   formations: [Formation!]!
   id: ID!
   name: String
@@ -287,6 +289,7 @@ type Region {
 type Sector {
   climbs: [Climb!]!
   crag: Crag
+  description: String
   formations: [Formation!]!
   id: ID!
   name: String
