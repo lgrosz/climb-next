@@ -1,13 +1,14 @@
 import { graphqlQuery } from '@/graphql';
 import { graphql } from '@/gql';
 import Link from 'next/link';
+import Header from './Header';
 
 const cragData = graphql(`
   query cragData($id: ID!) {
     crag(
       id: $id
     ) {
-      name
+      id name
       description
       sectors { id name }
       formations { id name }
@@ -27,12 +28,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
-        {
-          crag.name ??
-          <i>Unnamed crag</i>
-        }
-      </h1>
+      <Header id={crag.id} name={crag.name ?? undefined} />
       <h3>Description</h3>
       <p>
         {

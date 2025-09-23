@@ -198,6 +198,13 @@ type MutationRoot {
     """Climb name"""
     name: String
   ): Climb!
+  renameCrag(
+    """Crag id"""
+    id: ID!
+
+    """Crag name"""
+    name: String
+  ): Crag!
   renameFormation(
     """Formation id"""
     id: ID!
