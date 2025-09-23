@@ -219,6 +219,13 @@ type MutationRoot {
     """Region name"""
     name: String
   ): Region!
+  renameSector(
+    """Sector id"""
+    id: ID!
+
+    """Sector name"""
+    name: String
+  ): Sector!
   topo(
     """ID of topo"""
     id: ID!
