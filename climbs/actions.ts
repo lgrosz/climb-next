@@ -103,10 +103,6 @@ export async function rename(climbId: Scalars["ID"]["input"], name: string) {
         name: $name
       ) {
         name
-        parent {
-          __typename
-          ... on Formation { id }
-        }
       }
     }
   `);
@@ -121,18 +117,6 @@ export async function rename(climbId: Scalars["ID"]["input"], name: string) {
 
   revalidatePath('/')
   revalidatePath(`/climbs/${climbId}`)
-
-  if (data.action.parent?.__typename == "Area") {
-    const parentAreaId = data.action.parent.id;
-    if (parentAreaId) {
-      revalidatePath(`/areas/${parentAreaId}`)
-    }
-  } else if (data.action.parent?.__typename == "Formation") {
-    const parentFormationId = data.action.parent.id;
-    if (parentFormationId) {
-      revalidatePath(`/formations/${parentFormationId}`)
-    }
-  }
 
   return data.action.name;
 }

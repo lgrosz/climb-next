@@ -104,18 +104,6 @@ export async function rename(formationId: Scalars["ID"]["input"], name: string) 
   revalidatePath('/')
   revalidatePath(`/formations/${formationId}`)
 
-  if (data.action.parent?.__typename == "Area") {
-    const parentAreaId = data.action.parent.id;
-    if (parentAreaId) {
-      revalidatePath(`/areas/${parentAreaId}`)
-    }
-  } else if (data.action.parent?.__typename == "Formation") {
-    const parentFormationId = data.action.parent.id;
-    if (parentFormationId) {
-      revalidatePath(`/formations/${parentFormationId}`)
-    }
-  }
-
   const childClimbs = data.action.climbs
   for (const child of childClimbs) {
     const childClimbId = child.id
