@@ -205,6 +205,13 @@ type MutationRoot {
     """Formation name"""
     name: String
   ): Formation!
+  renameRegion(
+    """Region id"""
+    id: ID!
+
+    """Region name"""
+    name: String
+  ): Region!
   topo(
     """ID of topo"""
     id: ID!

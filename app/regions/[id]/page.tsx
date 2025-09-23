@@ -1,13 +1,14 @@
 import { graphqlQuery } from '@/graphql';
 import { graphql } from '@/gql';
 import Link from 'next/link';
+import Header from './Header';
 
 const regionData = graphql(`
   query regionData($id: ID!) {
     region(
       id: $id
     ) {
-      name
+      id name
       description
       crags { id name }
       formations { id name }
@@ -27,12 +28,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
-        {
-          region.name ??
-          <i>Unnamed region</i>
-        }
-      </h1>
+      <Header id={region.id} name={region.name ?? undefined} />
       <h3>Description</h3>
       <p>
         {
