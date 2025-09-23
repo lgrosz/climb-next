@@ -1,3 +1,5 @@
+"use server";
+
 import { graphql } from "@/gql";
 import { ClimbParentInput, GradeInput, InputMaybe, Scalars } from "@/gql/graphql";
 import { graphqlQuery } from "@/graphql";
