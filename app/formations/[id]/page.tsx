@@ -6,6 +6,7 @@ import { TopoViewer } from '@/components/TopoViewer';
 import { fromGql } from '@/lib/TopoWorld';
 import styles from "./formation.module.css"
 import Header from './Header';
+import Description from './Description';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -63,16 +64,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <div>
         <Link href={`/formations/${formation.id}/move`}>Move</Link>
       </div>
-      <div>
-        <h3>Description</h3>
-        <p>
-          {
-            formation.description ??
-            <i>No description available</i>
-          }
-        </p>
-        <Link href={`/formations/${formation.id}/describe`}>Describe</Link>
-      </div>
+      <Description id={formation.id} description={formation.description ?? undefined} />
       <div>
         <h3>Climbs</h3>
         <Link href="/climbs/new">New climb</Link>

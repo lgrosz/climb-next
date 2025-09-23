@@ -5,6 +5,7 @@ import FontainebleauGrade from '@/fontainebleau-grade';
 import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
 import { graphql } from '@/gql';
 import Header from './Header';
+import Description from './Description';
 
 const climbData = graphql(`
   query climbData($id: ID!) {
@@ -73,16 +74,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         }
         <Link href={`/climbs/${climb.id}/move`}>Move</Link>
       </div>
-      <div>
-        <h3>Description</h3>
-        <p>
-          {
-            climb.description ??
-            <i>No description available</i>
-          }
-        </p>
-        <Link href={`/climbs/${climb.id}/describe`}>Describe</Link>
-      </div>
+      <Description id={climb.id} description={climb.description ?? undefined} />
       <h3>Grades</h3>
       {(fontGrades.length > 0 || verminGrades.length > 0 || ydsGrades.length > 0) && (
         <ul>

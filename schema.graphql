@@ -144,6 +144,13 @@ type MutationRoot {
     """Climb id"""
     id: ID!
   ): Climb!
+  describeCrag(
+    """Crag description"""
+    description: String
+
+    """Crag id"""
+    id: ID!
+  ): Crag!
   describeFormation(
     """Formation description"""
     description: String
@@ -151,6 +158,20 @@ type MutationRoot {
     """Formation id"""
     id: ID!
   ): Formation!
+  describeRegion(
+    """Region description"""
+    description: String
+
+    """Region id"""
+    id: ID!
+  ): Region!
+  describeSector(
+    """Sector description"""
+    description: String
+
+    """Sector id"""
+    id: ID!
+  ): Sector!
   image(
     """ID of image"""
     id: ID!

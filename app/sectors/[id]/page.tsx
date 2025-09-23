@@ -2,6 +2,7 @@ import { graphqlQuery } from '@/graphql';
 import { graphql } from '@/gql';
 import Link from 'next/link';
 import Header from './Header';
+import Description from './Description';
 
 const sectorData = graphql(`
   query sectorData($id: ID!) {
@@ -28,13 +29,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <div>
       <Header id={sector.id} name={sector.name ?? undefined} />
-      <h3>Description</h3>
-      <p>
-        {
-          sector.description ??
-          <i>No description available</i>
-        }
-      </p>
+      <Description id={sector.id} description={sector.description ?? undefined} />
       <h3>Formations</h3>
       <ul>
         {sector.formations.map((formation) => (
