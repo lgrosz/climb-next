@@ -1,13 +1,14 @@
 import { graphqlQuery } from '@/graphql';
 import { graphql } from '@/gql';
 import Link from 'next/link';
+import Header from './Header';
 
 const sectorData = graphql(`
   query sectorData($id: ID!) {
     sector(
       id: $id
     ) {
-      name
+      id name
       description
       formations { id name }
       climbs { id name }
@@ -26,12 +27,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <h1>
-        {
-          sector.name ??
-          <i>Unnamed sector</i>
-        }
-      </h1>
+      <Header id={sector.id} name={sector.name ?? undefined} />
       <h3>Description</h3>
       <p>
         {
