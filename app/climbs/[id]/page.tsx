@@ -4,6 +4,7 @@ import { graphqlQuery } from '@/graphql';
 import FontainebleauGrade from '@/fontainebleau-grade';
 import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
 import { graphql } from '@/gql';
+import Header from './Header';
 
 const climbData = graphql(`
   query climbData($id: ID!) {
@@ -63,15 +64,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
-      <div>
-        <h1>
-          {
-            climb.name ??
-            <i>Unnamed climb</i>
-          }
-        </h1>
-        <Link href={`/climbs/${climb.id}/rename`}>Rename</Link>
-      </div>
+      <Header id={climb.id} name={climb.name ?? undefined} />
       <div>
         {
           climb.parent ?
