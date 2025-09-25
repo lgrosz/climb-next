@@ -127,6 +127,13 @@ type MutationRoot {
     """Formation parent"""
     parent: FormationParentInput
   ): Formation!
+  addRegion(
+    """Region description"""
+    description: String
+
+    """Region name"""
+    name: String
+  ): Region!
   addTopo(
     """Topo height"""
     height: Float!
