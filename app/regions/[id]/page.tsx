@@ -31,7 +31,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div>
       <Header id={region.id} name={region.name ?? undefined} />
       <Description id={region.id} description={region.description ?? undefined} />
-      <h3>Sectors</h3>
+      <h3>Crags</h3>
       <ul>
         {region.crags.map((crag) => (
           <li key={`crag-${crag.id}`}>
