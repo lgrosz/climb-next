@@ -150,6 +150,10 @@ export default async function Page() {
     <div>
       <h1>Content</h1>
       <ul>
+        <li>
+          <a href="/regions/new">Create new region</a>
+        </li>
+        <hr />
         { regions.map(r => <RegionItem key={`region/${r.id}`} { ...r } />) }
         { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
