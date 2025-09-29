@@ -117,6 +117,16 @@ type MutationRoot {
     """Climb id"""
     id: ID!
   ): Climb!
+  addCrag(
+    """Crag description"""
+    description: String
+
+    """Crag name"""
+    name: String
+
+    """Region ID"""
+    regionId: ID
+  ): Crag!
   addFormation(
     """Formation location"""
     location: CoordinateInput

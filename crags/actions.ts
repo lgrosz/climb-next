@@ -5,6 +5,34 @@ import { Scalars } from "@/gql/graphql";
 import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
+export async function create(
+  name?: string,
+  description?: string,
+  regionId?: Scalars["ID"]["input"]
+) {
+  const mutation = graphql(`
+    mutation addCrag(
+      $name: String
+      $description: String
+      $regionId: ID
+    ) {
+      action: addCrag(
+        name: $name
+        description: $description
+        regionId: $regionId
+      ) {
+        id
+      }
+    }
+  `);
+
+  const {
+    action: { id }
+  } = await graphqlQuery(mutation, { name, description, regionId });
+
+  return id;
+}
+
 export async function describe(cragId: Scalars["ID"]["input"], description: string) {
   const mutation = graphql(`
     mutation describeCrag(
