@@ -144,6 +144,16 @@ type MutationRoot {
     """Region name"""
     name: String
   ): Region!
+  addSector(
+    """Region ID"""
+    cragId: ID!
+
+    """Sector description"""
+    description: String
+
+    """Sector name"""
+    name: String
+  ): Sector!
   addTopo(
     """Topo height"""
     height: Float!
