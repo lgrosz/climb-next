@@ -5,9 +5,30 @@ import { CoordinateInput, FormationParentInput, InputMaybe, Scalars } from "@/gq
 import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
+interface IParent {
+  id: Scalars["ID"]["input"],
+}
+
+type RegionParent = IParent & {
+  type: "region",
+};
+
+type CragParent = IParent & {
+  type: "crag",
+};
+
+type SectorParent = IParent & {
+  type: "sector",
+};
+
+type Parent = |
+  RegionParent |
+  CragParent |
+  SectorParent
+
 export async function create(
   name?: string,
-  parent?: FormationParentInput
+  parent?: Parent
 ) {
   const mutation = graphql(`
     mutation addFormation(
@@ -23,22 +44,21 @@ export async function create(
     }
   `);
 
-  const data = await graphqlQuery(
+  const parentVar = parent ? {
+    region: parent.type === "region" ? parent.id : undefined,
+    crag: parent.type === "crag" ? parent.id : undefined,
+    sector: parent.type === "sector" ? parent.id : undefined,
+  } : undefined;
+
+  const { action: { id } } = await graphqlQuery(
     mutation,
     {
       name: name,
-      area: parent?.area,
-      formation: parent?.formation,
+      parent: parentVar,
     }
   );
 
-  let id = data.action.id;
-
-  if (id) {
-    revalidatePath(`/areas/${id}`);
-  }
-
-  revalidatePath('/');
+  revalidatePath(`/formations/${id}`);
 
   return id;
 }
