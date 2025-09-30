@@ -45,6 +45,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       </ul>
       <h3>Formations</h3>
       <ul>
+        <li>
+          <Link href={`/formations/new?region=${region.id}`}>Add formation</Link>
+        </li>
+        <hr />
         {region.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>{formation.name}</Link>

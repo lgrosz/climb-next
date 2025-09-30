@@ -1,7 +1,8 @@
 "use client";
 
 import { FragmentType, getFragmentData, graphql } from "@/gql";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 const SectorFieldsFragment = graphql(`
   fragment NewFormationSectorFields on Sector {
@@ -33,23 +34,51 @@ export default function FormationForm(
     crags: Array<FragmentType<typeof CragFieldsFragment>>,
   }
 ) {
+  const searchParams = useSearchParams();
+
+  const defaultSector = searchParams.get("sector") || undefined;
+
+  // TODO This logic is a bit messy and could be better. Really, in both of these cases, we know
+  // what the default-region is, so we don't need to calculate that afterward.
+  const defaultCrag = defaultSector
+    ? (() => {
+        // check root crags first
+        const crag = props.crags
+          .map(c => getFragmentData(CragFieldsFragment, c))
+          .find(c => c.sectors.some(s => s.id === defaultSector));
+        if (crag) return crag.id;
+
+        // check crags nested under regions
+        for (const r of props.regions) {
+          // TODO technically, here we also know the default-region
+          const region = getFragmentData(RegionFieldsFragment, r);
+          const crag = region.crags
+            .map(c => getFragmentData(CragFieldsFragment, c))
+            .find(c => c.sectors.some(s => s.id === defaultSector));
+          if (crag) return crag.id;
+        }
+
+        return undefined;
+      })()
+    : searchParams.get("crag") || undefined;
+
+  const defaultRegion = defaultCrag
+    ? props.regions
+        .map(c => getFragmentData(RegionFieldsFragment, c))
+        .find(c => c.crags.some(s => s.id === defaultCrag))?.id
+    : searchParams.get("region") || undefined;
+
   const regions = props.regions.map(r => getFragmentData(RegionFieldsFragment, r));
 
-  const [region, setRegion] = useState<string>();
+  const [region, setRegion] = useState<string | undefined>(defaultRegion);
   const crags = region !== undefined
     ? regions.find(r => r.id === region)?.crags.map(c => getFragmentData(CragFieldsFragment, c)) ?? []
     : props.crags.map(c => getFragmentData(CragFieldsFragment, c));
 
-  const [crag, setCrag] = useState<string>();
+  const [crag, setCrag] = useState<string | undefined>(defaultCrag);
   const sectors = crag !== undefined
     ? crags.find(c => c.id === crag)?.sectors.map(s => getFragmentData(SectorFieldsFragment, s)) ??[]
     : [];
-
-  // TODO There has to be a neater way of doing this
-  // To avoid issues with keeping state from old selections
-  useEffect(() => {
-    setCrag(undefined);
-  }, [region])
 
   return (
     <form action={action}>
@@ -72,7 +101,14 @@ export default function FormationForm(
             <label htmlFor="region">
               Region
             </label>
-            <select name="region" onChange={e => setRegion(e.target.value)}>
+            <select
+              name="region"
+              defaultValue={defaultRegion}
+              onChange={e => {
+                setRegion(e.target.value)
+                setCrag(undefined)
+              }}
+            >
               <option value={undefined} label="No region" />
               {regions.map(r => (
                 <option key={r.id} value={r.id}>{r.name}</option>
@@ -83,7 +119,11 @@ export default function FormationForm(
             <label htmlFor="crag">
               Crag
             </label>
-            <select name="crag" onChange={e => setCrag(e.target.value)}>
+            <select
+              name="crag"
+              defaultValue={defaultCrag}
+              onChange={e => setCrag(e.target.value)}
+            >
               <option value={undefined} label="No crag" />
               {crags.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -94,7 +134,10 @@ export default function FormationForm(
             <label htmlFor="sector">
               Select a sector
             </label>
-            <select name="sector">
+            <select
+              name="sector"
+              defaultValue={defaultSector}
+            >
               <option value={undefined} label="No sector" />
               {sectors.map(s => (
                 <option key={s.id} value={s.id}>{s.name}</option>
