@@ -65,11 +65,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Link href={`/formations/${formation.id}/move`}>Move</Link>
       </div>
       <Description id={formation.id} description={formation.description ?? undefined} />
-      <div>
-        <h3>Climbs</h3>
-        <Link href="/climbs/new">New climb</Link>
-      </div>
+      <h3>Climbs</h3>
       <ul>
+        <li>
+          <Link href={`/climbs/new?formation=${formation.id}`}>Add climb</Link>
+        </li>
+        <hr />
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
