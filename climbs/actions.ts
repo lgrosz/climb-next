@@ -5,9 +5,35 @@ import { ClimbParentInput, GradeInput, InputMaybe, Scalars } from "@/gql/graphql
 import { graphqlQuery } from "@/graphql";
 import { revalidatePath } from "next/cache";
 
+interface IParent {
+  id: Scalars["ID"]["input"],
+}
+
+type RegionParent = IParent & {
+  type: "region",
+};
+
+type CragParent = IParent & {
+  type: "crag",
+};
+
+type SectorParent = IParent & {
+  type: "sector",
+};
+
+type FormationParent = IParent & {
+  type: "formation",
+};
+
+type Parent = |
+  RegionParent |
+  CragParent |
+  SectorParent |
+  FormationParent
+
 export async function create(
   name?: string,
-  parent?: ClimbParentInput
+  parent?: Parent
 ) {
   // TODO Raise error on failure
 
@@ -21,41 +47,26 @@ export async function create(
         parent: $parent
       ) {
         id
-        parent {
-          __typename
-          ... on Formation { id }
-        }
       }
     }
   `);
 
-  const data = await graphqlQuery(
+  const parentVar = parent ? {
+    region: parent.type === "region" ? parent.id : undefined,
+    crag: parent.type === "crag" ? parent.id : undefined,
+    sector: parent.type === "sector" ? parent.id : undefined,
+    formation: parent.type === "formation" ? parent.id : undefined,
+  } : undefined;
+
+  const { action: { id } } = await graphqlQuery(
     mutation,
     {
       name: name,
-      parent: parent
+      parent: parentVar
     }
   );
 
-  let id = data.action.id;
-  let parentId = data.action.parent?.id;
-  let parentType = data.action.parent?.__typename;
-
-  if (id) {
-    revalidatePath(`/areas/${id}`);
-  }
-
-  if (parentType === "Area") {
-    if (parentId) {
-      revalidatePath(`/areas/${parentId}`);
-    }
-  } else if (parentType === "Formation"){
-    if (parentId) {
-      revalidatePath(`/formations/${parentId}`);
-    }
-  }
-
-  revalidatePath('/');
+  revalidatePath(`/climbs/${id}`);
 
   return id;
 }
