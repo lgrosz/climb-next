@@ -57,6 +57,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       </ul>
       <h3>Climbs</h3>
       <ul>
+        <li>
+          <Link href={`/climbs/new?region=${region.id}`}>Add climb</Link>
+        </li>
+        <hr />
         {region.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
