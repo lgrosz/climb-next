@@ -107,6 +107,27 @@ export default function FormationForm(
 	  name="description"
 	/>
         <fieldset>
+          <legend>Coordinates</legend>
+          <label className="block">
+            Latitude
+            <input
+              className="block"
+              type="number"
+              name="latitude"
+              step="any"
+            />
+          </label>
+          <label className="block">
+            Longitude
+            <input
+              className="block"
+              type="number"
+              name="longitude"
+              step="any"
+            />
+          </label>
+        </fieldset>
+        <fieldset>
           <legend>Select a parent</legend>
           <div>
             <label htmlFor="region">
