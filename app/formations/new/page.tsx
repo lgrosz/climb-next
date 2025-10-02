@@ -18,6 +18,7 @@ export default async function Page() {
     'use server';
 
     const name = formData.get('name')?.toString();
+    const description = formData.get('description')?.toString();
 
     let parent;
 
@@ -36,7 +37,8 @@ export default async function Page() {
     }
 
     const id = await create(
-      name ?? undefined,
+      name || undefined,
+      description || undefined,
       parent,
     );
 
