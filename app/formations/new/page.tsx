@@ -46,11 +46,14 @@ export default async function Page() {
   }
 
   return (
-    <FormationForm
-      action={action}
-      regions={regions}
-      crags={crags}
-    />
+    <div>
+      <h1>Create a new formation</h1>
+      <FormationForm
+        action={action}
+        regions={regions}
+        crags={crags}
+      />
+    </div>
   )
 }
 

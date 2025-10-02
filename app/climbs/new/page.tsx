@@ -55,12 +55,15 @@ export default async function Page() {
   }
 
   return (
-    <ClimbForm
-      action={action}
-      regions={regions}
-      crags={crags}
-      formations={formations}
-    />
+    <div>
+      <h1>Create a new climb</h1>
+      <ClimbForm
+        action={action}
+        regions={regions}
+        crags={crags}
+        formations={formations}
+      />
+    </div>
   )
 }
 
