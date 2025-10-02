@@ -151,7 +151,7 @@ type MutationRoot {
     name: String
   ): Region!
   addSector(
-    """Region ID"""
+    """Crag ID"""
     cragId: ID!
 
     """Sector description"""
