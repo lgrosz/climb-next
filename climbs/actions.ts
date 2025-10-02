@@ -33,6 +33,7 @@ type Parent = |
 
 export async function create(
   name?: string,
+  description?: string,
   parent?: Parent
 ) {
   // TODO Raise error on failure
@@ -40,10 +41,12 @@ export async function create(
   const mutation = graphql(`
     mutation addClimb(
       $name: String
+      $description: String
       $parent: ClimbParentInput
     ) {
       action: addClimb(
         name: $name
+        description: $description
         parent: $parent
       ) {
         id
@@ -61,7 +64,8 @@ export async function create(
   const { action: { id } } = await graphqlQuery(
     mutation,
     {
-      name: name,
+      name,
+      description,
       parent: parentVar
     }
   );
