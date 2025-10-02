@@ -174,6 +174,17 @@ export default function ClimbForm(
           className="w-full"
           name="name"
         />
+	<label
+	  className="block"
+	  htmlFor="description"
+	>
+	  Add a description
+	</label>
+	<textarea
+	  id="description"
+	  className="w-full resize-y"
+	  name="description"
+	/>
         <fieldset>
           <legend>Select a parent</legend>
           <div>

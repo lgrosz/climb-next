@@ -104,6 +104,9 @@ type ImageMutationRoot {
 
 type MutationRoot {
   addClimb(
+    """Climb description"""
+    description: String
+
     """Climb name"""
     name: String
 
