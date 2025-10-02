@@ -28,15 +28,18 @@ type Parent = |
 
 export async function create(
   name?: string,
+  description?: string,
   parent?: Parent
 ) {
   const mutation = graphql(`
     mutation addFormation(
       $name: String
+      $description: String
       $parent: FormationParentInput
     ) {
       action: addFormation(
         name: $name
+        description: $description
         parent: $parent
       ) {
         id
@@ -53,7 +56,8 @@ export async function create(
   const { action: { id } } = await graphqlQuery(
     mutation,
     {
-      name: name,
+      name,
+      description,
       parent: parentVar,
     }
   );
