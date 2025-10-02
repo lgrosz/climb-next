@@ -20,6 +20,12 @@ export default async function Page() {
     const name = formData.get('name')?.toString();
     const description = formData.get('description')?.toString();
 
+    const location = (() => {
+      const latitude = Number(formData.get("latitude") ?? NaN);
+      const longitude = Number(formData.get("longitude") ?? NaN);
+      return !isNaN(latitude) && !isNaN(longitude) ? { latitude, longitude } : undefined;
+    })();
+
     let parent;
 
     const sector = formData.get("sector")?.toString();
@@ -39,6 +45,7 @@ export default async function Page() {
     const id = await create(
       name || undefined,
       description || undefined,
+      location,
       parent,
     );
 

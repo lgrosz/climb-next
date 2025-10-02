@@ -29,17 +29,20 @@ type Parent = |
 export async function create(
   name?: string,
   description?: string,
+  location?: CoordinateInput,
   parent?: Parent
 ) {
   const mutation = graphql(`
     mutation addFormation(
       $name: String
       $description: String
+      $location: CoordinateInput
       $parent: FormationParentInput
     ) {
       action: addFormation(
         name: $name
         description: $description
+        location: $location
         parent: $parent
       ) {
         id
@@ -58,6 +61,7 @@ export async function create(
     {
       name,
       description,
+      location,
       parent: parentVar,
     }
   );
