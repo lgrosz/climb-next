@@ -1,56 +1,25 @@
-import { create } from '@/climbs/actions';
-import { redirect } from "next/navigation";
 import ClimbForm from './ClimbForm';
 import { graphql } from '@/gql';
 import { graphqlQuery } from '@/graphql';
+import { submitNewClimbForm } from './actions';
+import { redirect } from 'next/navigation';
+import { toClimbParentOptions } from './ClimbParentOptions';
 
 const query = graphql(`
   query NewClimbPageData {
-    regions { ...NewClimbRegionFields }
-    crags { ...NewClimbCragFields }
-    formations { ...NewClimbFormationFields }
+    regions { ...RegionClimbParentOptionFields }
+    crags { ...CragClimbParentOptionFields }
+    formations { ...FormationClimbParentOptionFields }
   }
 `);
 
 export default async function Page() {
   const result = await graphqlQuery(query);
-  const {
-    regions,
-    crags,
-    formations,
-  } = result;
+  const parentOptions = toClimbParentOptions(result);
 
   const action = async (formData: FormData) => {
-    'use server';
-    const name = formData.get('name')?.toString();
-    const description = formData.get('description')?.toString();
-
-    let parent;
-
-    const formation = formData.get("formation")?.toString();
-    const sector = formData.get("sector")?.toString();
-    const crag = formData.get("crag")?.toString();
-    const region = formData.get("region")?.toString();
-
-    if (formation) {
-      parent = { type: "formation", id: formation } as const;
-    } else if (sector) {
-      parent = { type: "sector", id: sector } as const;
-    } else if (crag) {
-      parent = { type: "crag", id: crag } as const;
-    } else if (region) {
-      parent = { type: "region", id: region } as const;
-    } else {
-      parent = undefined;
-    }
-
-    const id = await create(
-      name ?? undefined,
-      description ?? undefined,
-      parent,
-    );
-
-
+    "use server";
+    const id = await submitNewClimbForm(formData);
     redirect(`/climbs/${id}`);
   }
 
@@ -58,11 +27,15 @@ export default async function Page() {
     <div>
       <h1>Create a new climb</h1>
       <ClimbForm
+        id="new-climb-form"
         action={action}
-        regions={regions}
-        crags={crags}
-        formations={formations}
+        parentOptions={parentOptions}
       />
+      <div className="flex justify-end">
+        <button form="new-climb-form" type="submit">
+          Create
+        </button>
+      </div>
     </div>
   )
 }
