@@ -2,6 +2,7 @@
 
 import { FragmentType, getFragmentData, graphql } from "@/gql"
 import { useSearchParams } from "next/navigation";
+import { SectorParentOptions } from "./SectorParentOptions";
 
 const CragFieldsFragment = graphql(`
   fragment NewSectorCragFields on Crag {
@@ -42,21 +43,21 @@ function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
 
 export default function SectorForm(
   {
+    id,
     action,
-    ...props
+    parentOptions,
   } : {
+    id?: string,
     action: (_: FormData) => Promise<void>,
-    crags: Array<FragmentType<typeof CragFieldsFragment>>,
-    regions: Array<FragmentType<typeof RegionFieldsFragment>>,
+    parentOptions: SectorParentOptions,
   }
 ) {
   const searchParams = useSearchParams();
   const defaultCrag = searchParams.get("crag") || undefined;
-  const crags = props.crags.map(c => getFragmentData(CragFieldsFragment, c));
-  const regions = props.regions.map(r => getFragmentData(RegionFieldsFragment, r));
+  const { regions, crags } = parentOptions;
 
   return (
-    <form action={action}>
+    <form id={id} action={action}>
       <div>
 	<label
 	  className="block"
@@ -95,14 +96,6 @@ export default function SectorForm(
 	    <RegionItem key={r.id} {...r} />
 	  ))}
 	</select>
-      </div>
-      <div className="flex justify-end">
-	<button type="button">
-	  Cancel
-	</button>
-	<button type="submit">
-	  Create
-	</button>
       </div>
     </form>
   );
