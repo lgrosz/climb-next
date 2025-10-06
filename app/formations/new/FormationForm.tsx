@@ -1,37 +1,18 @@
 "use client";
 
-import { FragmentType, getFragmentData, graphql } from "@/gql";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-
-const SectorFieldsFragment = graphql(`
-  fragment NewFormationSectorFields on Sector {
-    id name
-  }
-`);
-
-const CragFieldsFragment = graphql(`
-  fragment NewFormationCragFields on Crag {
-    id name
-    sectors { id ...NewFormationSectorFields }
-  }
-`);
-
-const RegionFieldsFragment = graphql(`
-  fragment NewFormationRegionFields on Region {
-    id name
-    crags { id ...NewFormationCragFields }
-  }
-`);
+import { FormationParentOptions } from "./FormationParentOptions";
 
 export default function FormationForm(
   {
+    id,
     action,
-    ...props
+    parentOptions,
   } : {
+    id?: string,
     action: (_: FormData) => Promise<void>,
-    regions: Array<FragmentType<typeof RegionFieldsFragment>>,
-    crags: Array<FragmentType<typeof CragFieldsFragment>>,
+    parentOptions: FormationParentOptions,
   }
 ) {
   const searchParams = useSearchParams();
@@ -43,17 +24,14 @@ export default function FormationForm(
   const defaultCrag = defaultSector
     ? (() => {
         // check root crags first
-        const crag = props.crags
-          .map(c => getFragmentData(CragFieldsFragment, c))
+        const crag = parentOptions.crags
           .find(c => c.sectors.some(s => s.id === defaultSector));
         if (crag) return crag.id;
 
         // check crags nested under regions
-        for (const r of props.regions) {
+        for (const r of parentOptions.regions) {
           // TODO technically, here we also know the default-region
-          const region = getFragmentData(RegionFieldsFragment, r);
-          const crag = region.crags
-            .map(c => getFragmentData(CragFieldsFragment, c))
+          const crag = r.crags
             .find(c => c.sectors.some(s => s.id === defaultSector));
           if (crag) return crag.id;
         }
@@ -63,25 +41,22 @@ export default function FormationForm(
     : searchParams.get("crag") || undefined;
 
   const defaultRegion = defaultCrag
-    ? props.regions
-        .map(c => getFragmentData(RegionFieldsFragment, c))
+    ? parentOptions.regions
         .find(c => c.crags.some(s => s.id === defaultCrag))?.id
     : searchParams.get("region") || undefined;
 
-  const regions = props.regions.map(r => getFragmentData(RegionFieldsFragment, r));
-
   const [region, setRegion] = useState<string | undefined>(defaultRegion);
   const crags = region !== undefined
-    ? regions.find(r => r.id === region)?.crags.map(c => getFragmentData(CragFieldsFragment, c)) ?? []
-    : props.crags.map(c => getFragmentData(CragFieldsFragment, c));
+    ? parentOptions.regions.find(r => r.id === region)?.crags ?? []
+    : parentOptions.crags;
 
   const [crag, setCrag] = useState<string | undefined>(defaultCrag);
   const sectors = crag !== undefined
-    ? crags.find(c => c.id === crag)?.sectors.map(s => getFragmentData(SectorFieldsFragment, s)) ??[]
+    ? crags.find(c => c.id === crag)?.sectors ??[]
     : [];
 
   return (
-    <form action={action}>
+    <form id={id} action={action}>
       <div>
         <label
           className="block"
@@ -142,7 +117,7 @@ export default function FormationForm(
               }}
             >
               <option value={undefined} label="No region" />
-              {regions.map(r => (
+              {parentOptions.regions.map(r => (
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}
             </select>
@@ -177,14 +152,6 @@ export default function FormationForm(
             </select>
           </div>
         </fieldset>
-      </div>
-      <div className="flex justify-end">
-	<button type="button">
-	  Cancel
-	</button>
-	<button type="submit">
-	  Create
-	</button>
       </div>
     </form>
   );
