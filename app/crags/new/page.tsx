@@ -1,34 +1,36 @@
 import { graphql } from "@/gql"
-import { create } from "@/crags/actions";
 import { redirect } from "next/navigation";
 import { graphqlQuery } from "@/graphql";
 import CragForm from "./CragForm";
+import { submitNewCragForm } from "./actions";
+import { toCragParentOptions } from "./CragParentOptions";
 
-const regionOptions = graphql(`
-  query regionOptions {
-    regions { ...RegionFieldsForCragFormFragment }
+const query = graphql(`
+  query NewCragPageData {
+    regions { ...RegionCragParentOptionFields }
   }
 `);
 
 export default async function Page()
 {
-  const { regions } = await graphqlQuery(regionOptions);
+  const result = await graphqlQuery(query);
+  const parentOptions = toCragParentOptions(result);
 
   const action = async (formData: FormData) => {
     "use server";
-
-    const name = formData.get("name")?.toString();
-    const description = formData.get("description")?.toString();
-    const region_id = formData.get("region")?.toString();
-
-    const id = await create(name, description, region_id);
+    const id = await submitNewCragForm(formData);
     redirect(`/crags/${id}`);
   }
 
   return (
     <div>
       <h1>Create a new crag</h1>
-      <CragForm action={action} regions={regions} />
+      <CragForm id="new-crag-form" action={action} parentOptions={parentOptions} />
+      <div className="flex justify-end">
+        <button form="new-crag-form" type="submit">
+          Create
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,27 +1,22 @@
 "use client"
 
-import { FragmentType, getFragmentData, graphql } from "@/gql"
 import { useSearchParams } from "next/navigation";
-
-const RegionFieldsForCragFormFragment = graphql(`
-  fragment RegionFieldsForCragFormFragment on Region {
-    id name
-  }
-`);
+import { CragParentOptions } from "./CragParentOptions";
 
 export default function CragForm({
+  id,
   action,
-  ...props
+  parentOptions,
 }: {
+  id?: string,
   action: (_: FormData) => Promise<void>
-  regions: Array<FragmentType<typeof RegionFieldsForCragFormFragment>>
+  parentOptions: CragParentOptions,
 }) {
   const searchParams = useSearchParams();
-  const regions = props.regions.map(f => getFragmentData(RegionFieldsForCragFormFragment, f));
   const defaultRegion = searchParams.get("region") || undefined;
 
   return (
-    <form action={action}>
+    <form id={id} action={action}>
       <div>
 	<label
 	  className="block"
@@ -54,18 +49,10 @@ export default function CragForm({
 	</label>
 	<select name="region" defaultValue={defaultRegion}>
 	  <option label="No region" value={undefined} />
-	  {regions.map(r => (
+	  {parentOptions.regions.map(r => (
 	    <option key={r.id} label={r.name ?? ""} value={r.id} />
 	  ))}
 	</select>
-      </div>
-      <div className="flex justify-end">
-	<button type="button">
-	  Cancel
-	</button>
-	<button type="submit">
-	  Create
-	</button>
       </div>
     </form>
   );
