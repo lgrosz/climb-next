@@ -151,7 +151,7 @@ export default async function Page() {
       <h1>Content</h1>
       <ul>
         <li>
-          <a href="/regions/new">Create new region</a>
+          <Link href="/regions/new">Create new region</Link>
         </li>
         <hr />
         { regions.map(r => <RegionItem key={`region/${r.id}`} { ...r } />) }
