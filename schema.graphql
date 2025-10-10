@@ -3,6 +3,20 @@ schema {
   mutation: MutationRoot
 }
 
+type Ascent {
+  ascentWindow: DateRange
+  climb: Climb!
+  firstAscent: Boolean!
+  id: ID!
+  party: AscentParty!
+  verified: Boolean!
+}
+
+type AscentParty {
+  complete: Boolean!
+  members: [Climber!]!
+}
+
 type BasisSpline {
   controlPoints: [Point2D!]!
   degree: Int!
@@ -16,6 +30,7 @@ input BasisSplineInput {
 }
 
 type Climb {
+  ascents: [Ascent!]!
   description: String
   grades: [Grade!]!
   id: ID!
@@ -30,6 +45,12 @@ input ClimbParentInput {
   formation: ID
   region: ID
   sector: ID
+}
+
+type Climber {
+  firstName: String
+  id: ID!
+  lastName: String
 }
 
 type Coordinate {
@@ -51,6 +72,8 @@ type Crag {
   region: Region
   sectors: [Sector!]!
 }
+
+scalar DateRange
 
 type Fontainebleau {
   value: FontainebleauGrade!
@@ -312,10 +335,15 @@ input Point2DInput {
 }
 
 type QueryRoot {
+  ascent(
+    """Ascent ID"""
+    id: ID!
+  ): Ascent!
   climb(
     """Climb id"""
     id: ID!
   ): Climb!
+  climbers: [Climber!]!
   climbs: [Climb!]!
   crag(
     """Crag id"""

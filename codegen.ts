@@ -41,7 +41,7 @@ async function config() {
       plugins: [],
       config: {
         scalars: {
-          DateInterval: {
+          DateRange: {
             input: 'string',
             output: 'string',
           },
