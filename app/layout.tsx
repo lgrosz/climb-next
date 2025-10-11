@@ -19,9 +19,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
+  breadcrumb,
   children,
   modal,
 }: Readonly<{
+  breadcrumb: React.ReactNode;
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
@@ -34,6 +36,7 @@ export default function RootLayout({
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-4 py-6">
+          {breadcrumb}
           {children}
           {modal}
         </main>
