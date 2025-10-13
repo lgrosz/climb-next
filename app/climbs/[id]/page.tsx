@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import VerminGrade from '@/vermin-grade'
 import { graphqlQuery } from '@/graphql';
 import FontainebleauGrade from '@/fontainebleau-grade';
@@ -28,10 +27,6 @@ const climbData = graphql(`
           yds_value: value
         }
       }
-      parent {
-        __typename
-        ... on Formation { id name }
-      }
       ascents {
         ...AscentTableDataFragment
       }
@@ -48,13 +43,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const { climb } = data;
 
-  let parentHref: string | null = null;
-  if (climb.parent?.__typename == "Formation") {
-    parentHref = `/formations/${climb.parent.id}`
-  } else if (climb.parent?.__typename == "Area") {
-    parentHref = `/areas/${climb.parent.id}`
-  }
-
   const fontGrades = climb.grades.map(grade =>
     grade.__typename == "Fontainebleau" && grade.font_value ? FontainebleauGrade.fromString(grade.font_value) : undefined
   ).filter((g): g is FontainebleauGrade => !!g).sort(FontainebleauGrade.compare);
@@ -70,14 +58,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <div>
       <Header id={climb.id} name={climb.name ?? undefined} />
-      <div>
-        {
-          climb.parent ?
-          <h2><Link href={`${parentHref}`}>{climb.parent.name}</Link></h2> :
-          null
-        }
-        <Link href={`/climbs/${climb.id}/move`}>Move</Link>
-      </div>
       <Description id={climb.id} description={climb.description ?? undefined} />
       <h3>Grades</h3>
       {(fontGrades.length > 0 || verminGrades.length > 0 || ydsGrades.length > 0) && (
