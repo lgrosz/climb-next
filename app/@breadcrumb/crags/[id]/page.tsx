@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import BreadcrumbItem from "@/components/ui/BreadcrumbItem";
 import BreadcrumbLink from "@/components/ui/BreadcrumbLink";
 import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
 import BreadcrumbSeparator from "@/components/ui/BreadcrumbSeparator";
@@ -28,13 +29,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <Breadcrumb>
       {region &&
         <>
-          <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
         </>
       }
-      <BreadcrumbPage>
-        { crag.name }
-      </BreadcrumbPage>
+      <BreadcrumbItem>
+        <BreadcrumbPage>
+          { crag.name }
+        </BreadcrumbPage>
+      </BreadcrumbItem>
     </Breadcrumb>
   );
 }

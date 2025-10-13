@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import BreadcrumbItem from "@/components/ui/BreadcrumbItem";
 import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
@@ -20,9 +21,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <Breadcrumb>
-      <BreadcrumbPage>
-        { region.name }
-      </BreadcrumbPage>
+      <BreadcrumbItem>
+        <BreadcrumbPage>
+          { region.name }
+        </BreadcrumbPage>
+      </BreadcrumbItem>
     </Breadcrumb>
   );
 }

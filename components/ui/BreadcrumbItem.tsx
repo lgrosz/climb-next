@@ -8,8 +8,8 @@ export default function BreadcrumbItem(
   }
 ) {
   return (
-    <div>
+    <span>
       { children }
-    </div>
+    </span>
   )
 }
