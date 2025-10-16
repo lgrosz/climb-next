@@ -7,6 +7,7 @@ import { fromGql } from '@/lib/TopoWorld';
 import styles from "./formation.module.css"
 import Header from './Header';
 import Description from './Description';
+import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -49,7 +50,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <div>
       <Header id={formation.id} name={formation.name ?? undefined} />
-      <div>
+      <div className="w-full p-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3>
           {
             location ?
@@ -59,7 +60,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             <i>No location</i>
           }
         </h3>
-        <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
+        <div className="flex gap-2 flex-row">
+          <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
+          <CopyToClipboardButton disabled={!location} content={location?.toDMSString() ?? ""}>Copy DMS</CopyToClipboardButton>
+          <CopyToClipboardButton disabled={!location} content={location?.toDDDString() ?? ""}>Copy DDD</CopyToClipboardButton>
+        </div>
       </div>
       <Description id={formation.id} description={formation.description ?? undefined} />
       <h3>Climbs</h3>

@@ -25,6 +25,10 @@ class Coordinate {
     return `${this.dms(this.latitude, true)} ${this.dms(this.longitude, false)}`;
   }
 
+  public toDDDString(): string {
+    return `${this.latitude} ${this.longitude}`;
+  }
+
   toJSON() {
     return {
       latitude: this.latitude,
