@@ -13,8 +13,8 @@ class Coordinate {
   }
 
   private dms(d: number, isLatitude: boolean): string {
-    const degrees = Math.floor(d);
-    const minutesAndSeconds = (d - degrees) * 60;
+    const degrees = Math.trunc(d);
+    const minutesAndSeconds = Math.abs(d - degrees) * 60;
     const minutes = Math.floor(minutesAndSeconds);
     const seconds = (minutesAndSeconds - minutes) * 60;
     const direction = isLatitude ? (d >= 0 ? 'N' : 'S') : (d >= 0 ? 'E' : 'W');
