@@ -5,6 +5,7 @@ import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
 import BreadcrumbSeparator from "@/components/ui/BreadcrumbSeparator";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import Link from "next/link";
 
 const Query = graphql(`
   query CragBreadcrumbData(
@@ -26,21 +27,24 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const region = crag.region;
 
   return (
-    <Breadcrumb>
-      {region &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      <BreadcrumbItem>
-        <BreadcrumbPage>
-          { crag.name }
-        </BreadcrumbPage>
-      </BreadcrumbItem>
-    </Breadcrumb>
+    <div className="w-full p-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+      <Breadcrumb>
+        {region &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        <BreadcrumbItem>
+          <BreadcrumbPage>
+            { crag.name }
+          </BreadcrumbPage>
+        </BreadcrumbItem>
+      </Breadcrumb>
+      <Link href={`/crags/${id}/move`}>Move</Link>
+    </div>
   );
 }
 

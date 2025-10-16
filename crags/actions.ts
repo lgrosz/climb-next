@@ -61,6 +61,24 @@ export async function describe(cragId: Scalars["ID"]["input"], description: stri
   return data.action.description;
 }
 
+export async function move(id: Scalars["ID"]["input"], regionId: Scalars["ID"]["input"] | null) {
+  const mutation = graphql(`
+    mutation moveCrag(
+      $id: ID!
+      $regionId: ID
+    ) {
+      action: moveCrag(
+        id: $id
+        regionId: $regionId
+      ) {
+        id
+      }
+    }
+  `);
+
+  await graphqlQuery( mutation, { id, regionId });
+}
+
 export async function rename(cragId: Scalars["ID"]["input"], name: string) {
   const mutation = graphql(`
     mutation renameCrag(

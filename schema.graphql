@@ -239,6 +239,7 @@ type MutationRoot {
     """Climb parent"""
     parent: ClimbParentInput
   ): Climb!
+  moveCrag(id: ID!, regionId: ID): Crag!
   moveFormation(
     """Formation id"""
     id: ID!
