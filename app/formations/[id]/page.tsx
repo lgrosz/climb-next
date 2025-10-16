@@ -61,9 +61,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </h3>
         <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
       </div>
-      <div>
-        <Link href={`/formations/${formation.id}/move`}>Move</Link>
-      </div>
       <Description id={formation.id} description={formation.description ?? undefined} />
       <h3>Climbs</h3>
       <ul>

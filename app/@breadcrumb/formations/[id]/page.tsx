@@ -5,6 +5,7 @@ import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
 import BreadcrumbSeparator from "@/components/ui/BreadcrumbSeparator";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
+import Link from "next/link";
 
 const Query = graphql(`
   query FormationBreadcrumbData(
@@ -58,37 +59,40 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <Breadcrumb>
-      {region &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      {crag &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/crags/${crag.id}`}>{crag.name}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      {sector &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/sectors/${sector.id}`}>{sector.name}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      <BreadcrumbItem>
-        <BreadcrumbPage>
-          { formation.name }
-        </BreadcrumbPage>
-      </BreadcrumbItem>
-    </Breadcrumb>
+    <div className="w-full p-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+      <Breadcrumb>
+        {region &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        {crag &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/crags/${crag.id}`}>{crag.name}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        {sector &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/sectors/${sector.id}`}>{sector.name}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        <BreadcrumbItem>
+          <BreadcrumbPage>
+            { formation.name }
+          </BreadcrumbPage>
+        </BreadcrumbItem>
+      </Breadcrumb>
+      <Link href={`/formations/${id}/move`}>Move</Link>
+    </div>
   );
 }
 
