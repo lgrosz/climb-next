@@ -51,9 +51,12 @@ function ClimbItem(frag: FragmentType<typeof ClimbFieldsFragment>) {
     name,
   } = getFragmentData(ClimbFieldsFragment, frag);
 
+  const linkContent = 
+    name ? name : (<i>Anonymous climb</i>);
+
   return (
     <li>
-      <Link href={`/climbs/${id}`}>{ name }</Link>
+      <Link href={`/climbs/${id}`}>{ linkContent }</Link>
     </li>
   )
 }
@@ -65,9 +68,12 @@ function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
     climbs,
   } = getFragmentData(FormationFieldsFragment, frag);
 
+  const linkContent = 
+    name ? name : (<i>Anonymous formation</i>);
+
   return (
     <li>
-      <Link href={`/formations/${id}`}>{ name }</Link>
+      <Link href={`/formations/${id}`}>{ linkContent }</Link>
       <ul>
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
       </ul>
@@ -83,9 +89,12 @@ function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
     climbs,
   } = getFragmentData(SectorFieldsFragment, frag);
 
+  const linkContent = 
+    name ? name : (<i>Anonymous sector</i>);
+
   return (
     <li>
-      <Link href={`/sectors/${id}`}>{ name }</Link>
+      <Link href={`/sectors/${id}`}>{ linkContent }</Link>
       <ul>
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
@@ -103,9 +112,12 @@ function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
     climbs,
   } = getFragmentData(CragFieldsFragment, frag);
 
+  const linkContent = 
+    name ? name : (<i>Anonymous crag</i>);
+
   return (
     <li>
-      <Link href={`crags/${id}`}>{ name }</Link>
+      <Link href={`crags/${id}`}>{ linkContent }</Link>
       <ul>
         { sectors.map(s => <SectorItem key={`sector/${s.id}`} { ...s } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
@@ -124,9 +136,12 @@ function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
     climbs,
   } = getFragmentData(RegionFieldsFragment, frag);
 
+  const linkContent = 
+    name ? name : (<i>Anonymous region</i>);
+
   return (
     <li>
-      <Link href={`/regions/${id}`}>{ name }</Link>
+      <Link href={`/regions/${id}`}>{ linkContent }</Link>
       <ul>
         { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }

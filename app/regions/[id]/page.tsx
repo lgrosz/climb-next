@@ -39,7 +39,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {region.crags.map((crag) => (
           <li key={`crag-${crag.id}`}>
-            <Link href={`/crags/${crag.id}`}>{crag.name}</Link>
+            <Link href={`/crags/${crag.id}`}>
+              { crag.name ? crag.name : <i>Anonymous crag</i> }
+            </Link>
           </li>
         ))}
       </ul>
@@ -51,7 +53,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {region.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
-            <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
+            <Link href={`/formations/${formation.id}`}>
+              { formation.name ? formation.name : <i>Anonymous formation</i> }
+            </Link>
           </li>
         ))}
       </ul>
@@ -63,7 +67,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {region.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
+            <Link href={`/climbs/${climb.id}`}>
+              { climb.name ? climb.name : <i>Anonymous climb</i> }
+            </Link>
           </li>
         ))}
       </ul>

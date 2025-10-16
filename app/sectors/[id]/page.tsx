@@ -38,7 +38,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {sector.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
-            <Link href={`/formations/${formation.id}`}>{formation.name}</Link>
+            <Link href={`/formations/${formation.id}`}>
+              { formation.name ? formation.name : <i>Anonymous formation</i> }
+            </Link>
           </li>
         ))}
       </ul>
@@ -50,7 +52,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {sector.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
+            <Link href={`/climbs/${climb.id}`}>
+              { climb.name ? climb.name : <i>Anonymous climb</i> }
+            </Link>
           </li>
         ))}
       </ul>

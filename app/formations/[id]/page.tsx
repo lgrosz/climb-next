@@ -73,7 +73,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <hr />
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>{climb.name}</Link>
+            <Link href={`/climbs/${climb.id}`}>
+              { climb.name ? climb.name : <i>Anonymous climb</i> }
+            </Link>
           </li>
         ))}
       </ul>
