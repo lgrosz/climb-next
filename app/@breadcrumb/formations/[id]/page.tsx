@@ -64,7 +64,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {region &&
           <>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+              <BreadcrumbLink href={`/regions/${region.id}`}>
+                { region.name || <i>Anonymous region</i> }
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
           </>
@@ -72,7 +74,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {crag &&
           <>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/crags/${crag.id}`}>{crag.name}</BreadcrumbLink>
+              <BreadcrumbLink href={`/crags/${crag.id}`}>
+                { crag.name || <i>Anonymous crag</i> }
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
           </>
@@ -80,14 +84,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {sector &&
           <>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/sectors/${sector.id}`}>{sector.name}</BreadcrumbLink>
+              <BreadcrumbLink href={`/sectors/${sector.id}`}>
+                { sector.name || <i>Anonymous sector</i> }
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
           </>
         }
         <BreadcrumbItem>
           <BreadcrumbPage>
-            { formation.name }
+            { formation.name || <i>Anonymous formation</i> }
           </BreadcrumbPage>
         </BreadcrumbItem>
       </Breadcrumb>

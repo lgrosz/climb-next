@@ -42,14 +42,14 @@ export default function MoveCragForm(
 	  <select name="region" defaultValue={defaultRegionId}>
 	    <option value={undefined} label="None"/>
 	    {regions.map(r => (
-	      <option key={r.id} value={r.id} label={r.name} />
+	      <option key={r.id} value={r.id} label={r.name || "Anonymous region"} />
 	    ))}
 	  </select>
 	</BreadcrumbItem>
 	<BreadcrumbSeparator />
 	<BreadcrumbItem>
 	  <BreadcrumbPage>
-	    {crag.name}
+	    { crag.name || <i>Anonymous crag</i>}
 	  </BreadcrumbPage>
 	</BreadcrumbItem>
       </Breadcrumb>

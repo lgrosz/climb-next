@@ -99,7 +99,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {region &&
         <>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+            <BreadcrumbLink href={`/regions/${region.id}`}>
+              { region.name || <i>Anonymous region</i> }
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </>
@@ -107,7 +109,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {crag &&
         <>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/crags/${crag.id}`}>{crag.name}</BreadcrumbLink>
+            <BreadcrumbLink href={`/crags/${crag.id}`}>
+              { crag.name || <i>Anonymous crag</i> }
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </>
@@ -115,7 +119,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {sector &&
         <>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/sectors/${sector.id}`}>{sector.name}</BreadcrumbLink>
+            <BreadcrumbLink href={`/sectors/${sector.id}`}>
+              { sector.name || <i>Anonymous sector</i> }
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </>
@@ -123,14 +129,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {formation &&
         <>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/formations/${formation.id}`}>{formation.name}</BreadcrumbLink>
+            <BreadcrumbLink href={`/formations/${formation.id}`}>
+              {formation.name || <i>Anonymous formation</i>}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </>
       }
       <BreadcrumbItem>
         <BreadcrumbPage>
-          { climb.name }
+          { climb.name || <i>Anonymous climb</i> }
         </BreadcrumbPage>
       </BreadcrumbItem>
     </Breadcrumb>

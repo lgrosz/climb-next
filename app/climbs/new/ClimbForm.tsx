@@ -163,7 +163,7 @@ export default function ClimbForm(
           >
             <option value={undefined} label="No region" />
             {regions.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
+              <option key={r.id} value={r.id} label={r.name || "Anonymous region"} />
             ))}
           </select>
         </div>
@@ -178,7 +178,7 @@ export default function ClimbForm(
           >
             <option value={undefined} label="No crag" />
             {crags.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id} label={c.name || "Anonymous crag"} />
             ))}
           </select>
         </div>
@@ -193,7 +193,7 @@ export default function ClimbForm(
           >
             <option value={undefined} label="No sector" />
             {sectors.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id} label={s.name || "Anonymous sector"} />
             ))}
           </select>
         </div>
@@ -207,7 +207,7 @@ export default function ClimbForm(
           >
             <option value={undefined} label="No formation" />
             {formations.map(f => (
-              <option key={f.id} value={f.id}>{f.name}</option>
+              <option key={f.id} value={f.id} label={f.name || "Anonymous formation"} />
             ))}
           </select>
         </div>

@@ -23,7 +23,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <Breadcrumb>
       <BreadcrumbItem>
         <BreadcrumbPage>
-          { region.name }
+          { region.name || <i>Anonymous region</i> }
         </BreadcrumbPage>
       </BreadcrumbItem>
     </Breadcrumb>

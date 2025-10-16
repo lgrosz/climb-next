@@ -32,14 +32,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {region &&
           <>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/regions/${region.id}`}>{region.name}</BreadcrumbLink>
+              <BreadcrumbLink href={`/regions/${region.id}`}>
+                { region.name || <i>Anonymous region</i> }
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
           </>
         }
         <BreadcrumbItem>
           <BreadcrumbPage>
-            { crag.name }
+            { crag.name || <i>Anonymous crag</i> }
           </BreadcrumbPage>
         </BreadcrumbItem>
       </Breadcrumb>

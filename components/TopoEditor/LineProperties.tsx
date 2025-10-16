@@ -38,7 +38,7 @@ export default function LineProperties(
             Select a climb
           </option>
           {availableClimbs.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id} label={c.name || "Anonymous climb"} />
           ))}
         </select>
       </div>
