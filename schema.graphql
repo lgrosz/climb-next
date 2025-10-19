@@ -17,6 +17,11 @@ type AscentParty {
   members: [Climber!]!
 }
 
+input AscentPartyInput {
+  complete: Boolean!
+  memberIds: [ID!]!
+}
+
 type BasisSpline {
   controlPoints: [Point2D!]!
   degree: Int!
@@ -126,6 +131,22 @@ type ImageMutationRoot {
 }
 
 type MutationRoot {
+  addAscent(
+    """Climb ID"""
+    climbId: ID!
+
+    """Ascent date window"""
+    dateWindow: DateRange
+
+    """Whether this is a first ascent"""
+    firstAscent: Boolean!
+
+    """Ascent party"""
+    party: AscentPartyInput!
+
+    """Whether this ascent is verified"""
+    verified: Boolean!
+  ): Ascent!
   addClimb(
     """Climb description"""
     description: String
