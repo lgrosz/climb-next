@@ -8,9 +8,9 @@ export default function Modal(
     children,
     footer,
   }: {
-    header: ReactNode,
-    children: ReactNode,
-    footer: ReactNode,
+    header?: ReactNode,
+    children?: ReactNode,
+    footer?: ReactNode,
   }
 ) {
   return (
