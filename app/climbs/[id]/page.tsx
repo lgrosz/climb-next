@@ -5,8 +5,8 @@ import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
 import { graphql } from '@/gql';
 import Header from './Header';
 import Description from './Description';
-import { AscentTable, fragmentAsAscentTableProp } from '@/components/AscentTable';
-import Link from 'next/link';
+import AscentList from '@/components/AscentList';
+import { fragmentAsAscentTableProp } from '@/components/AscentTable';
 
 const climbData = graphql(`
   query climbData($id: ID!) {
@@ -76,10 +76,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       )}
       <h3>Ascents</h3>
       <div className="overflow-x-auto">
-        <AscentTable ascents={fragmentAsAscentTableProp(climb.ascents)} className="w-full" />
-        <div className="flex justify-end">
-          <Link href={`/climbs/${climb.id}/add-ascent`}>Add ascent</Link>
-        </div>
+        <AscentList climbId={climb.id} ascents={fragmentAsAscentTableProp(climb.ascents)}/>
       </div>
     </div>
   );
