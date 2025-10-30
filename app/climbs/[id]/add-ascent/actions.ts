@@ -1,3 +1,5 @@
+"use server";
+
 import { addAscent } from "@/ascents/actions";
 import { parseLocalDate } from "@/lib/DateUtils";
 
