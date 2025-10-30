@@ -40,7 +40,7 @@ export async function addAscent(
     mutation, {
       climbId,
       firstAscent: isFa,
-      dateWindow: (dateWindow[0] && dateWindow[1]) ? formatDateRange(dateWindow) : null,
+      dateWindow: (dateWindow[0] || dateWindow[1]) ? formatDateRange(dateWindow) : null,
       verified: isVerified,
       party: {
         complete: partyIsComplete,
