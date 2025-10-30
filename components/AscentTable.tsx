@@ -11,6 +11,7 @@ type Party = {
 };
 
 type Ascent = {
+  id: string;
   ascentWindow?: string;
   firstAscent: boolean;
   verified: boolean;
@@ -19,11 +20,14 @@ type Ascent = {
 
 type AscentTableProps = {
   className?: string;
+  selected?: Set<string>;
+  toggleSelect?: (_: string) => void
   ascents: Ascent[];
 };
 
 const AscentFragmentType = graphql(`
   fragment AscentTableDataFragment on Ascent {
+    id
     ascentWindow
     firstAscent
     verified
@@ -40,6 +44,7 @@ export function fragmentAsAscentTableProp(frag: Array<FragmentType<typeof Ascent
   const a = getFragmentData(AscentFragmentType, frag);
 
   return a.map(d => ({
+    id: d.id,
     ascentWindow: d.ascentWindow || undefined,
     firstAscent: d.firstAscent,
     verified: d.verified,
@@ -53,11 +58,12 @@ export function fragmentAsAscentTableProp(frag: Array<FragmentType<typeof Ascent
   }));
 }
 
-export function AscentTable({ className, ascents }: AscentTableProps) {
+export function AscentTable({ className, selected, ascents, toggleSelect }: AscentTableProps) {
   return (
     <table className={className} border={1}>
       <thead>
         <tr>
+          { !!selected && <th /> }
           <th>Party</th>
           <th>Date Window</th>
           <th>First Ascent</th>
@@ -66,6 +72,16 @@ export function AscentTable({ className, ascents }: AscentTableProps) {
       <tbody>
         {ascents.map((ascent, i) => (
           <tr key={i}>
+            { !!selected &&
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selected?.has(ascent.id) ?? false}
+                  disabled={!toggleSelect}
+                  onChange={() => toggleSelect?.(ascent.id)}
+                />
+              </td>
+            }
             <td>
               {ascent.party.members.length > 0 ? (
                 <span>
