@@ -275,6 +275,10 @@ type MutationRoot {
     """Formation location"""
     location: CoordinateInput
   ): Formation!
+  removeAscents(
+    """Ascent IDs"""
+    ids: [ID!]!
+  ): [Ascent!]!
   removeClimb(
     """Climb id"""
     id: ID!
