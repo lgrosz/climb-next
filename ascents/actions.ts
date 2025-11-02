@@ -49,3 +49,19 @@ export async function addAscent(
     }
   )
 }
+
+export async function deleteAscents(
+  ids: Array<Scalars["ID"]["input"]>
+) {
+  const mutation = graphql(`
+    mutation removeAscents(
+      $ids: [ID!]!
+    ) {
+      action: removeAscents (
+        ids: $ids
+      ) { id }
+    }
+  `);
+
+  await graphqlQuery(mutation, { ids });
+}

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { AscentTable } from "./AscentTable";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useCallback, useState } from "react";
+import { deleteAscents } from "@/ascents/actions";
 
 export default function AscentList({
   climbId,
@@ -23,6 +24,14 @@ export default function AscentList({
     });
   };
 
+  const onDeleteAscents = useCallback(async () => {
+    const confirmed = confirm(`Are you sure you want to delete (${selectedAscents.size}) ascents?`)
+
+    if (confirmed) {
+      await deleteAscents([...selectedAscents])
+    }
+  }, [selectedAscents]);
+
   return (
     <div>
       <AscentTable
@@ -34,6 +43,9 @@ export default function AscentList({
       <div className="flex justify-end">
         { !!climbId &&
           <Link href={`/climbs/${climbId}/add-ascent`}>Add ascent</Link>
+        }
+        { !!selectedAscents.size &&
+          <button onClick={onDeleteAscents}>Delete ascents</button>
         }
       </div>
     </div>
