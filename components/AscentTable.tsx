@@ -1,4 +1,5 @@
 import { FragmentType, getFragmentData, graphql } from "@/gql";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 type PartyMember = {
   firstName: string;
@@ -60,29 +61,30 @@ export function fragmentAsAscentTableProp(frag: Array<FragmentType<typeof Ascent
 
 export function AscentTable({ className, selected, ascents, toggleSelect }: AscentTableProps) {
   return (
-    <table className={className} border={1}>
-      <thead>
-        <tr>
-          { !!selected && <th /> }
-          <th>Party</th>
-          <th>Date Window</th>
-          <th>First Ascent</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table className={className} border={1}>
+      <TableCaption>Notable ascents</TableCaption>
+      <TableHeader>
+        <TableRow>
+          { !!selected && <TableHead /> }
+          <TableHead>Party</TableHead>
+          <TableHead>Date Window</TableHead>
+          <TableHead>First Ascent</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {ascents.map((ascent, i) => (
-          <tr key={i}>
+          <TableRow key={i}>
             { !!selected &&
-              <td>
+              <TableCell>
                 <input
                   type="checkbox"
                   checked={selected?.has(ascent.id) ?? false}
                   disabled={!toggleSelect}
                   onChange={() => toggleSelect?.(ascent.id)}
                 />
-              </td>
+              </TableCell>
             }
-            <td>
+            <TableCell>
               {ascent.party.members.length > 0 ? (
                 <span>
                   {ascent.party.members
@@ -93,16 +95,16 @@ export function AscentTable({ className, selected, ascents, toggleSelect }: Asce
             ) : (
               <em>None</em>
             )}
-            </td>
-            <td>
+            </TableCell>
+            <TableCell>
               {ascent.ascentWindow}
               {!ascent.verified && <sup>†</sup>}
-            </td>
-            <td>{ascent.firstAscent ? "Yes" : "No"}</td>
-          </tr>
+            </TableCell>
+            <TableCell>{ascent.firstAscent ? "Yes" : "No"}</TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 };
 
