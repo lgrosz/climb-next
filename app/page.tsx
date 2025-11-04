@@ -74,7 +74,7 @@ function FormationItem(frag: FragmentType<typeof FormationFieldsFragment>) {
   return (
     <li>
       <Link href={`/formations/${id}`}>{ linkContent }</Link>
-      <ul>
+      <ul className="list-disc pl-6">
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
       </ul>
     </li>
@@ -95,7 +95,7 @@ function SectorItem(frag: FragmentType<typeof SectorFieldsFragment>) {
   return (
     <li>
       <Link href={`/sectors/${id}`}>{ linkContent }</Link>
-      <ul>
+      <ul className="list-disc pl-6">
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
       </ul>
@@ -118,7 +118,7 @@ function CragItem(frag: FragmentType<typeof CragFieldsFragment>) {
   return (
     <li>
       <Link href={`crags/${id}`}>{ linkContent }</Link>
-      <ul>
+      <ul className="list-disc pl-6">
         { sectors.map(s => <SectorItem key={`sector/${s.id}`} { ...s } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
@@ -142,7 +142,7 @@ function RegionItem(frag: FragmentType<typeof RegionFieldsFragment>) {
   return (
     <li>
       <Link href={`/regions/${id}`}>{ linkContent }</Link>
-      <ul>
+      <ul className="list-disc pl-6">
         { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }
         { climbs.map(c => <ClimbItem key={`climb/${c.id}`} { ...c } />) }
@@ -164,7 +164,7 @@ export default async function Page() {
   return (
     <div>
       <h1>Content</h1>
-      <ul>
+      <ul className="list-disc pl-6">
         <li>
           <Link href="/regions/new">Create new region</Link>
         </li>
