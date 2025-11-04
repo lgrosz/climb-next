@@ -1,8 +1,4 @@
-import Breadcrumb from "@/components/ui/Breadcrumb";
-import BreadcrumbItem from "@/components/ui/BreadcrumbItem";
-import BreadcrumbLink from "@/components/ui/BreadcrumbLink";
-import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
-import BreadcrumbSeparator from "@/components/ui/BreadcrumbSeparator";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
 
@@ -31,31 +27,33 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <Breadcrumb>
-      {region &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/regions/${region.id}`}>
-              { region.name || <i>Anonymous region</i> }
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      {crag &&
-        <>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/crags/${crag.id}`}>
-              { crag.name || <i>Anonymous crag</i> }
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-        </>
-      }
-      <BreadcrumbItem>
-        <BreadcrumbPage>
-          { sector.name || <i>Anonymous sector</i> }
-        </BreadcrumbPage>
-      </BreadcrumbItem>
+      <BreadcrumbList>
+        {region &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/regions/${region.id}`}>
+                { region.name || <i>Anonymous region</i> }
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        {crag &&
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/crags/${crag.id}`}>
+                { crag.name || <i>Anonymous crag</i> }
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        }
+        <BreadcrumbItem>
+          <BreadcrumbPage>
+            { sector.name || <i>Anonymous sector</i> }
+          </BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
     </Breadcrumb>
   );
 }
