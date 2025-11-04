@@ -1,5 +1,8 @@
 import { FragmentType, getFragmentData, graphql } from "@/gql";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from "./ui/dropdown-menu";
+import { MoreHorizontal, Trash2Icon } from "lucide-react";
+import { Button } from "./ui/button";
 
 type PartyMember = {
   firstName: string;
@@ -69,6 +72,7 @@ export function AscentTable({ className, selected, ascents, toggleSelect }: Asce
           <TableHead>Party</TableHead>
           <TableHead>Date Window</TableHead>
           <TableHead>First Ascent</TableHead>
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -101,6 +105,32 @@ export function AscentTable({ className, selected, ascents, toggleSelect }: Asce
               {!ascent.verified && <sup>†</sup>}
             </TableCell>
             <TableCell>{ascent.firstAscent ? "Yes" : "No"}</TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>Change party members</DropdownMenuItem>
+                    <DropdownMenuItem>Change date window</DropdownMenuItem>
+                    <DropdownMenuItem>Toggle verified</DropdownMenuItem>
+                    <DropdownMenuItem>Toggle first ascent</DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem variant="destructive">
+                      <Trash2Icon />
+                      Trash
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
