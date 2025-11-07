@@ -6,18 +6,21 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ```sh
 pnpm run graphql-codegen
+pnpm run pg-codegen
 pnpm run build
 pnpm run start
 ```
 
 ### Development
 
-First, generate the GraphQL code:
+First, generate the required code:
 
 ```sh
 pnpm run graphql-codegen
+pnpm run pg-codegen
 # or
 pnpm run graphql-codegen --watch
+pnpm run pg-codegen --watch
 ```
 
 Next, run the development server:
