@@ -3,6 +3,8 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from "./ui/dropdown-menu";
 import { MoreHorizontal, Trash2Icon } from "lucide-react";
 import { Button } from "./ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import { deleteAscents } from "@/ascents/actions";
 
 type PartyMember = {
   firstName: string;
@@ -106,30 +108,44 @@ export function AscentTable({ className, selected, ascents, toggleSelect }: Asce
             </TableCell>
             <TableCell>{ascent.firstAscent ? "Yes" : "No"}</TableCell>
             <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>Change party members</DropdownMenuItem>
-                    <DropdownMenuItem>Change date window</DropdownMenuItem>
-                    <DropdownMenuItem>Toggle verified</DropdownMenuItem>
-                    <DropdownMenuItem>Toggle first ascent</DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem variant="destructive">
-                      <Trash2Icon />
-                      Trash
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>Change party members</DropdownMenuItem>
+                      <DropdownMenuItem>Change date window</DropdownMenuItem>
+                      <DropdownMenuItem>Toggle verified</DropdownMenuItem>
+                      <DropdownMenuItem>Toggle first ascent</DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem variant="destructive">
+                          <Trash2Icon />
+                          Trash
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteAscents([ascent.id])}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </TableCell>
           </TableRow>
         ))}
