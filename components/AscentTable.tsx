@@ -1,6 +1,6 @@
 "use client";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup, DropdownMenuCheckboxItem } from "./ui/dropdown-menu";
 import { MoreHorizontal, Trash2Icon } from "lucide-react";
 import { Button } from "./ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
@@ -84,12 +84,15 @@ export function AscentTable({ className, selected, ascents, toggleSelectAction }
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Properties</DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuCheckboxItem checked={ascent.verified}>Verified</DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem checked={ascent.firstAscent}>First ascent</DropdownMenuCheckboxItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuGroup>
                       <DropdownMenuItem>Change party members</DropdownMenuItem>
                       <DropdownMenuItem>Change date window</DropdownMenuItem>
-                      <DropdownMenuItem>Toggle verified</DropdownMenuItem>
-                      <DropdownMenuItem>Toggle first ascent</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
