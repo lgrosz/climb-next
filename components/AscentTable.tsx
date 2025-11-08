@@ -5,6 +5,7 @@ import { MoreHorizontal, Trash2Icon } from "lucide-react";
 import { Button } from "./ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { deleteAscents } from "@/ascents/actions";
+import { useCallback, useState } from "react";
 
 type PartyMember = {
   firstName: string;
@@ -31,7 +32,21 @@ type AscentTableProps = {
   ascents: Ascent[];
 };
 
-export function AscentTable({ className, selected, ascents, toggleSelectAction }: AscentTableProps) {
+export function AscentTable({ className, selected, toggleSelectAction, ...props }: AscentTableProps) {
+  const [ascents, setAscents] = useState(props.ascents);
+
+  const setVerified = useCallback((verified: boolean, id: string) => {
+    setAscents(prev =>
+      prev.map(a => a.id === id ? { ...a, verified } : a)
+    );
+  }, [setAscents]);
+
+  const setFirstAscent = useCallback((firstAscent: boolean, id: string) => {
+    setAscents(prev =>
+      prev.map(a => a.id === id ? { ...a, firstAscent } : a)
+    );
+  }, [setAscents]);
+
   return (
     <Table className={className} border={1}>
       <TableCaption>Notable ascents</TableCaption>
@@ -86,8 +101,18 @@ export function AscentTable({ className, selected, ascents, toggleSelectAction }
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Properties</DropdownMenuLabel>
                     <DropdownMenuGroup>
-                      <DropdownMenuCheckboxItem checked={ascent.verified}>Verified</DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem checked={ascent.firstAscent}>First ascent</DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={ascent.verified}
+                        onCheckedChange={checked => setVerified(checked, ascent.id)}
+                      >
+                        Verified
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={ascent.firstAscent}
+                        onCheckedChange={checked => setFirstAscent(checked, ascent.id)}
+                      >
+                        First ascent
+                      </DropdownMenuCheckboxItem>
                     </DropdownMenuGroup>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuGroup>
