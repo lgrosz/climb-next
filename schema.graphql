@@ -253,6 +253,13 @@ type MutationRoot {
     """ID of image"""
     id: ID!
   ): ImageMutationRoot!
+  markFirstAscent(
+    """ID of ascent"""
+    id: ID!
+
+    """Whether or not the ascent is a first ascent"""
+    isFirstAscent: Boolean!
+  ): Ascent!
   moveClimb(
     """Climb id"""
     id: ID!
@@ -343,6 +350,13 @@ type MutationRoot {
     """Image upload"""
     image: Upload!
   ): Image!
+  verifyAscent(
+    """ID of ascent"""
+    id: ID!
+
+    """Whether or not the ascent is verified"""
+    isVerified: Boolean!
+  ): Ascent!
 }
 
 type PathFeatureMutationRoot {

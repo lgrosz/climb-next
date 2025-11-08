@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { AscentTable } from "./AscentTable";
+import { AscentTable, UpdateAscentAction } from "./AscentTable";
 import { ComponentProps, useCallback, useState } from "react";
-import { deleteAscents } from "@/ascents/actions";
+import { deleteAscents, markFirstAscent, verifyAscent } from "@/ascents/actions";
 
 export default function AscentList({
   climbId,
@@ -32,12 +32,25 @@ export default function AscentList({
     }
   }, [selectedAscents]);
 
+  const updateAscent = useCallback<UpdateAscentAction>(async (id , changes) => {
+    if (changes.verified !== undefined) {
+      verifyAscent(id, changes.verified);
+    }
+
+    if (changes.firstAscent !== undefined) {
+      markFirstAscent(id, changes.firstAscent);
+    }
+
+    // TODO who is responsible for eagerly updating the ascents?
+  }, []);
+
   return (
     <div>
       <AscentTable
         ascents={ascents}
         selected={selectedAscents}
         toggleSelectAction={toggleSelection}
+        updateAscentAction={updateAscent}
         className="w-full"
       />
       <div className="flex justify-end">

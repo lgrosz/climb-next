@@ -25,27 +25,37 @@ type Ascent = {
   party: Party;
 };
 
+type AscentChanges = {
+  verified?: boolean,
+  firstAscent?: boolean,
+};
+
+export type UpdateAscentAction = (id: string, changes: AscentChanges) => void | Promise<void>;
+
 type AscentTableProps = {
   className?: string;
   selected?: Set<string>;
   toggleSelectAction?: (_: string) => void
+  updateAscentAction?: UpdateAscentAction;
   ascents: Ascent[];
 };
 
-export function AscentTable({ className, selected, toggleSelectAction, ...props }: AscentTableProps) {
+export function AscentTable({ className, selected, toggleSelectAction, updateAscentAction, ...props }: AscentTableProps) {
   const [ascents, setAscents] = useState(props.ascents);
 
   const setVerified = useCallback((verified: boolean, id: string) => {
     setAscents(prev =>
       prev.map(a => a.id === id ? { ...a, verified } : a)
     );
-  }, [setAscents]);
+    updateAscentAction?.(id, { verified })
+  }, [updateAscentAction, setAscents]);
 
   const setFirstAscent = useCallback((firstAscent: boolean, id: string) => {
     setAscents(prev =>
       prev.map(a => a.id === id ? { ...a, firstAscent } : a)
     );
-  }, [setAscents]);
+    updateAscentAction?.(id, { firstAscent })
+  }, [updateAscentAction, setAscents]);
 
   return (
     <Table className={className} border={1}>

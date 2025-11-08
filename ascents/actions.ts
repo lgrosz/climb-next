@@ -65,3 +65,35 @@ export async function deleteAscents(
 
   await graphqlQuery(mutation, { ids });
 }
+
+export async function verifyAscent(id: Scalars["ID"]["input"], isVerified: boolean) {
+  const mutation = graphql(`
+    mutation verifyAscent(
+      $id: ID!
+      $isVerified: Boolean!
+    ) {
+      action: verifyAscent (
+        id: $id
+        isVerified: $isVerified
+      ) { id }
+    }
+  `);
+
+  await graphqlQuery(mutation, { id, isVerified });
+}
+
+export async function markFirstAscent(id: Scalars["ID"]["input"], isFirstAscent: boolean) {
+  const mutation = graphql(`
+    mutation markFirstAscentAscent(
+      $id: ID!
+      $isFirstAscent: Boolean!
+    ) {
+      action: markFirstAscent (
+        id: $id
+        isFirstAscent: $isFirstAscent
+      ) { id }
+    }
+  `);
+
+  await graphqlQuery(mutation, { id, isFirstAscent });
+}
