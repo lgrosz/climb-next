@@ -4,6 +4,7 @@ import { graphqlQuery } from '@/graphql';
 import { submitNewClimbForm } from './actions';
 import { redirect } from 'next/navigation';
 import { toClimbParentOptions } from './ClimbParentOptions';
+import { Suspense } from 'react';
 
 const query = graphql(`
   query NewClimbPageData {
@@ -26,11 +27,13 @@ export default async function Page() {
   return (
     <div>
       <h1>Create a new climb</h1>
-      <ClimbForm
-        id="new-climb-form"
-        action={action}
-        parentOptions={parentOptions}
-      />
+      <Suspense>
+        <ClimbForm
+          id="new-climb-form"
+          action={action}
+          parentOptions={parentOptions}
+        />
+      </Suspense>
       <div className="flex justify-end">
         <button form="new-climb-form" type="submit">
           Create

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
 
 type SuccessState = { success: true; imageId: string };
 type ErrorState = { success: false; error: string };
@@ -24,7 +24,7 @@ async function uploadImage(_: FormState,  formData: FormData): Promise<FormState
   }
 }
 
-export default function Page() {
+function NewImagePage() {
   const [state, dispatch, pending] = useActionState(uploadImage, null);
   const searchParams = useSearchParams();
   const formation = searchParams.get("formation");
@@ -100,5 +100,13 @@ export default function Page() {
         </section>
       )}
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <NewImagePage />
+    </Suspense>
   );
 }

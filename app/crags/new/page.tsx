@@ -4,6 +4,7 @@ import { graphqlQuery } from "@/graphql";
 import CragForm from "./CragForm";
 import { submitNewCragForm } from "./actions";
 import { toCragParentOptions } from "./CragParentOptions";
+import { Suspense } from "react";
 
 const query = graphql(`
   query NewCragPageData {
@@ -25,7 +26,9 @@ export default async function Page()
   return (
     <div>
       <h1>Create a new crag</h1>
-      <CragForm id="new-crag-form" action={action} parentOptions={parentOptions} />
+      <Suspense>
+        <CragForm id="new-crag-form" action={action} parentOptions={parentOptions} />
+      </Suspense>
       <div className="flex justify-end">
         <button form="new-crag-form" type="submit">
           Create

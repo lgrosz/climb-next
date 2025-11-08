@@ -4,6 +4,7 @@ import { graphql } from '@/gql';
 import { graphqlQuery } from '@/graphql';
 import { toFormationParentOptions } from "./FormationParentOptions";
 import { submitNewFormationForm } from "./actions";
+import { Suspense } from "react";
 
 const query = graphql(`
   query NewFormationPageData {
@@ -25,11 +26,13 @@ export default async function Page() {
   return (
     <div>
       <h1>Create a new formation</h1>
-      <FormationForm
-        id="new-formation-form"
-        action={action}
-        parentOptions={parentOptions}
-      />
+      <Suspense>
+        <FormationForm
+          id="new-formation-form"
+          action={action}
+          parentOptions={parentOptions}
+        />
+      </Suspense>
       <div className="flex justify-end">
         <button form="new-formation-form" type="submit">
           Create

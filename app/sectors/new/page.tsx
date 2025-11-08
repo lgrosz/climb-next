@@ -4,6 +4,7 @@ import { graphqlQuery } from "@/graphql";
 import SectorForm from "./SectorForm";
 import { toSectorParentOptions } from "./SectorParentOptions";
 import { submitNewSectorForm } from "./actions";
+import { Suspense } from "react";
 
 const query = graphql(`
   query NewSectorPageData {
@@ -26,7 +27,9 @@ export default async function Page()
   return (
     <div>
       <h1>Create a new sector</h1>
-      <SectorForm id="new-sector-form" action={action} parentOptions={parentOptions} />
+      <Suspense>
+        <SectorForm id="new-sector-form" action={action} parentOptions={parentOptions} />
+      </Suspense>
       <div className="flex justify-end">
         <button form="new-sector-form" type="submit">
           Create
