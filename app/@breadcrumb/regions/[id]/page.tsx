@@ -1,6 +1,4 @@
-import Breadcrumb from "@/components/ui/breadcrumb";
-import BreadcrumbItem from "@/components/ui/BreadcrumbItem";
-import BreadcrumbPage from "@/components/ui/BreadcrumbPage";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { graphql } from "@/gql";
 import { graphqlQuery } from "@/graphql";
 
