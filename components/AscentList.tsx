@@ -37,7 +37,7 @@ export default function AscentList({
       <AscentTable
         ascents={ascents}
         selected={selectedAscents}
-        toggleSelect={toggleSelection}
+        toggleSelectAction={toggleSelection}
         className="w-full"
       />
       <div className="flex justify-end">

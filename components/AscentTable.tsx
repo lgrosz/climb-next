@@ -1,4 +1,4 @@
-import { FragmentType, getFragmentData, graphql } from "@/gql";
+"use client";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from "./ui/dropdown-menu";
 import { MoreHorizontal, Trash2Icon } from "lucide-react";
@@ -27,44 +27,11 @@ type Ascent = {
 type AscentTableProps = {
   className?: string;
   selected?: Set<string>;
-  toggleSelect?: (_: string) => void
+  toggleSelectAction?: (_: string) => void
   ascents: Ascent[];
 };
 
-const AscentFragmentType = graphql(`
-  fragment AscentTableDataFragment on Ascent {
-    id
-    ascentWindow
-    firstAscent
-    verified
-    party {
-      complete
-      members {
-	firstName lastName
-      }
-    }
-  }
-`);
-
-export function fragmentAsAscentTableProp(frag: Array<FragmentType<typeof AscentFragmentType>>): Ascent[] {
-  const a = getFragmentData(AscentFragmentType, frag);
-
-  return a.map(d => ({
-    id: d.id,
-    ascentWindow: d.ascentWindow || undefined,
-    firstAscent: d.firstAscent,
-    verified: d.verified,
-    party: {
-      complete: d.party.complete,
-      members: d.party.members.map(m => ({
-        firstName: m.firstName ?? "",
-        lastName: m.lastName ?? "",
-      })),
-    }
-  }));
-}
-
-export function AscentTable({ className, selected, ascents, toggleSelect }: AscentTableProps) {
+export function AscentTable({ className, selected, ascents, toggleSelectAction }: AscentTableProps) {
   return (
     <Table className={className} border={1}>
       <TableCaption>Notable ascents</TableCaption>
@@ -85,8 +52,8 @@ export function AscentTable({ className, selected, ascents, toggleSelect }: Asce
                 <input
                   type="checkbox"
                   checked={selected?.has(ascent.id) ?? false}
-                  disabled={!toggleSelect}
-                  onChange={() => toggleSelect?.(ascent.id)}
+                  disabled={!toggleSelectAction}
+                  onChange={() => toggleSelectAction?.(ascent.id)}
                 />
               </TableCell>
             }

@@ -2,11 +2,43 @@ import VerminGrade from '@/vermin-grade'
 import { graphqlQuery } from '@/graphql';
 import FontainebleauGrade from '@/fontainebleau-grade';
 import YosemiteDecimalGrade from '@/yosemite-decimal-grade';
-import { graphql } from '@/gql';
+import { FragmentType, getFragmentData, graphql } from '@/gql';
 import Header from './Header';
 import Description from './Description';
 import AscentList from '@/components/AscentList';
-import { fragmentAsAscentTableProp } from '@/components/AscentTable';
+
+const AscentFragmentType = graphql(`
+  fragment AscentTableDataFragment on Ascent {
+    id
+    ascentWindow
+    firstAscent
+    verified
+    party {
+      complete
+      members {
+        firstName
+        lastName
+      }
+    }
+  }
+`);
+
+export function fragmentAsAscentTableProp(frag: Array<FragmentType<typeof AscentFragmentType>>) {
+  const a = getFragmentData(AscentFragmentType, frag);
+  return a.map(d => ({
+    id: d.id,
+    ascentWindow: d.ascentWindow || undefined,
+    firstAscent: d.firstAscent,
+    verified: d.verified,
+    party: {
+      complete: d.party.complete,
+      members: d.party.members.map(m => ({
+        firstName: m.firstName ?? "",
+        lastName: m.lastName ?? "",
+      })),
+    },
+  }));
+}
 
 const climbData = graphql(`
   query climbData($id: ID!) {
