@@ -3,6 +3,7 @@ import { graphql } from '@/gql';
 import Link from 'next/link';
 import Header from './Header';
 import Description from './Description';
+import { Separator } from '@/components/ui/separator';
 
 const sectorData = graphql(`
   query sectorData($id: ID!) {
@@ -35,7 +36,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/formations/new?sector=${sector.id}`}>Add formation</Link>
         </li>
-        <hr />
+        <Separator />
         {sector.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>
@@ -49,7 +50,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/climbs/new?sector=${sector.id}`}>Add climb</Link>
         </li>
-        <hr />
+        <Separator />
         {sector.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>

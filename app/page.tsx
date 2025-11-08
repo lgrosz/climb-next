@@ -1,3 +1,4 @@
+import { Separator } from '@/components/ui/separator';
 import { FragmentType, graphql, getFragmentData } from '@/gql'
 import { graphqlQuery } from '@/graphql'
 import Link from 'next/link';
@@ -168,7 +169,7 @@ export default async function Page() {
         <li>
           <Link href="/regions/new">Create new region</Link>
         </li>
-        <hr />
+        <Separator />
         { regions.map(r => <RegionItem key={`region/${r.id}`} { ...r } />) }
         { crags.map(c => <CragItem key={`crag/${c.id}`} { ...c } />) }
         { formations.map(f => <FormationItem key={`formation/${f.id}`} { ...f } />) }

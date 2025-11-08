@@ -3,6 +3,7 @@ import { graphql } from '@/gql';
 import Link from 'next/link';
 import Header from './Header';
 import Description from './Description';
+import { Separator } from '@/components/ui/separator';
 
 const regionData = graphql(`
   query regionData($id: ID!) {
@@ -36,7 +37,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/crags/new?region=${region.id}`}>Add crag</Link>
         </li>
-        <hr />
+        <Separator />
         {region.crags.map((crag) => (
           <li key={`crag-${crag.id}`}>
             <Link href={`/crags/${crag.id}`}>
@@ -50,7 +51,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/formations/new?region=${region.id}`}>Add formation</Link>
         </li>
-        <hr />
+        <Separator />
         {region.formations.map((formation) => (
           <li key={`formation-${formation.id}`}>
             <Link href={`/formations/${formation.id}`}>
@@ -64,7 +65,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/climbs/new?region=${region.id}`}>Add climb</Link>
         </li>
-        <hr />
+        <Separator />
         {region.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>

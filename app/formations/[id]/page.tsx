@@ -8,6 +8,7 @@ import styles from "./formation.module.css"
 import Header from './Header';
 import Description from './Description';
 import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
+import { Separator } from '@/components/ui/separator';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -72,7 +73,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <li>
           <Link href={`/climbs/new?formation=${formation.id}`}>Add climb</Link>
         </li>
-        <hr />
+        <Separator />
         {formation.climbs.map((climb) => (
           <li key={`climb-${climb.id}`}>
             <Link href={`/climbs/${climb.id}`}>
