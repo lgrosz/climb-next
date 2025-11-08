@@ -1,6 +1,5 @@
 "use client";
 
-import { graphql } from "@/gql";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ClimbParentOptions, CragClimbParentOption } from "./ClimbParentOptions";
