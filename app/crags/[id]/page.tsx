@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Header from './Header';
 import Description from './Description';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 const cragData = graphql(`
   query cragData($id: ID!) {
@@ -29,51 +31,74 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { crag } = data;
 
   return (
-    <div>
+    <div className='space-y-4'>
       <Header id={crag.id} name={crag.name ?? undefined} />
       <Description id={crag.id} description={crag.description ?? undefined} />
-      <h3>Sectors</h3>
-      <ul>
-        <li>
-          <Link href={`/sectors/new?crag=${crag.id}`}>Add sector</Link>
-        </li>
-        <Separator />
-        {crag.sectors.map((sector) => (
-          <li key={`sector-${sector.id}`}>
-            <Link href={`/sectors/${sector.id}`}>
-              { sector.name ? sector.name : (<i>Anonymous sector</i>) }
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Sectors</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/sectors/new?crag=${crag.id}`}>Add sector</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {crag.sectors.map((sector) => (
+            <Link key={sector.id} href={`/sectors/${sector.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {sector.name || <i>Anonymous sector</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
-      <h3>Formations</h3>
-      <ul>
-        <li>
-          <Link href={`/formations/new?crag=${crag.id}`}>Add formation</Link>
-        </li>
-        <Separator />
-        {crag.formations.map((formation) => (
-          <li key={`formation-${formation.id}`}>
-            <Link href={`/formations/${formation.id}`}>
-              { formation.name ? formation.name : (<i>Anonymous formation</i>) }
+          ))}
+        </div>
+      </section>
+      <Separator />
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Formations</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/formations/new?crag=${crag.id}`}>Add formation</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {crag.formations.map((formation) => (
+            <Link key={formation.id} href={`/formations/${formation.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {formation.name || <i>Anonymous formation</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
-      <h3>Climbs</h3>
-      <ul>
-        <li>
-          <Link href={`/climbs/new?crag=${crag.id}`}>Add climb</Link>
-        </li>
-        <Separator />
-        {crag.climbs.map((climb) => (
-          <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>
-              { climb.name ? climb.name : (<i>Anonymous climb</i>) }
+          ))}
+        </div>
+      </section>
+      <Separator />
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Climbs</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/climbs/new?crag=${crag.id}`}>Add climb</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {crag.climbs.map((climb) => (
+            <Link key={climb.id} href={`/climbs/${climb.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {climb.name || <i>Anonymous climb</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -9,6 +9,8 @@ import Header from './Header';
 import Description from './Description';
 import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -49,7 +51,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div>
+    <div className='space-y-4'>
       <Header id={formation.id} name={formation.name ?? undefined} />
       <div className="w-full p-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3>
@@ -68,20 +70,28 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </div>
       </div>
       <Description id={formation.id} description={formation.description ?? undefined} />
-      <h3>Climbs</h3>
-      <ul>
-        <li>
-          <Link href={`/climbs/new?formation=${formation.id}`}>Add climb</Link>
-        </li>
-        <Separator />
-        {formation.climbs.map((climb) => (
-          <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>
-              { climb.name ? climb.name : <i>Anonymous climb</i> }
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Climbs</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/climbs/new?formations=${formation.id}`}>Add climb</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {formation.climbs.map((climb) => (
+            <Link key={climb.id} href={`/climbs/${climb.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {climb.name || <i>Anonymous climb</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </section>
+      <Separator />
       <div>
         <h3>Topos</h3>
         <Link href={`/formations/${formation.id}/new-topo`}>New topo</Link>

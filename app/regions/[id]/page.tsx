@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Header from './Header';
 import Description from './Description';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 const regionData = graphql(`
   query regionData($id: ID!) {
@@ -29,51 +31,74 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { region } = data;
 
   return (
-    <div>
+    <div className='space-y-4'>
       <Header id={region.id} name={region.name ?? undefined} />
       <Description id={region.id} description={region.description ?? undefined} />
-      <h3>Crags</h3>
-      <ul>
-        <li>
-          <Link href={`/crags/new?region=${region.id}`}>Add crag</Link>
-        </li>
-        <Separator />
-        {region.crags.map((crag) => (
-          <li key={`crag-${crag.id}`}>
-            <Link href={`/crags/${crag.id}`}>
-              { crag.name ? crag.name : <i>Anonymous crag</i> }
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Crags</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/crags/new?region=${region.id}`}>Add crag</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {region.crags.map((crag) => (
+            <Link key={crag.id} href={`/crags/${crag.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {crag.name || <i>Anonymous crag</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
-      <h3>Formations</h3>
-      <ul>
-        <li>
-          <Link href={`/formations/new?region=${region.id}`}>Add formation</Link>
-        </li>
-        <Separator />
-        {region.formations.map((formation) => (
-          <li key={`formation-${formation.id}`}>
-            <Link href={`/formations/${formation.id}`}>
-              { formation.name ? formation.name : <i>Anonymous formation</i> }
+          ))}
+        </div>
+      </section>
+      <Separator />
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Formations</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/formations/new?region=${region.id}`}>Add formation</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {region.formations.map((formation) => (
+            <Link key={formation.id} href={`/formations/${formation.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {formation.name || <i>Anonymous formation</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
-      <h3>Climbs</h3>
-      <ul>
-        <li>
-          <Link href={`/climbs/new?region=${region.id}`}>Add climb</Link>
-        </li>
-        <Separator />
-        {region.climbs.map((climb) => (
-          <li key={`climb-${climb.id}`}>
-            <Link href={`/climbs/${climb.id}`}>
-              { climb.name ? climb.name : <i>Anonymous climb</i> }
+          ))}
+        </div>
+      </section>
+      <Separator />
+      <section className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold'>Climbs</h3>
+          <Button asChild variant='secondary' size='sm'>
+            <Link href={`/climbs/new?region=${region.id}`}>Add climb</Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {region.climbs.map((climb) => (
+            <Link key={climb.id} href={`/climbs/${climb.id}`} className="block group">
+              <Card className="transition-transform hover:scale-[1.02] hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-primary transition-colors">
+                    {climb.name || <i>Anonymous climb</i>}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
             </Link>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
