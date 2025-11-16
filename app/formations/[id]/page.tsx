@@ -7,10 +7,12 @@ import { fromGql } from '@/lib/TopoWorld';
 import styles from "./formation.module.css"
 import Header from './Header';
 import Description from './Description';
-import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
+import { CopyToClipboardDropdownMenuItem } from '@/components/CopyToClipboardDropdownMenuItem';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CopyIcon } from 'lucide-react';
 
 const formationData = graphql(`
   query formationData($id: ID!) {
@@ -65,8 +67,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </h3>
         <div className="flex gap-2 flex-row">
           <Link href={`/formations/${formation.id}/relocate`}>Relocate</Link>
-          <CopyToClipboardButton disabled={!location} content={location?.toDMSString() ?? ""}>Copy DMS</CopyToClipboardButton>
-          <CopyToClipboardButton disabled={!location} content={location?.toDDDString() ?? ""}>Copy DDD</CopyToClipboardButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={!location} variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open Menu</span>
+                <CopyIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <CopyToClipboardDropdownMenuItem content={location?.toDMSString() ?? ""}>DMS</CopyToClipboardDropdownMenuItem>
+              <CopyToClipboardDropdownMenuItem content={location?.toDDDString() ?? ""}>DDD</CopyToClipboardDropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <Description id={formation.id} description={formation.description ?? undefined} />
