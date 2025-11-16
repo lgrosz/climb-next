@@ -4,6 +4,7 @@ import { useToggle } from "@/hooks/useToggle";
 import { ElementType } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 function Inputs({
   defaultValue,
@@ -18,7 +19,7 @@ function Inputs({
 
   return (
       <div className="w-full p-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
-        <input className="w-full" type="text" name="value" defaultValue={defaultValue} placeholder={placeholder} disabled={pending} />
+        <Input className="w-full" type="text" name="value" defaultValue={defaultValue} placeholder={placeholder} disabled={pending} />
         <div className="flex gap-2 flex-row">
           { onCancel && <Button variant="secondary" onClick={onCancel} disabled={pending}>Cancel</Button> }
           <Button type="submit" disabled={pending}>Save</Button>
