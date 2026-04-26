@@ -1,6 +1,7 @@
 "use client";
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 
 type Region = {
@@ -37,6 +38,13 @@ export default function MoveCragForm(
       <Breadcrumb>
 	<BreadcrumbList>
 	  <BreadcrumbItem>
+	  <Select>
+	    <SelectTrigger>
+	    <SelectValue placeholder="Select a region" />
+	    </SelectTrigger>
+	    <SelectContent>
+	    </SelectContent>
+	  </Select>
 	    <select name="region" defaultValue={defaultRegionId}>
 	      <option value={undefined} label="None"/>
 	      {regions.map(r => (

@@ -27,6 +27,7 @@ export default function AscentList({
   const onDeleteAscents = useCallback(async () => {
     const confirmed = confirm(`Are you sure you want to delete (${selectedAscents.size}) ascents?`)
 
+    // TODO eagerly update ascents?
     if (confirmed) {
       await deleteAscents([...selectedAscents])
     }
